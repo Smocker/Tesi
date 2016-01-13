@@ -1,0 +1,69 @@
+<!-- Struttura del file BPMN: 4.bpmn -->
+
+<!-- Collaboration indica quali sono i Participant e i Message Flow -->
+<collaboration id="COLLABORATION_1" isClosed="false">
+	<!-- Due partecipanti e due Message Flow -->
+   <participant id="_2" name="Participant" processRef="F3_1"></participant>
+   <participant id="_3" name="Participant" processRef="F4_1"></participant>
+   <messageFlow id="_4" sourceRef="F3_3" targetRef="F4_3"></messageFlow>
+   <messageFlow id="_5" sourceRef="F4_4" targetRef="F3_4"></messageFlow>
+</collaboration>
+
+<!-- Process descrive il processo di un Partecipant -->
+<process id="F3_1" isClosed="false" processType="None">
+   <!-- Input -->
+   <startEvent id="F3_2" isInterrupting="true" parallelMultiple="false">
+      <outgoing>F3_6</outgoing>
+   </startEvent>
+   <!-- Descrizione dei task: con chi e a chi sono collegati -->
+   <task completionQuantity="1" id="F3_3" isForCompensation="false" name="Task A" startQuantity="1">
+      <incoming>F3_6</incoming>
+      <outgoing>F3_7</outgoing>
+   </task>
+   <task completionQuantity="1" id="F3_4" isForCompensation="false" name="Task B" startQuantity="1">
+      <incoming>F3_7</incoming>
+      <outgoing>F3_8</outgoing>
+   </task>
+   <!-- Output -->
+   <endEvent id="F3_5">
+      <incoming>F3_8</incoming>
+   </endEvent>
+   <!-- Descrizione dei flussi -->
+   <sequenceFlow id="F3_6" sourceRef="F3_2" targetRef="F3_3"/>
+   <sequenceFlow id="F3_7" sourceRef="F3_3" targetRef="F3_4"/>
+   <sequenceFlow id="F3_8" sourceRef="F3_4" targetRef="F3_5"/>
+</process>
+
+<!-- Uguale a quello di prima -->
+<process id="F4_1" isClosed="false" processType="None">
+   <startEvent id="F4_2" isInterrupting="true" parallelMultiple="false">
+      <outgoing>F4_6</outgoing>
+   </startEvent>
+   <task completionQuantity="1" id="F4_3" isForCompensation="false" name="Task C" startQuantity="1">
+      <incoming>F4_6</incoming>
+      <outgoing>F4_7</outgoing>
+   </task>
+   <task completionQuantity="1" id="F4_4" isForCompensation="false" name="Task D" startQuantity="1">
+      <incoming>F4_7</incoming>
+      <outgoing>F4_8</outgoing>
+   </task>
+   <endEvent id="F4_5">
+      <incoming>F4_8</incoming>
+   </endEvent>
+   <sequenceFlow id="F4_6" sourceRef="F4_2" targetRef="F4_3"/>
+   <sequenceFlow id="F4_7" sourceRef="F4_3" targetRef="F4_4"/>
+   <sequenceFlow id="F4_8" sourceRef="F4_4" targetRef="F4_5"/>
+</process>
+
+<!-- I gateway exclusive e parallel hanno una struttura simile hai sequence flow sono che devono avere un "apertura" e "chiusura"-->
+<parallelGateway gatewayDirection="Diverging" id="F2_5"> <!-- Diverge -->
+   <incoming>F2_6</incoming>
+   <outgoing>F2_7</outgoing>
+   <outgoing>F2_8</outgoing>
+</parallelGateway>
+<parallelGateway gatewayDirection="Converging" id="_3"> <!-- Converge -->
+   <incoming>_4</incoming>
+   <incoming>_5</incoming>
+   <outgoing>_7</outgoing>
+</parallelGateway>
+
