@@ -14,33 +14,31 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class LocalConfigurationMap extends HashMap<PetrinetNode, LocalConfiguration> 
 {
-	/**
-	 * serialVersionUID
-	 */
+	/** serialVersionUID */
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * Inserisce una LocalConfiguration di un nodo
-	 * @param pn
-	 * @param net
+	 * Inserisce una configurazione locale di un nodo
+	 * 
+	 * @param pn: nodo da analizzare
+	 * @param net: rete di unfolding
 	 */
 	public void insert(PetrinetNode pn, Petrinet net)
 	{
 		if(this.containsKey(pn))
 			return;
 		
-		/* Create local configuration of pn */
+		/* Creo la configurazione locale di pn inserendola nella HashMap */
 		LocalConfiguration localConfiguration = new LocalConfiguration();
 		localConfiguration.create(net, pn);
-		
-		/* Put as the key the PetrinetNode pn and as value its local configuration */
-		this.put(pn, localConfiguration);
+		put(pn, localConfiguration);
 	}
 	
 	/**
 	 * Restituisce la LocalConfiguration di un nodo
-	 * @param pn
-	 * @return this.get(pn).get()
+	 * 
+	 * @param pn: nodo da analizzare
+	 * @return ArrayList di transazioni
 	 */
 	public ArrayList<Transition> read(PetrinetNode pn) 
 	{

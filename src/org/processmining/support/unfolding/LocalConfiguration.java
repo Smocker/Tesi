@@ -42,7 +42,7 @@ public class LocalConfiguration
 	/**
 	 * Restituisce la configurazione locale
 	 * 
-	 * @return localConfiguration
+	 * @return configurazione locale
 	 */
 	public ArrayList<Transition> get() 
 	{
@@ -52,9 +52,9 @@ public class LocalConfiguration
 	/**
 	 * Visita all'indietro la rete di unfolding per la costruzione della configurazione locale
 	 * 
-	 * @param unfolding
-	 * @param pn
-	 * @param array
+	 * @param unfolding: rete di unfolding
+	 * @param pn: nodo corrente
+	 * @param array: arraylist contenente le transazioni analizzate in precendenza
 	 */
 	private void getLeastBackwardClosed(Petrinet unfolding, PetrinetNode pn, ArrayList<Transition> array) 
 	{

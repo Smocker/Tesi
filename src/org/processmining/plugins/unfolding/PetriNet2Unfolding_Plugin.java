@@ -25,10 +25,14 @@ public class PetriNet2Unfolding_Plugin {
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"
 	)
-	public Object[] convert(PluginContext context, Petrinet net) 
+	public Object[] convert(PluginContext context, Petrinet petrinet) 
 	{
-		PetriNet2Unfolding conv = new PetriNet2Unfolding(net);
+		PetriNet2Unfolding conv = new PetriNet2Unfolding(petrinet);
 		Object[] unfolding = conv.convert();
+		
+		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
+		context.addConnection(new UnfoldingConnection((IdentificationMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));
+		
 		return new Object [] {unfolding[0], unfolding[1]} ;
 	}
 }

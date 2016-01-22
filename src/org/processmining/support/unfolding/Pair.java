@@ -16,8 +16,8 @@ public class Pair<A, B>
     /**
      * Costruttore
      * 
-     * @param first
-     * @param second
+     * @param first: primo elemento
+     * @param second: secondo elemento
      */
     public Pair(A first, B second) 
     {
@@ -29,7 +29,7 @@ public class Pair<A, B>
     /**
      * Restituisce il primo argomento
      * 
-     * @return this.first
+     * @return primo elemento
      */
     public A getFirst() 
     {
@@ -39,7 +39,7 @@ public class Pair<A, B>
     /**
      * Setta il primo argomento
      * 
-     * @param first
+     * @param first: primo elemento
      */
     public void setFirst(A first) 
     {
@@ -49,7 +49,7 @@ public class Pair<A, B>
     /**
      * Legge il secondo argomento
      * 
-     * @return this.second
+     * @return secondo elemento
      */
     public B getSecond() 
     {
@@ -59,7 +59,7 @@ public class Pair<A, B>
     /**
      * Setta il secondo argomento
      * 
-     * @param second
+     * @param: secondo elemento
      */
     public void setSecond(B second) 
     {

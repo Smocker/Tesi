@@ -18,7 +18,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 public class Utility 
 {	
 	/**
-	 * Prende la piazza iniziale della rete di petri
+	 * Prende la piazza iniziale della rete di Petri
 	 *  
 	 * @param petrinet: rete di petri
 	 * @return pn: piazza iniziale o null se la rete ha un nodo senza archi in ingresso
@@ -27,6 +27,20 @@ public class Utility
 	{		
 		for(PetrinetNode pn: petrinet.getNodes())
 			if(petrinet.getGraph().getInEdges(pn).isEmpty())
+				return pn;
+		return null;
+	}
+	
+	/**
+	 * Prende la piazza finale della rete di Petri
+	 *  
+	 * @param petrinet: rete di petri
+	 * @return pn: piazza iniziale o null se la rete ha un nodo senza archi in ingresso
+	 */
+	public static PetrinetNode getEndNode(Petrinet petrinet) 
+	{		
+		for(PetrinetNode pn: petrinet.getNodes())
+			if(petrinet.getGraph().getOutEdges(pn).isEmpty())
 				return pn;
 		return null;
 	}
@@ -84,7 +98,7 @@ public class Utility
 	/**
 	 * Visita all'indietro la rete di occorrenze, salvando i place attraversati
 	 * 
-	 * @param unfolding: rete di occorrenze
+	 * @param unfolding: rete di Occorrenze
 	 * @param pn: nodo di partenza 
 	 */
 	private static void getBackPlace(Petrinet unfolding, PetrinetNode pn, ArrayList<Place> history) 
@@ -111,25 +125,25 @@ public class Utility
 	/**
 	 * Verifico se il marking di due configurazione provocano la rete bounded
 	 * 
-	 * @param cT
-	 * @param cT1
-	 * @param petrinet
-	 * @param unf2PetriMap
-	 * @param t3 
-	 * @param marking 
-	 * @return int
+	 * @param lcT: configurazione locale della transazione t
+	 * @param lcT1: configurazione locale della transazione t1
+	 * @param petrinet: rete di Petri originale
+	 * @param unf2PetriMap: map da unfolding a petrinet
+	 * @param t3: transazione che vogliamo analizzare
+	 * @param marking: ,appa ogni transazione della rete di occorrenze con il rispettivo marking
+	 * @return intero avente valore 0 se t3 è un cutoff, 1 se t3 è un cutoff che provoca la rete unbounded, -1 niente
 	 */
-	public static int isBounded(LocalConfiguration cT, LocalConfiguration cT1, Petrinet petrinet, HashMap <PetrinetNode, PetrinetNode> unf2PetriMap, Transition t3, HashMap<PetrinetNode, ArrayList<PetrinetNode>> marking) 
+	public static int isBounded(LocalConfiguration lcT, LocalConfiguration lcT1, Petrinet petrinet, HashMap <PetrinetNode, PetrinetNode> unf2PetriMap, Transition t3, HashMap<PetrinetNode, ArrayList<PetrinetNode>> marking) 
 	{
 		ArrayList <PetrinetNode> markT = new ArrayList <PetrinetNode> (), markT1 = new ArrayList <PetrinetNode> (), mark;
 		
 		/* Calcolo il marking di t: postset(H(t)) - preset(H(t)) */
-		for(Transition t : cT.get())
+		for(Transition t : lcT.get())
 		{
 			for(PetrinetNode postset : Utility.getPostset(petrinet, unf2PetriMap.get(t)))
 				markT.add(postset);
 		}
-		for(Transition t : cT.get())
+		for(Transition t : lcT.get())
 		{
 			for(PetrinetNode preset : Utility.getPreset(petrinet, unf2PetriMap.get(t)))
 			{
@@ -139,12 +153,12 @@ public class Utility
 		}		
 		
 		/* Calcolo il marking di t1 */
-		for(Transition t : cT1.get())
+		for(Transition t : lcT1.get())
 		{
 			for(PetrinetNode postset : Utility.getPostset(petrinet, unf2PetriMap.get(t)))
 				markT1.add(postset);
 		}
-		for(Transition t : cT1.get())
+		for(Transition t : lcT1.get())
 		{
 			for(PetrinetNode preset : Utility.getPreset(petrinet, unf2PetriMap.get(t)))
 			{
@@ -199,6 +213,7 @@ public class Utility
 				if(unfolding.getGraph().getOutEdges(pn).size() > 1)
 					if(!history.contains(pn))
 						history.add((Place) pn);
+				
 				Arc a = (Arc) preset.next();
 				Transition t = (Transition) a.getSource();
 				getBackPlaceXOR(unfolding, t, history);
@@ -227,6 +242,20 @@ public class Utility
 		if(unfolding.getGraph().getOutEdges(pn).size() > 1)
 			history.add(new Pair<Place, Arc>((Place) pn, a));
 		
+		getBackPlaceConflictXOR(unfolding, pn, history);
+		return history;
+	}
+	
+	/**
+	 * Restituisce la storia di un nodo avente i place con più di un arco in uscita (viene utilizzata nell'individuazione dei deadlock)
+	 * 
+	 * @param unfolding: rete di occorrenze
+	 * @param pn: nodo corrente 
+	 * @return history: storia dei place del nodo corrente
+	 */
+	public static ArrayList <Pair <Place, Arc>> getHistoryPlaceConflictXORDeadLock(Petrinet unfolding, PetrinetNode pn)
+	{
+		ArrayList <Pair <Place, Arc>> history = new ArrayList <Pair <Place, Arc>> ();
 		getBackPlaceConflictXOR(unfolding, pn, history);
 		return history;
 	}
@@ -261,11 +290,11 @@ public class Utility
 	}
 	
 	/**
-	 * Verifico se un ArrayList e una PetrinetNodeTupla contengono gli stessi elementi
+	 * Verifico se due strutture contengono gli stessi elementi
 	 * 
-	 * @param arrayT
-	 * @param petrinetNodes
-	 * @return boolean
+	 * @param arrayT: ArrayList di PetrinetNode
+	 * @param petrinetNodes: PetrinetNodeTupla
+	 * @return true se contengono gli stessi elementi, false altrimenti
 	 */
 	public static boolean equalsArrayList(ArrayList <PetrinetNode> arrayT, PetrinetNodeTupla petrinetNodes)
 	{
@@ -278,17 +307,35 @@ public class Utility
 	/**
 	 * Verifico se due transazioni sono in conflitto
 	 * 
-	 * @param unfolding
-	 * @param t
-	 * @param u
-	 * @return boolean
+	 * @param unfolding: rete di unfolding
+	 * @param t: prima transazione
+	 * @param u: seconda transazione
+	 * @return true se condividono almeno uno xor, false altrimenti
 	 */
 	public static boolean isConflit(Petrinet unfolding, Transition t, Transition u)
 	{
-		ArrayList <Place> xorT = Utility.getHistoryPlaceXOR(unfolding, t), xorU = Utility.getHistoryPlaceXOR(unfolding, u);
+		ArrayList <Pair <Place, Arc>> xorT = Utility.getHistoryPlaceConflictXORDeadLock(unfolding, t), xorU = Utility.getHistoryPlaceConflictXORDeadLock(unfolding, u);
 		for(int i = 0; i < xorT.size(); i++)
 			for(int j = 0; j < xorU.size(); j++)
-				if(xorT.get(i).equals(xorU.get(j)))
+				if(xorT.get(i).getFirst().equals(xorU.get(j).getFirst()) && !xorT.get(i).getSecond().equals(xorU.get(j).getSecond()))
+					return true;
+		return false;
+	}
+	
+	/**
+	 * Verifico se due transazioni sono in conflitto (rispetto a isConflit la lista di <Place, Arc> è stata costruita) 
+	 * 
+	 * @param unfolding: rete di unfolding
+	 * @param xorT: ArrayList di <Place, Arc> della transazione t
+	 * @param u: transazione u
+	 * @return true se condividono almeno uno xor, false altrimenti
+	 */
+	public static boolean isConflit2(Petrinet unfolding, ArrayList <Pair <Place, Arc>> xorT, Transition u)
+	{
+		ArrayList <Pair <Place, Arc>> xorU = Utility.getHistoryPlaceConflictXORDeadLock(unfolding, u);
+		for(int i = 0; i < xorT.size(); i++)
+			for(int j = 0; j < xorU.size(); j++)
+				if(xorT.get(i).getFirst().equals(xorU.get(j).getFirst()) && !xorT.get(i).getSecond().equals(xorU.get(j).getSecond()))
 					return true;
 		return false;
 	}

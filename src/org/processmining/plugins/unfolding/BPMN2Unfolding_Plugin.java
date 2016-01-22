@@ -8,8 +8,6 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.converters.bpmn2pn.BPMN2PetriNetConverter;
 import org.processmining.support.unfolding.IdentificationMap;
 
-import sun.misc.Contended;
-
 /**
  * Converte un BPMNDiagram in una Occurrence net with Unfolding
  * 
@@ -43,7 +41,8 @@ public class BPMN2Unfolding_Plugin {
 		PetriNet2Unfolding petrinet2unfolding = new PetriNet2Unfolding(petrinet);
 		unfolding = petrinet2unfolding.convert();
 		
-		context.addConnection(new UnfoldingConnection((IdentificationMap)unfolding[1], bpmn, petrinet,(Petrinet) unfolding[0]));
+		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
+		context.addConnection(new UnfoldingConnection((IdentificationMap)unfolding[1], petrinet,(Petrinet) unfolding[0]));
 		
 		return new Object [] {unfolding[0], unfolding[1]};
 	}

@@ -11,17 +11,15 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class PetrinetQueue extends LinkedList <LocalConfiguration>
 {
-	/**
-	 * serialVersionUID
-	 */
+	/** serialVersionUID */
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * Aggiunge una nuova configurazione nella coda
+	 * Aggiunge una nuova configurazione di una tranasazione nella coda
 	 * 
-	 * @param localConfigurationMap 
-	 * @param petrinet
-	 * @param t
+	 * @param localConfigurationMap: LocalConfigurationMap a cui aggiungere la nuova configurazione
+	 * @param petrinet: rete di petri
+	 * @param t: transazione da analizzare
 	 */
 	public void insert(LocalConfigurationMap localConfigurationMap, Petrinet petrinet, Transition t)
 	{
