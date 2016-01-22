@@ -5,11 +5,11 @@ import java.awt.Color;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
-import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
@@ -46,8 +46,9 @@ public class VisualizeUnfoldingStatistics_Plugin
 	{
 		JPanel panel = new JPanel();
 		Petrinet petrinet, unfolding;
+
 		try 
-		{
+		{	
 			/* Carico le reti utilizzando la connessione creata in precedenza */
 			UnfoldingConnection unfoldingConnection = context.getConnectionManager().getFirstConnection(UnfoldingConnection.class, context, output);
 			petrinet = unfoldingConnection.getObjectWithRole(UnfoldingConnection.PETRINET);
@@ -56,15 +57,16 @@ public class VisualizeUnfoldingStatistics_Plugin
 		 	/* Creo i pannelli per la visualizzazione */
 		 	double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
 			panel.setLayout(new TableLayout(size));
-			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, petrinet);
+			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraphWithoutRememberingLayout(petrinet);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
 			panel.add(unfoldingPanel, "0,1");
 			JLabel statisticsPanel = new JLabel(output.loadStatistics());
 			statisticsPanel.setBackground(Color.WHITE);
-			panel.add(statisticsPanel, "0,2");
+			JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
+			panel.add(scrollStatisticsPanel, "0,2");
 		} 
-		catch (ConnectionCannotBeObtained e) 
+		catch (Exception e) 
 		{
 			e.printStackTrace();
 		}

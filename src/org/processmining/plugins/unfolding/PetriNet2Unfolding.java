@@ -85,7 +85,6 @@ public class PetriNet2Unfolding
 		
 		/* Estraggo i deadlock ed effettuo le statistiche della rete */
 		getStatistics();
-		System.out.println(identificationMap.loadStatistics());
 		
 		return new Object [] {unfolding, identificationMap};
 	}
@@ -447,7 +446,7 @@ public class PetriNet2Unfolding
 		identificationMap.insertDeadLock(deadlock);
 		
 		/* Inserisco le altre statistiche */
-		identificationMap.setNetStatistics(unfolding, marking);
+		identificationMap.setNetStatistics(petrinet, unfolding, marking);
 	}
 
 	/**
