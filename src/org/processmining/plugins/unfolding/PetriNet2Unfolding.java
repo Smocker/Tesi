@@ -61,18 +61,18 @@ public class PetriNet2Unfolding
 	/**
 	 * Converte una rete di petri in una rete di occorrenze con la tecnica dell'unfolding
 	 * 
-	 * @return unfolding 
+	 * @return unfolding: rete di unfolding
 	 */
 	public Object[] convert() 
 	{
-		Place p1;
+		Place i1;
 		i = (Place) Utility.getStartNode(petrinet); 
 		o = (Place) Utility.getEndNode(petrinet);
 
-		/* Inizio la costruzione della rete inserendo la piazza iniziale p1 */
+		/* Inizio la costruzione della rete inserendo la piazza iniziale i1 */
 		unfolding = PetrinetFactory.newPetrinet("Unfolding from Petrinet");		
-		p1 = unfolding.addPlace("start");		
-		addCorrispondence(i, p1);
+		i1 = unfolding.addPlace("start");		
+		addCorrispondence(i, i1);
 		
 		/* Trasformo la rete di Petri N in N* */
 		reset = petrinet.addTransition("reset");
@@ -80,7 +80,7 @@ public class PetriNet2Unfolding
 		petrinet.addArc(reset, i);
 
 		/* Inizializzo e visito la coda */
-		initQueue(i, p1);		
+		initQueue(i, i1);		
 		visitQueue();	
 		
 		/* Estraggo i deadlock ed effettuo le statistiche della rete */
@@ -90,7 +90,7 @@ public class PetriNet2Unfolding
 	}
 
 	/**
-	 * Inizializzo la coda di priorità
+	 * Inizializzazione della coda di priorità
 	 * 
 	 * @param p: piazza iniziale della rete di petri
 	 * @param p1: piazza iniziale della rete di occorrenze
@@ -105,16 +105,16 @@ public class PetriNet2Unfolding
 			unfolding.addArc(p1, t1);			
 			addCorrispondence(t,t1);
 			
-			/* Per tutti i place p2 delle rete di petri attaccate a t */
-			for(PetrinetNode p2: Utility.getPostset(petrinet, t))
+			/* Per tutti i place u delle rete di petri attaccate a t */
+			for(PetrinetNode u: Utility.getPostset(petrinet, t))
 			{
-				// Creo un place p3 nell'unfolding e attacco t1 con p3
-				Place p3 = unfolding.addPlace(p2.getLabel());
-				unfolding.addArc(t1, p3);				
-				addCorrispondence(p2, p3);
+				// Creo un place u1 nell'unfolding e attacco t1 con u1
+				Place u1 = unfolding.addPlace(u.getLabel());
+				unfolding.addArc(t1, u1);				
+				addCorrispondence(u, u1);
 			}
 
-			/* Aggiungo ogni configurazione nella coda */
+			/* Aggiungo ogni configurazione di t1 nella coda */
 			pq.insert(localConfigurationMap, unfolding, t1);
 		}
 	}
@@ -490,7 +490,7 @@ public class PetriNet2Unfolding
 	 * Prendo tutte le transazioni che sono in conflitto con il cutoff
 	 * 
 	 * @param t: cutoff scelto
-	 * @return arraylist contenenti tutte le transazioni in conflitto con il cutoff
+	 * @return spoilers: arraylist di transazioni contenenti tutte le transazioni in conflitto con il cutoff
 	 */
 	private ArrayList<Transition> getSpoilers(Transition t) 
 	{
@@ -507,9 +507,9 @@ public class PetriNet2Unfolding
 	/**
 	 * Scelto come nuovo insieme di cutoff quelle che non sono in conflitto con lo spoiler
 	 * 
-	 * @param cutoff: insieme correnti di cutoff
+	 * @param cutoff: insieme corrente di cutoff
 	 * @param spoiler: spoiler corrente
-	 * @return arraylist contenente la nuova lista di cutoff
+	 * @return cutoff1: arraylist di transazioni contenente la nuova lista di cutoff
 	 */
 	private ArrayList<Transition> removeConflict(ArrayList<Transition> cutoff, Transition spoiler) 
 	{	

@@ -54,13 +54,13 @@ public class Utility
 	 */
 	public static ArrayList<PetrinetNode> getPreset(Petrinet net, PetrinetNode pn)
 	{
-		ArrayList<PetrinetNode> array = new ArrayList <PetrinetNode> (); 
+		ArrayList<PetrinetNode> preset = new ArrayList <PetrinetNode> (); 
 		for (Iterator<?> inEdge = net.getGraph().getInEdges(pn).iterator(); inEdge.hasNext();) 
 		{
 			Arc a = (Arc) inEdge.next();
-			array.add(a.getSource());
+			preset.add(a.getSource());
 		}
-		return array;
+		return preset;
 	}
 	
 	/**
@@ -68,17 +68,17 @@ public class Utility
 	 * 
 	 * @param net: rete di petri
 	 * @param pn: nodo corrente
-	 * @return array: arraylist contenente il postset di pn
+	 * @return postset: arraylist di PetrinetNode contenente il postset di pn
 	 */
 	public static ArrayList<PetrinetNode> getPostset(Petrinet net, PetrinetNode pn)
 	{
-		ArrayList<PetrinetNode> array = new ArrayList <PetrinetNode> (); 
+		ArrayList<PetrinetNode> postset = new ArrayList <PetrinetNode> (); 
 		for (Iterator<?> outEdge = net.getGraph().getOutEdges(pn).iterator(); outEdge.hasNext();) 
 		{
 			Arc a = (Arc) outEdge.next();
-			array.add(a.getTarget());
+			postset.add(a.getTarget());
 		}
-		return array;
+		return postset;
 	}
 	
 	/**
@@ -205,7 +205,8 @@ public class Utility
 	 * @param unfolding: rete di occorrenze
 	 * @param pn: nodo di partenza 
 	 */
-	private static void getBackPlaceXOR(Petrinet unfolding, PetrinetNode pn, ArrayList<Place> history) {
+	private static void getBackPlaceXOR(Petrinet unfolding, PetrinetNode pn, ArrayList<Place> history) 
+	{
 		for (Iterator<?> preset = unfolding.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
 		{
 			if(pn instanceof Place) 

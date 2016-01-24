@@ -141,8 +141,8 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	
 	/**
 	 * Crea alcune statistiche della rete
-	 * @param unfolding2 
 	 * 
+	 * @param petrinet: rete di petri 
 	 * @param unfolding: rete di unfolding
 	 * @param marking: map contenente le transazioni che provocano la rete unbounded con il rispettivo marking
 	 */
@@ -160,7 +160,7 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	/**
 	 * Carico tutte le statistiche della rete in una stringa html
 	 * 
-	 * @return stringa contenente le statistiche
+	 * @return out: stringa contenente le statistiche
 	 */
 	public String loadStatistics()
 	{
