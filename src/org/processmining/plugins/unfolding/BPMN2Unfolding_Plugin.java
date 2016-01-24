@@ -17,8 +17,8 @@ public class BPMN2Unfolding_Plugin {
 	@Plugin(
 		name = "Convert BPMN diagram to Unfolding net", 
 		parameterLabels = {"Petri net"},
-		returnLabels = { "Petri net", "Identification Map" }, 
-		returnTypes = { Petrinet.class, IdentificationMap.class }, 
+		returnLabels = {  "Identification Map","Petri net" }, 
+		returnTypes = {  IdentificationMap.class,Petrinet.class }, 
 		userAccessible = true, 
 		help = "Convert BPMN diagram to Unfolding net"
 		)
@@ -44,6 +44,6 @@ public class BPMN2Unfolding_Plugin {
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 		context.addConnection(new UnfoldingConnection((IdentificationMap)unfolding[1], petrinet,(Petrinet) unfolding[0]));
 		
-		return new Object [] {unfolding[0], unfolding[1]};
+		return new Object [] {unfolding[1], unfolding[0]};
 	}
 }

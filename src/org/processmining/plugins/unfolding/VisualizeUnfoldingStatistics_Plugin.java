@@ -32,12 +32,12 @@ public class VisualizeUnfoldingStatistics_Plugin
 			returnLabels = { "Visualize Unfolding Statistics" }, 
 			parameterLabels = { "Identification Map" }, 
 			returnTypes = { JComponent.class }, 
-			userAccessible = false,
+			userAccessible = true,
 			help = "Visualize Unfolding Statistics"
 		)
     @UITopiaVariant
     	(
-    		affiliation = "Università di Pisa", 
+    		affiliation = "Universita di Pisa", 
     		author = "Daniele Cicciarella", 
     		email = "cicciarellad@gmail.com"
     	)
@@ -57,7 +57,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 		 	/* Creo i pannelli per la visualizzazione */
 		 	double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
 			panel.setLayout(new TableLayout(size));
-			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraphWithoutRememberingLayout(petrinet);
+			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
 			panel.add(unfoldingPanel, "0,1");

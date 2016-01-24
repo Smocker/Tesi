@@ -21,14 +21,18 @@ public class PetriNet2Unfolding_Plugin {
 		help = "Convert Petri net to Unfolding net"
 	)
 	@UITopiaVariant(
-		affiliation = "Università di Pisa", 
+		affiliation = "Universita' di Pisa", 
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"
 	)
 	public Object[] convert(PluginContext context, Petrinet petrinet) 
 	{
+		context.getProgress().setMinimum(0);
+		context.getProgress().setMaximum(2);
 		PetriNet2Unfolding conv = new PetriNet2Unfolding(petrinet);
 		Object[] unfolding = conv.convert();
+		context.getProgress().inc();
+		
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 		context.addConnection(new UnfoldingConnection((IdentificationMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));
