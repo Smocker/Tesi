@@ -11,7 +11,6 @@
 	<classpathentry kind="lib" path="packagelib/ProcessTree.jar"/>
 	<classpathentry kind="lib" path="packagelib/Properties.jar"/>
 	<classpathentry kind="lib" path="packagelib/Widgets.jar"/>
-	<classpathentry kind="lib" path="packagelib/Widgets-lib/Widgets.jar"/>
 	<classpathentry kind="lib" path="packagelib/Widgets-lib/lib/japura-1.12.3.jar"/>
 	<classpathentry kind="lib" path="stdlib/axis.jar"/>
 	<classpathentry kind="lib" path="stdlib/bsh-2.0b4.jar"/>
