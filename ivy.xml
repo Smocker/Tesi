@@ -10,5 +10,6 @@
        <dependency org="prom" name="Widgets" rev="latest" changing="true" />
        <dependency org="prom" name="BPMN" rev="latest" changing="true" />
        <dependency org="prom" name="BPMNConversions" rev="latest" changing="true" />
+       <dependency org="tablelayout" name="TableLayout" rev="20050920"/>
     </dependencies>
 </ivy-module>
