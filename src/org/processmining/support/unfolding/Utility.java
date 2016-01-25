@@ -167,16 +167,12 @@ public class Utility
 	/**
 	 * Verifico se due transazioni sono in conflitto
 	 * 
-	 * @param U rete di unfolding
-	 * @param t prima transazione dell'unfolding
-	 * @param u seconda transazione dell'unfolding
+	 * @param TODO
+	 * @param TODO
 	 * @return true se condividono almeno uno xor, false altrimenti
 	 */
-	public static boolean isConflit(Petrinet U, Transition t, Transition u)
-	{
-		ArrayList <Pair <Place, Arc>> xorT = Utility.getHistoryPlaceConflictXOR(U, t, null);
-		ArrayList <Pair <Place, Arc>>xorU = Utility.getHistoryPlaceConflictXOR(U, u, null);
-		
+	public static boolean isConflit(ArrayList <Pair <Place, Arc>> xorT, ArrayList <Pair <Place, Arc>>xorU)
+	{		
 		/* Se hanno lo stesso place ma archi diversi è uno xor-split */
 		for(int i = 0; i < xorT.size(); i++)
 			for(int j = 0; j < xorU.size(); j++)

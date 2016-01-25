@@ -2,6 +2,7 @@ package org.processmining.plugins.unfolding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -47,6 +48,8 @@ public class PetriNet2Unfolding
 	
 	/* HashMap contenente i livelock e deadlock e altre statistiche */
 	protected IdentificationMap identificationMap = new IdentificationMap();
+	
+	protected HashMap <Transition, ArrayList<Pair <Place, Arc>>> xorLinks = new HashMap <Transition, ArrayList<Pair <Place, Arc>>>();
 
 	/**
 	 * Costruttore
@@ -257,6 +260,9 @@ public class PetriNet2Unfolding
 		
 		petri2UnfMap.get(nodePetri).add(nodeUnfolding);
 		unf2PetriMap.put(nodeUnfolding, nodePetri);
+		
+		if(nodeUnfolding instanceof Transition)
+			xorLinks.put((Transition) nodeUnfolding, Utility.getHistoryPlaceConflictXOR(unfolding, nodeUnfolding, null));
 	}
 	
 	/**
@@ -433,21 +439,16 @@ public class PetriNet2Unfolding
 	 * Estraggo i deadlock ed effettuo le statistiche della rete
 	 */
 	private void getStatistics()
-	{
-		ArrayList <Transition> set = new ArrayList <Transition> ();
-		
+	{		
 		/* Inserisco i livelock trovati in un ArrayList */
 		ArrayList <Transition> cutoff = new ArrayList <Transition> ();
 		for(int i = 0; i < identificationMap.readLiveLock().size(); i++)
 			cutoff.add(identificationMap.readLiveLock().get(i));
 		for(int i = 0; i < identificationMap.readLiveLockUnbounded().size(); i++)
 			cutoff.add(identificationMap.readLiveLockUnbounded().get(i));
-		
-		for(Transition t : unfolding.getTransitions())
-			set.add(t);
-		
+	
 		/* Inserire i deadlock */
-		ArrayList <Transition> deadlock = deleteCutOff(cutoff, set);
+		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition());
 		identificationMap.insertDeadLock(deadlock);
 		
 		/* Inserisco le altre statistiche */
@@ -464,7 +465,6 @@ public class PetriNet2Unfolding
 	{
 		Transition t1 = null;
 		ArrayList <Transition> deadlock = null, cutoff1 = null, possibleSpoilers1 = null;
-		
 		if(cutoff.isEmpty())
 			return null;
 		else
@@ -504,7 +504,7 @@ public class PetriNet2Unfolding
 		
 		/* Se sono in conflitto le aggiungo alla nuova lista */
 		for(Transition t1: set)
-			if(Utility.isConflit(unfolding, t, t1))
+			if(Utility.isConflit(xorLinks.get(t), xorLinks.get(t1)))
 				spoilers.add(t1);
 		
 		return spoilers;
@@ -523,9 +523,29 @@ public class PetriNet2Unfolding
 		
 		/* Se le transazioni del cutoff non sono in conflitto con lo spoiler le aggiungo alla nuova lista */
 		for(Transition t: cutoff)
-			if(!Utility.isConflit(unfolding, t, spoiler))
+			if(t != spoiler && !Utility.isConflit(xorLinks.get(t), xorLinks.get(spoiler)))
 				cutoff1.add(t);
 		
 		return cutoff1;
+	}
+	
+	private ArrayList<Transition> getChoiceTransition()
+	{
+		ArrayList <Transition> choice = new ArrayList <Transition>();
+		
+		for(Place p : unfolding.getPlaces())
+		{
+			if(unfolding.getGraph().getOutEdges(p).size() > 1)
+			{
+				for (Iterator<?> i = unfolding.getGraph().getOutEdges(p).iterator(); i.hasNext();) 
+				{
+					Arc a = (Arc) i.next();
+					Transition t = (Transition) a.getTarget();
+					if(!choice.contains(t))
+						choice.add(t);
+				}
+			}
+		}
+		return choice;
 	}
 }
