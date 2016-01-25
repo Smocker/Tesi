@@ -7,11 +7,12 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 
 /**
  * PetrinetQueue estende la classe LinkedList per la creazione della rete di occorrenze con la tecnica dell'unfolding
- * @author cicciarella
+ * 
+ * @author Daniele Cicciarella
  */
 public class PetrinetQueue extends LinkedList <LocalConfiguration>
 {
-	/** serialVersionUID */
+	/* serialVersionUID */
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -25,6 +26,6 @@ public class PetrinetQueue extends LinkedList <LocalConfiguration>
 	{
 		if(!localConfigurationMap.containsKey(t))
 			localConfigurationMap.insert(t, petrinet);
-		this.add(localConfigurationMap.get(t));
+		add(localConfigurationMap.get(t));
 	}	
 }

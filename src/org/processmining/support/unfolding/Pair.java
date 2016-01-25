@@ -39,7 +39,7 @@ public class Pair<A, B>
     /**
      * Setta il primo argomento
      * 
-     * @param first: primo elemento
+     * @param first primo elemento
      */
     public void setFirst(A first) 
     {
@@ -59,7 +59,7 @@ public class Pair<A, B>
     /**
      * Setta il secondo argomento
      * 
-     * @param: secondo elemento
+     * @param secondo elemento
      */
     public void setSecond(B second) 
     {

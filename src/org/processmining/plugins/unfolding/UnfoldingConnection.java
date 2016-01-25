@@ -10,8 +10,7 @@ import org.processmining.support.unfolding.IdentificationMap;
  * @author Daniele Cicciarella
  */
 public class UnfoldingConnection extends AbstractStrongReferencingConnection 
-{
-	
+{	
 	public static String IDENTIFICATION_MAP = "IDENTIFICATION_MAP";
 	public static String PETRINET = "PETRINET";
 	public static String UNFOLDING = "UNFOLDING";

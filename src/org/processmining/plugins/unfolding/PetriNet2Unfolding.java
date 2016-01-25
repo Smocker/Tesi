@@ -434,6 +434,8 @@ public class PetriNet2Unfolding
 	 */
 	private void getStatistics()
 	{
+		ArrayList <Transition> set = new ArrayList <Transition> ();
+		
 		/* Inserisco i livelock trovati in un ArrayList */
 		ArrayList <Transition> cutoff = new ArrayList <Transition> ();
 		for(int i = 0; i < identificationMap.readLiveLock().size(); i++)
@@ -441,8 +443,11 @@ public class PetriNet2Unfolding
 		for(int i = 0; i < identificationMap.readLiveLockUnbounded().size(); i++)
 			cutoff.add(identificationMap.readLiveLockUnbounded().get(i));
 		
+		for(Transition t : unfolding.getTransitions())
+			set.add(t);
+		
 		/* Inserire i deadlock */
-		ArrayList <Transition> deadlock = deleteCutOff(cutoff);
+		ArrayList <Transition> deadlock = deleteCutOff(cutoff, set);
 		identificationMap.insertDeadLock(deadlock);
 		
 		/* Inserisco le altre statistiche */
@@ -455,21 +460,22 @@ public class PetriNet2Unfolding
 	 * @param cutoff: arraylist contenente i punti di cutoff
 	 * @return arraylist contenente i punti di deadlock
 	 */
-	private ArrayList<Transition> deleteCutOff(ArrayList<Transition> cutoff) 
+	private ArrayList<Transition> deleteCutOff(ArrayList<Transition> cutoff, ArrayList<Transition> possibleSpoilers) 
 	{
 		Transition t1 = null;
-		ArrayList <Transition> deadlock = null, cutoff1 = null;
+		ArrayList <Transition> deadlock = null, cutoff1 = null, possibleSpoilers1 = null;
 		
 		if(cutoff.isEmpty())
 			return null;
 		else
 		{
 			Transition t = cutoff.get(0);
-			ArrayList<Transition> spoilers = getSpoilers(t);	
+			ArrayList<Transition> spoilers = getSpoilers(t,possibleSpoilers);	
 			while(!spoilers.isEmpty() && deadlock == null)
 			{
 				t1 = spoilers.remove(0);
 				cutoff1 = removeConflict(cutoff, t1);
+				possibleSpoilers1 = removeConflict(possibleSpoilers, t1);
 				if(cutoff1.isEmpty())
 				{
 					deadlock  = new ArrayList <Transition>();
@@ -477,7 +483,7 @@ public class PetriNet2Unfolding
 				}
 				else
 				{
-					deadlock = deleteCutOff(cutoff1);
+					deadlock = deleteCutOff(cutoff1,possibleSpoilers1);
 					if(deadlock != null)
 						deadlock.add(t1);
 				}
@@ -492,12 +498,12 @@ public class PetriNet2Unfolding
 	 * @param t: cutoff scelto
 	 * @return spoilers: arraylist di transazioni contenenti tutte le transazioni in conflitto con il cutoff
 	 */
-	private ArrayList<Transition> getSpoilers(Transition t) 
+	private ArrayList<Transition> getSpoilers(Transition t, ArrayList<Transition> set) 
 	{
 		ArrayList<Transition> spoilers = new ArrayList<Transition>();
 		
 		/* Se sono in conflitto le aggiungo alla nuova lista */
-		for(Transition t1: unfolding.getTransitions())
+		for(Transition t1: set)
 			if(Utility.isConflit(unfolding, t, t1))
 				spoilers.add(t1);
 		

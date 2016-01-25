@@ -31,6 +31,8 @@ public class BPMN2Unfolding_Plugin {
 	{
 		Petrinet petrinet;
 		Object[] unfolding;
+		context.getProgress().setMinimum(0);
+		context.getProgress().setMaximum(3);
 		
 		/* Converte BPMNDiagram in Petri net */
 		BPMN2PetriNetConverter bpmn2petrinet = new BPMN2PetriNetConverter(bpmn);
@@ -40,6 +42,7 @@ public class BPMN2Unfolding_Plugin {
 		/* Converte Petri net in una Occurrence net con Unfolding */
 		PetriNet2Unfolding petrinet2unfolding = new PetriNet2Unfolding(petrinet);
 		unfolding = petrinet2unfolding.convert();
+		context.getProgress().inc();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 		context.addConnection(new UnfoldingConnection((IdentificationMap)unfolding[1], petrinet,(Petrinet) unfolding[0]));
