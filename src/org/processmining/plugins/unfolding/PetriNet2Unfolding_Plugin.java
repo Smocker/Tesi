@@ -28,11 +28,11 @@ public class PetriNet2Unfolding_Plugin {
 	public Object[] convert(PluginContext context, Petrinet petrinet) 
 	{
 		context.getProgress().setMinimum(0);
-		context.getProgress().setMaximum(2);
+		context.getProgress().setMaximum(3);
+		context.log("Converto da rete di Petri a rete di unfolding");
 		PetriNet2Unfolding conv = new PetriNet2Unfolding(context, petrinet);
 		Object[] unfolding = conv.convert();
 		context.getProgress().inc();
-		context.log("ciao");
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 		context.addConnection(new UnfoldingConnection((IdentificationMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));

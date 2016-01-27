@@ -55,6 +55,7 @@ public class PetriNet2Unfolding
 	protected HashMap <Transition, ArrayList<Pair <Place, Arc>>> xorLinks = new HashMap <Transition, ArrayList<Pair <Place, Arc>>>();
 
 	private PluginContext context;
+	
 	/**
 	 * Costruttore
 	 * @param context 
@@ -93,6 +94,8 @@ public class PetriNet2Unfolding
 		visitQueue();	
 		
 		/* Estraggo i deadlock ed effettuo le statistiche della rete */
+		context.getProgress().inc();
+		context.log("Estrazione dei deadlock");
 		getStatistics();
 		
 		return new Object [] {unfolding, identificationMap};
@@ -459,8 +462,21 @@ public class PetriNet2Unfolding
 		for(int i = 0; i < identificationMap.readLiveLockUnbounded().size(); i++)
 			cutoff.add(identificationMap.readLiveLockUnbounded().get(i));
 	
+		
+		ArrayList <Transition> cutoffHistory = new ArrayList <Transition> ();
+		
+		for(Transition v: cutoff)
+		{ 
+			localConfigurationMap.insert(v, unfolding);
+			for(Transition u: localConfigurationMap.get(v).get())
+			{
+				if(!cutoffHistory.contains(u))
+					cutoffHistory.add(u);
+			}
+		}
+		
 		/* Individuo i deadlock */
-		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition());
+		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition(cutoffHistory));
 		
 		// Li coloro di arancione
 		if(deadlock != null)
@@ -487,7 +503,7 @@ public class PetriNet2Unfolding
 		if(cutoff.isEmpty())
 			return null;
 		else
-		{
+		{		
 			Transition t = cutoff.get(0);
 			ArrayList<Transition> spoilers = getSpoilers(t,possibleSpoilers);	
 			while(!spoilers.isEmpty() && deadlock == null)
@@ -548,7 +564,7 @@ public class PetriNet2Unfolding
 		return cutoff1;
 	}
 	
-	private ArrayList<Transition> getChoiceTransition()
+	private ArrayList<Transition> getChoiceTransition(ArrayList<Transition> cutoffHistory)
 	{
 		ArrayList <Transition> choice = new ArrayList <Transition>();
 		
@@ -560,7 +576,7 @@ public class PetriNet2Unfolding
 				{
 					Arc a = (Arc) i.next();
 					Transition t = (Transition) a.getTarget();
-					if(!choice.contains(t))
+					if(!choice.contains(t) && !cutoffHistory.contains(t))
 						choice.add(t);
 				}
 			}
