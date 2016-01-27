@@ -70,7 +70,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="packagelib/BPMN.jar"/>
-	<classpathentry kind="lib" path="packagelib/BPMNConversions.jar"/>
 	<classpathentry kind="lib" path="packagelib/DataPetriNets.jar"/>
 	<classpathentry kind="lib" path="packagelib/args4j-2.0.23.jar"/>
 	<classpathentry kind="lib" path="packagelib/autocomplete-2.5.7.jar"/>

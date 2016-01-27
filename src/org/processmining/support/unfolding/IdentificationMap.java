@@ -85,8 +85,7 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void insertDeadLock(ArrayList<Transition> t)
 	{
-		if(t != null)
-			put("DeadLock Identification", t);
+		put("DeadLock Identification", t);
 	}
 	
 	/**

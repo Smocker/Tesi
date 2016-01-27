@@ -6,6 +6,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
@@ -15,6 +16,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
 import org.processmining.support.unfolding.IdentificationMap;
+import org.processmining.support.unfolding.LegendConformancePanel;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -60,6 +62,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
+			LegendConformancePanel legendPanel = new LegendConformancePanel(unfoldingPanel, "legend");
+			unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
 			panel.add(unfoldingPanel, "0,1");
 			JLabel statisticsPanel = new JLabel(output.loadStatistics());
 			statisticsPanel.setBackground(Color.WHITE);

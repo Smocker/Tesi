@@ -38,9 +38,11 @@ public class BPMN2Unfolding_Plugin {
 		BPMN2PetriNetConverter bpmn2petrinet = new BPMN2PetriNetConverter(bpmn);
 		bpmn2petrinet.convert();
 		petrinet = bpmn2petrinet.getPetriNet();
-		
+		context.log("BPMN convertito in rete di Petri");
+		context.getProgress().inc();
+
 		/* Converte Petri net in una Occurrence net con Unfolding */
-		PetriNet2Unfolding petrinet2unfolding = new PetriNet2Unfolding(petrinet);
+		PetriNet2Unfolding petrinet2unfolding = new PetriNet2Unfolding(context, petrinet);
 		unfolding = petrinet2unfolding.convert();
 		context.getProgress().inc();
 		

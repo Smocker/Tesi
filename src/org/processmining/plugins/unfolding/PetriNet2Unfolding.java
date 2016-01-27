@@ -1,9 +1,12 @@
 package org.processmining.plugins.unfolding;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
@@ -51,13 +54,16 @@ public class PetriNet2Unfolding
 	
 	protected HashMap <Transition, ArrayList<Pair <Place, Arc>>> xorLinks = new HashMap <Transition, ArrayList<Pair <Place, Arc>>>();
 
+	private PluginContext context;
 	/**
 	 * Costruttore
+	 * @param context 
 	 * 
 	 * @param petrinet: rete di petri originale
 	 */
-	PetriNet2Unfolding(Petrinet petrinet) 
+	PetriNet2Unfolding(PluginContext context, Petrinet petrinet) 
 	{
+		this.context = context;
 		this.petrinet = petrinet;
 	}
 	
@@ -212,10 +218,14 @@ public class PetriNet2Unfolding
 						{
 							// Verifico se la reset provoca la rete bounded o unbounded
 							int isBoundedReset = setMarkingReset(t3);
-							if(isBoundedReset == 0)
+							if(isBoundedReset == 0){
+								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 								identificationMap.insertLiveLock((Transition) t3);
-							else  
+							}
+							else  {
+								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 								identificationMap.insertLiveLockUnbounded((Transition) t3);
+							}
 						}
 						else
 						{
@@ -326,12 +336,14 @@ public class PetriNet2Unfolding
 					if(isBounded == 0)
 					{
 						isCutOff = true;
+						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 						identificationMap.insertLiveLock(t);
 						break;
 					}
 					else if(isBounded > 0) 
 					{
 						isCutOff = true;
+						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 						identificationMap.insertLiveLockUnbounded(t);
 						break;
 					}
@@ -447,9 +459,16 @@ public class PetriNet2Unfolding
 		for(int i = 0; i < identificationMap.readLiveLockUnbounded().size(); i++)
 			cutoff.add(identificationMap.readLiveLockUnbounded().get(i));
 	
-		/* Inserire i deadlock */
+		/* Individuo i deadlock */
 		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition());
-		identificationMap.insertDeadLock(deadlock);
+		
+		// Li coloro di arancione
+		if(deadlock != null)
+		{
+			for(Transition t : deadlock)
+				t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.ORANGE);
+			identificationMap.insertDeadLock(deadlock);
+		}
 		
 		/* Inserisco le altre statistiche */
 		identificationMap.setNetStatistics(petrinet, unfolding, marking);
