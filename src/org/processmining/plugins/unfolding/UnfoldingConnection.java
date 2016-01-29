@@ -15,11 +15,18 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 	public static String PETRINET = "PETRINET";
 	public static String UNFOLDING = "UNFOLDING";
 
+	/**
+	 * Inserimento delle reti di petri nel connettore
+	 * 
+	 * @param identificationMap
+	 * @param petrinet
+	 * @param unfolding
+	 */
 	public UnfoldingConnection(IdentificationMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
 	{
 		super("UnfoldingConnection");
-		putStrong(IDENTIFICATION_MAP,identificationMap);
-		putStrong(PETRINET,petrinet);
-		putStrong(UNFOLDING,unfolding);	
+		putStrong(IDENTIFICATION_MAP, identificationMap);
+		putStrong(PETRINET, petrinet);
+		putStrong(UNFOLDING, unfolding);	
 	}
 }

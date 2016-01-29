@@ -31,22 +31,29 @@ public class LegendConformancePanel extends JPanel implements MouseListener, Mou
         private JComponent component;
         private String panelName;
 
-        public LegendConformancePanel(ScalableViewPanel panel, String panelName) {
+        /**
+         * Costruttore 
+         * 
+         * @param panel
+         * @param panelName
+         */
+        public LegendConformancePanel(ScalableViewPanel panel, String panelName) 
+        {
                 super(new BorderLayout());
-
                 this.setBorder(BorderFactory.createEmptyBorder());
                 this.setOpaque(true);
                 this.setSize(new Dimension(90, 250));
-
                 this.addMouseMotionListener(this);
                 this.addMouseListener(this);
-
                 panel.getViewport();
-                this.panelName = panelName;
                 paintLegend();
         }
 
-        public synchronized void paintLegend() {
+        /**
+         * Disegna la legenda
+         */
+        public synchronized void paintLegend() 
+        {
                 this.setBackground(new Color(30, 30, 30));
 
                 JPanel legendPanel = new JPanel();
@@ -173,5 +180,4 @@ public class LegendConformancePanel extends JPanel implements MouseListener, Mou
         public void setSize(int width, int height) {
                 super.setSize(width, height);
         }
-
 }

@@ -1,7 +1,7 @@
 package org.processmining.support.unfolding;
 
 /**
- * Classe utilizzata per creare una coppia
+ * Creare una coppia
  * 
  * @author Daniele Cicciarella
  *

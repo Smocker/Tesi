@@ -9,7 +9,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
 /**
- * IdentificationMap viene utilizzata per la creazione delle statistiche della rete di occorrenze con la tecnica dell'unfolding
+ * Map contenente le statistiche della rete di unfolding
  * 
  * @author Daniele Cicciarella
  */
@@ -22,7 +22,6 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	private int sizeArcs = 0, sizePlaces = 0, sizeTransitions = 0;
 	private boolean isBoundedness;
 	private double startTime = System.currentTimeMillis(), time = 0;
-	private String nameNet = null;
 
 	/**
 	 * Costruttore
@@ -97,27 +96,7 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	{
 		return get("DeadLock Identification");
 	}
-	
-	/**
-	 * Prendo il nome della rete di petri originale
-	 * 
-	 * @return nome della rete di petri
-	 */
-	public String getNameNet() 
-	{
-		return nameNet;
-	}
 
-	/**
-	 * Setto il nome della rete di petri
-	 * 
-	 * @param nameNet nome della rete di petri
-	 */
-	public void setNameNet(String nameNet) 
-	{
-		this.nameNet = nameNet;
-	}
-	
 	/**
 	 * Prendo il tempo di esecuzione dell'unfolding
 	 * 
@@ -145,14 +124,13 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	 * @param unfolding: rete di unfolding
 	 * @param marking: map contenente le transazioni che provocano la rete unbounded con il rispettivo marking
 	 */
-	public void setNetStatistics(Petrinet petrinet, Petrinet unfolding, HashMap<PetrinetNode, ArrayList<PetrinetNode>> marking)
+	public void setNetStatistics(Petrinet unfolding)
 	{
 		for(Place p : unfolding.getPlaces())
 			sizeArcs += unfolding.getGraph().getInEdges(p).size() + unfolding.getGraph().getOutEdges(p).size();
 		sizePlaces = unfolding.getPlaces().size();
 		sizeTransitions = unfolding.getTransitions().size();
-		isBoundedness = marking.isEmpty() ? true : false;	
-		setNameNet(petrinet.getLabel());
+		isBoundedness = get("Livelock Identification Unbounded").isEmpty() ? true : false;	
 		setTime();
 	}
 	

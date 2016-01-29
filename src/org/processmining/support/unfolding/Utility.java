@@ -9,9 +9,10 @@ import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.support.localconfiguration.LocalConfiguration;
 
 /**
- * Metodi utilizzati dalla classe PetriNet2Unfolding.java
+ * Metodi di supporto alla conversione delle rete di Petri in reti di unfolding
  * 
  * @author Daniele Cicciarella
  */
@@ -79,6 +80,52 @@ public class Utility
 			postset.add(a.getTarget());
 		}
 		return postset;
+	}
+	
+	/**
+	 * Verifica se un nodo è abilitato
+	 * 
+	 * @param N rete di Petri
+	 * @param t nodo da verificare
+	 * @param petri2UnfMap map da rete di Petri a rete di Unfolding
+	 * @return preset di t se è abilitata, null altrimenti
+	 */
+	public static ArrayList <PetrinetNode> isEnabled(Petrinet N, PetrinetNode t, HashMap <PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap)
+	{		
+		ArrayList <PetrinetNode> preset = getPreset(N, t); 
+		if(preset.size() > 1) 
+		{
+			for(int i = 0; i < preset.size(); i++)
+				if(!petri2UnfMap.containsKey(preset.get(i))) 
+					return null;
+		}
+		return preset;
+	}
+	
+	/**
+	 * Calcola il marking di un nodo
+	 * 
+	 * @param N rete di Petri
+	 * @param localConfiguration configurazione locale del nodo
+	 * @param unf2PetriMap map da unfolding a petrinet
+	 * @return marking del nodo
+	 */
+	public static ArrayList <PetrinetNode> setMarking(Petrinet N, LocalConfiguration localConfiguration, HashMap <PetrinetNode, PetrinetNode> unf2PetriMap)
+	{
+		ArrayList <PetrinetNode> marking = new ArrayList <PetrinetNode> ();
+		
+		for(Transition t : localConfiguration.get())
+		{
+			for(PetrinetNode postset : Utility.getPostset(N, unf2PetriMap.get(t)))
+				marking.add(postset);
+		}
+		for(Transition t : localConfiguration.get())
+		{
+			for(PetrinetNode preset : Utility.getPreset(N, unf2PetriMap.get(t)))
+				if(marking.contains(preset))
+					marking.remove(preset);
+		}
+		return marking;
 	}
 	
 	/**
@@ -167,8 +214,8 @@ public class Utility
 	/**
 	 * Verifico se due transazioni sono in conflitto
 	 * 
-	 * @param TODO
-	 * @param TODO
+	 * @param lista degli xor-split della transazione t
+	 * @param lista degli xor-split della transazione U
 	 * @return true se condividono almeno uno xor, false altrimenti
 	 */
 	public static boolean isConflit(ArrayList <Pair <Place, Arc>> xorT, ArrayList <Pair <Place, Arc>>xorU)
@@ -185,51 +232,15 @@ public class Utility
 	/**
 	 * Verifico se vi è un cutoff e se esso provoca la rete unbounded
 	 * 
-	 * @param cT configurazione locale della transazione t
-	 * @param cT1 configurazione locale della transazione t1
-	 * @param N rete di Petri originale
-	 * @param unf2PetriMap map da unfolding a petrinet
-	 * @param T transazione che vogliamo verificare se provoca il cutoff
-	 * @param marking mappa da transazione a rispettivo marking
-	 * @return intero avente valore 0 se t3 e' un cutoff, 1 se t3 e' un cutoff che provoca la rete unbounded, -1 niente
+	 * @param markingT marking della transazione t
+	 * @param markingF marking della configurazione f
+	 * @return intero che indica se c'è cutoff e di che tipo è
 	 */
-	public static int isBounded(
-			LocalConfiguration cT, 
-			LocalConfiguration cT1, 
-			Petrinet N, HashMap <PetrinetNode, PetrinetNode> unf2PetriMap, 
-			Transition T, HashMap<PetrinetNode, 
-			ArrayList<PetrinetNode>> marking) 
+	public static int isBounded(ArrayList <PetrinetNode> markingT, ArrayList <PetrinetNode> markingF) 
 	{
-		ArrayList <PetrinetNode> markT = new ArrayList <PetrinetNode> (), markT1 = new ArrayList <PetrinetNode> (), mark;
-		
-		/* Calcolo il marking di t */
-		for(Transition t : cT.get())
-		{
-			for(PetrinetNode postset : Utility.getPostset(N, unf2PetriMap.get(t)))
-				markT.add(postset);
-		}
-		for(Transition t : cT.get())
-		{
-			for(PetrinetNode preset : Utility.getPreset(N, unf2PetriMap.get(t)))
-				if(markT.contains(preset))
-					markT.remove(preset);
-		}		
-		
-		/* Calcolo il marking di t1 */
-		for(Transition t : cT1.get())
-		{
-			for(PetrinetNode postset : Utility.getPostset(N, unf2PetriMap.get(t)))
-				markT1.add(postset);
-		}
-		for(Transition t : cT1.get())
-		{
-			for(PetrinetNode preset : Utility.getPreset(N, unf2PetriMap.get(t)))
-				if(markT1.contains(preset))
-					markT1.remove(preset);
-		}
+		ArrayList <PetrinetNode> markT = markingT, markT1 = markingF;
 
-		/* Verifico se e' un cutoff */		
-		mark = markT;
+		/* Verifichiamo se t è un cutoff */
 		for(int i = 0; i < markT1.size(); i++)
 		{
 			if(!markT.contains(markT1.get(i)))
@@ -238,14 +249,11 @@ public class Utility
 				markT.remove(markT1.get(i));
 		}
 		
-		/* Verifico se il cutoff è unbounded */
+		/* Verifico il suo tipo */
 		if (markT.isEmpty())
 			return 0;
 		else 
-		{
-			marking.put(T, mark);
 			return 1;
-		}
 	}
 	
 	/**

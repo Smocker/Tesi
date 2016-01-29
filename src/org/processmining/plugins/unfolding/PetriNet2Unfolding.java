@@ -13,53 +13,56 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
+import org.processmining.support.localconfiguration.LocalConfiguration;
+import org.processmining.support.localconfiguration.LocalConfigurationMap;
+import org.processmining.support.localconfiguration.LocalConfigurationQueue;
 import org.processmining.support.unfolding.IdentificationMap;
-import org.processmining.support.unfolding.LocalConfiguration;
-import org.processmining.support.unfolding.LocalConfigurationMap;
 import org.processmining.support.unfolding.Pair;
 import org.processmining.support.unfolding.PetrinetNodeTupla;
-import org.processmining.support.unfolding.PetrinetQueue;
 import org.processmining.support.unfolding.Utility;
 
 /**
- * Classe usata dai plugins BPMN2Unfolding_Plugin and PetriNet2Unfolding_Plugin per convertire un PetriNet in una rete di Occorrenze con la tecnica dell'unfolding
+ * Converte un rete di Petri in una rete di unfolding
  * 
  * @author Daniele Cicciarella
  */
 public class PetriNet2Unfolding 
 {	
+	/* Contesto di ProM */
+	protected PluginContext context;
+	
+	/* Reti di petri */
 	protected Petrinet petrinet, unfolding;
 
-	/* Variabili per la trasformazione della petrinet in N* */
+	/* Variabili per la trasformazione della rete di Petri in N* */
 	protected Place i, o;
 	protected Transition reset;
 		
 	/* Coda di priorità che contiene le configurazioni da analizzare */
-	protected PetrinetQueue pq = new PetrinetQueue();
+	protected LocalConfigurationQueue pq = new LocalConfigurationQueue();
 	
-	/* HashMap contenente le configurazioni locali di ogni transazione delle rete di Occorrenze */
-	protected LocalConfigurationMap localConfigurationMap = new LocalConfigurationMap();
-	
-	/* Mappa ogni nodo della rete di Petri a un uno o più nodi della rete di Occorrenze */
+	/* Mappa ogni nodo della rete di Petri a un uno o più nodi della rete di unfolding */
 	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
 	
-	/* Mappa ogni nodo della rete di Occorrenze a un nodo della rete di Petri */
+	/* Mappa ogni nodo della rete di unfolding a un nodo della rete di Petri */
 	protected HashMap <PetrinetNode, PetrinetNode> unf2PetriMap = new HashMap <PetrinetNode, PetrinetNode>();
 	
-	/* Mappa ogni transazione della rete di occorrenze con il rispettivo marking */
+	/* Mappa ogni transazione della rete di unfolding con il rispettivo marking */
 	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> marking = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
 	
-	/* HashMap contenente i livelock e deadlock e altre statistiche */
+	/* Mappa le configurazioni locali di ogni transazione delle rete di unfolding */
+	protected LocalConfigurationMap localConfigurationMap = new LocalConfigurationMap();
+	
+	/* Mappa i livelock e deadlock e altre statistiche */
 	protected IdentificationMap identificationMap = new IdentificationMap();
 	
+	/* Mappa ogni transazione la storia dei suoi xor-split  */
 	protected HashMap <Transition, ArrayList<Pair <Place, Arc>>> xorLinks = new HashMap <Transition, ArrayList<Pair <Place, Arc>>>();
-
-	private PluginContext context;
 	
 	/**
 	 * Costruttore
-	 * @param context 
 	 * 
+	 * @param context 
 	 * @param petrinet: rete di petri originale
 	 */
 	PetriNet2Unfolding(PluginContext context, Petrinet petrinet) 
@@ -69,9 +72,9 @@ public class PetriNet2Unfolding
 	}
 	
 	/**
-	 * Converte una rete di petri in una rete di occorrenze con la tecnica dell'unfolding
+	 * Converte una rete di Petri in una rete di unfolding
 	 * 
-	 * @return unfolding: rete di unfolding
+	 * @return la rete di unfolding e le sue statistiche
 	 */
 	public Object[] convert() 
 	{
@@ -94,8 +97,7 @@ public class PetriNet2Unfolding
 		visitQueue();	
 		
 		/* Estraggo i deadlock ed effettuo le statistiche della rete */
-		context.getProgress().inc();
-		context.log("Estrazione dei deadlock");
+		writeLog(context, "Extraction of the dealock points...");
 		getStatistics();
 		
 		return new Object [] {unfolding, identificationMap};
@@ -104,8 +106,8 @@ public class PetriNet2Unfolding
 	/**
 	 * Inizializzazione della coda di priorità
 	 * 
-	 * @param p: piazza iniziale della rete di petri
-	 * @param p1: piazza iniziale della rete di occorrenze
+	 * @param p piazza iniziale della rete di petri
+	 * @param p1 piazza iniziale della rete di unfolding
 	 */
 	private void initQueue(Place p, Place p1) 
 	{
@@ -115,7 +117,6 @@ public class PetriNet2Unfolding
 			/* Creo una transazione t1 nell'unfolding e attacco p1 con t1 */
 			Transition t1 = unfolding.addTransition(t.getLabel());
 			unfolding.addArc(p1, t1);			
-			addCorrispondence(t,t1);
 			
 			/* Per tutti i place u delle rete di petri attaccate a t */
 			for(PetrinetNode u: Utility.getPostset(petrinet, t))
@@ -126,8 +127,9 @@ public class PetriNet2Unfolding
 				addCorrispondence(u, u1);
 			}
 
-			/* Aggiungo ogni configurazione di t1 nella coda */
-			pq.insert(localConfigurationMap, unfolding, t1);
+			/* Aggiorno tutte le strutture globali e la coda*/
+			refreshMap(t, t1);
+			pq.insert(localConfigurationMap.get(t1));
 		}
 	}
 
@@ -142,8 +144,7 @@ public class PetriNet2Unfolding
 			LocalConfiguration c = pq.remove();
 			
 			/* Mappo da unfolding (t1) a petri (t) la prima transazione della configurazione */
-			ArrayList <Transition> arrayC = c.get();
-			Transition t1 = arrayC.get(0);
+			Transition t1 = c.get().get(0);
 			Transition t = (Transition) unf2PetriMap.get(t1);
 					
 			/* Per ogni piazza p della rete originale attaccate a t */
@@ -157,26 +158,14 @@ public class PetriNet2Unfolding
 				/* Per ogni transazione t2 delle rete originale attaccate a p */
 				for(PetrinetNode t2: Utility.getPostset(petrinet, p))
 				{
-					boolean isEnabled = true;
 					ArrayList<PetrinetNodeTupla> combination = null;
+					ArrayList <PetrinetNode> presetT2 = null;
 					
-					// Se il preset di t2 è maggiore di uno devo verificare se è abilitata
-					ArrayList <PetrinetNode> presetT2 = Utility.getPreset(petrinet, t2); 
-					if(presetT2.size() > 1) 
-					{
-						for(int i = 0; i < presetT2.size(); i++)
-						{
-							if(!petri2UnfMap.containsKey(presetT2.get(i))) 
-							{
-								isEnabled = false;
-								break;
-							} 
-						}
-						if(!isEnabled)
-							continue;
-					}	
+					/* Verifico se t2 è abilitata */
+					if((presetT2 = Utility.isEnabled(petrinet, t2, petri2UnfMap)) == null)
+						continue;
 					
-					/* Se abilitata calcolo tutte le combinazioni possibili in ingresso a t2 */
+					/* Calcolo tutte le combinazioni possibili in ingresso a t2 */
 					ArrayList <ArrayList <PetrinetNode>> comb = new ArrayList <ArrayList <PetrinetNode>>();
 					for(int i = 0; i < presetT2.size(); i++)
 					{
@@ -202,43 +191,43 @@ public class PetriNet2Unfolding
 					/* Per ogni combinazione rimanente */
 					for(int i = 0; i < combination.size(); i++)
 					{					
-						/* Aggiungo t2 (t3) all'unfolding il quale sarà collagato con le piazze che lo abilitano */
+						/* Aggiungo t2 all'unfolding il quale sarà collagato con le piazze che lo abilitano */
 						Transition t3 = unfolding.addTransition(t2.getLabel());
 						for(int j = 0; j < combination.get(i).getElements().length; j++)
 							unfolding.addArc((Place) combination.get(i).getElements()[j], t3);
 						
-						// Se l'inserimento di t3 provaca conflitto allora la elimino
+						// Verifico se l'inserimento di t3 provaca conflitto in tal caso la elimino
 						if(this.isConflict(combination.get(i).getElements(), t3))
 						{
 							for(int j = 0; j < combination.get(i).getElements().length; j++)
 								unfolding.removeArc((Place) combination.get(i).getElements()[j], t3);
 							unfolding.removeTransition(t3);
 							continue;
-						}
-						addCorrispondence(t2,t3);
+						}	
+						refreshMap(t2, t3);
 						
+						/* Verifico i cutoff */
 						if(t2.equals(reset))
 						{
-							// Verifico se la reset provoca la rete bounded o unbounded
-							int isBoundedReset = setMarkingReset(t3);
-							if(isBoundedReset == 0){
+							if(marking.get(t3).size() == 0)
+							{
 								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 								identificationMap.insertLiveLock((Transition) t3);
 							}
-							else  {
+							else  
+							{
 								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 								identificationMap.insertLiveLockUnbounded((Transition) t3);
 							}
 						}
 						else
-						{
-							/* Verifico se t3 provoca un cutoff */
+						{							
 							boolean isCutOff = false;
 							for(PetrinetNode p2: Utility.getPostset(petrinet, t2))
 							{
 								// Controllo se un place del suo postset è stato inserito
 								if(petri2UnfMap.containsKey(p2) && !isCutOff)
-									isCutOff = isCutOff(t3, isCutOff, p2);
+									isCutOff = isCutOff(t3, p2);
 							}
 							
 							// Se t3 è un cutoff la configurazione non deve essere aggiunta nella coda
@@ -250,32 +239,13 @@ public class PetriNet2Unfolding
 									unfolding.addArc(t3, p3);						
 									addCorrispondence(p2, p3);
 								}
-								pq.insert(localConfigurationMap, unfolding, t3);
+								pq.insert(localConfigurationMap.get(t3));
 							}
 						}
 					}
 				}
 			}
 		}
-	}
-
-	/**
-	 * Aggiunge le corrispondenze nelle due map
-	 * 
-	 * @param nodePetri: nodo della rete di Petri
-	 * @param nodeUnfolding: nodo della rete di Occorrenze
-	 */
-	private void addCorrispondence(PetrinetNode nodePetri, PetrinetNode nodeUnfolding)
-	{
-		// Se non esiste la map da petri -> unfolding la creo
-		if(!petri2UnfMap.containsKey(nodePetri)) 
-			petri2UnfMap.put(nodePetri, new ArrayList<PetrinetNode>());
-		
-		petri2UnfMap.get(nodePetri).add(nodeUnfolding);
-		unf2PetriMap.put(nodeUnfolding, nodePetri);
-		
-		if(nodeUnfolding instanceof Transition)
-			xorLinks.put((Transition) nodeUnfolding, Utility.getHistoryPlaceConflictXOR(unfolding, nodeUnfolding, null));
 	}
 	
 	/**
@@ -314,83 +284,36 @@ public class PetriNet2Unfolding
 	 * @param p: stato finale della transazione t
 	 * @return isCutoff
 	 */
-	private boolean isCutOff(Transition t, boolean isCutOff, PetrinetNode p) 
+	private boolean isCutOff(Transition t, PetrinetNode placeFinal) 
 	{
-		ArrayList <Place> history = Utility.getHistoryPlace(unfolding, t);
-		LocalConfiguration cT = null;
-		int isBounded;
+		int isBounded = -1;
 		
-		for(int h = 0; h < history.size(); h++)
+		for(Place history : Utility.getHistoryPlace(unfolding, t))
 		{
-			// Se nella storia dei place di t3 esiste p allora è un ciclo (grafo aciclico)
-			if(unf2PetriMap.get(history.get(h)).equals(p)) 
-			{						
-				Place pH = history.get(h);
-				for(PetrinetNode tH: Utility.getPreset(unfolding, pH))
+			// Se nella storia dei place di t3 esiste p allora è un ciclo
+			if(unf2PetriMap.get(history).equals(placeFinal)) 
+			{	
+				PetrinetNode transitionFinal = Utility.getPreset(unfolding, history).get(0);
+				
+				// Verifico se c'e' un cutoff e se si di che tipo e'
+				isBounded = Utility.isBounded(marking.get(t), marking.get(transitionFinal));
+				if(isBounded == 0)
 				{
-					if(cT == null)
-					{
-						cT = new LocalConfiguration ();
-						cT.create(unfolding, t);
-					}
-					
-					// Verifico se il cut-off provoca la rete bounded o unbounded
-					isBounded = Utility.isBounded(cT, localConfigurationMap.get(tH), petrinet, unf2PetriMap, t, marking);
-					if(isBounded == 0)
-					{
-						isCutOff = true;
-						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-						identificationMap.insertLiveLock(t);
-						break;
-					}
-					else if(isBounded > 0) 
-					{
-						isCutOff = true;
-						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-						identificationMap.insertLiveLockUnbounded(t);
-						break;
-					}
+					t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+					identificationMap.insertLiveLock(t);
+					return true;
 				}
-			}
+				else if(isBounded > 0) 
+				{
+					t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+					identificationMap.insertLiveLockUnbounded(t);
+					return true;
+				}
+				else
+					return false;
+			}	
 		}
-		return isCutOff;
-	}
-	
-	/**
-	 * Calcolo il marking della transazione reset
-	 * 
-	 * @param t1 transazione reset unfoldata
-	 * @return 0 se la rete è bounded, 1 altrimenti
-	 */
-	private int setMarkingReset(Transition t1)
-	{
-		ArrayList <PetrinetNode> markT = new ArrayList <PetrinetNode> ();
-		LocalConfiguration cT = new LocalConfiguration ();
-		cT.create(unfolding, t1);
-		
-		/* Calcolo il marking di t: postset(H(t)) - preset(H(t)) */
-		for(Transition t : cT.get())
-		{
-			for(PetrinetNode postset : Utility.getPostset(petrinet, unf2PetriMap.get(t)))
-				markT.add(postset);
-		}
-		for(Transition t : cT.get())
-		{
-			for(PetrinetNode preset : Utility.getPreset(petrinet, unf2PetriMap.get(t)))
-			{
-				if(markT.contains(preset))
-					markT.remove(preset);
-			}
-		}	
-		
-		/* Verifico se il marking provoca la rete unbounded o bounded */ 
-		if(markT.size() == 0)
-			return 0;
-		else 
-		{
-			marking.put(t1, markT);
-			return 1;
-		}
+		return false;
 	}
 
 	/**
@@ -467,7 +390,6 @@ public class PetriNet2Unfolding
 		
 		for(Transition v: cutoff)
 		{ 
-			localConfigurationMap.insert(v, unfolding);
 			for(Transition u: localConfigurationMap.get(v).get())
 			{
 				if(!cutoffHistory.contains(u))
@@ -487,7 +409,7 @@ public class PetriNet2Unfolding
 		}
 		
 		/* Inserisco le altre statistiche */
-		identificationMap.setNetStatistics(petrinet, unfolding, marking);
+		identificationMap.setNetStatistics(unfolding);
 	}
 
 	/**
@@ -582,5 +504,49 @@ public class PetriNet2Unfolding
 			}
 		}
 		return choice;
+	}
+	
+	/**
+	 * Aggiunge le corrispondenze delle due map
+	 * 
+	 * @param t nodo della rete di Petri
+	 * @param t1 nodo della rete di Unfolding
+	 */
+	private void addCorrispondence(PetrinetNode t, PetrinetNode t1)
+	{
+		// Se non esiste la map da petri -> unfolding la creo
+		if(!petri2UnfMap.containsKey(t)) 
+			petri2UnfMap.put(t, new ArrayList<PetrinetNode>());
+		
+		petri2UnfMap.get(t).add(t1);
+		unf2PetriMap.put(t1, t);
+		
+		if(t1 instanceof Transition)
+			xorLinks.put((Transition) t1, Utility.getHistoryPlaceConflictXOR(unfolding, t1, null));
+	}
+	
+	/**
+	 * Aggiorna le map
+	 * 
+	 * @param t transazione della rete di Petri
+	 * @param t1 transazione delle rete di Unfolding
+	 */
+	private void refreshMap(PetrinetNode t, PetrinetNode t1) 
+	{
+		addCorrispondence(t,t1);
+		localConfigurationMap.set(t1, unfolding);
+		marking.put(t1, Utility.setMarking(petrinet, localConfigurationMap.get(t1), unf2PetriMap));
+	}
+	
+	/**
+	 * Scrive un messaggio di log e incrementa la barra progressiva
+	 * 
+	 * @param context contesto di ProM
+	 * @param log messaggio di log
+	 */
+	private void writeLog(PluginContext context, String log)
+	{
+		context.log(log);
+		context.getProgress().inc();
 	}
 }

@@ -13,30 +13,59 @@ import org.processmining.support.unfolding.IdentificationMap;
  */
 public class PetriNet2Unfolding_Plugin {
 	@Plugin(
-		name = "Convert Petri net to Unfolding net", 
+		name = "BCS Petri net to Unfolding", 
 		parameterLabels = {"Petri net"}, 
-		returnLabels = { "Identification Map", "Petri net" }, 
+		returnLabels = {"Identification Map", "Petri net"}, 
 		returnTypes = { IdentificationMap.class, Petrinet.class }, 
 		userAccessible = true, 
 		help = "Convert Petri net to Unfolding net"
 	)
 	@UITopiaVariant(
-		affiliation = "Universita' di Pisa", 
+		affiliation = "University of Pisa", 
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"
 	)
 	public Object[] convert(PluginContext context, Petrinet petrinet) 
 	{
-		context.getProgress().setMinimum(0);
-		context.getProgress().setMaximum(3);
-		context.log("Converto da rete di Petri a rete di unfolding");
-		PetriNet2Unfolding conv = new PetriNet2Unfolding(context, petrinet);
-		Object[] unfolding = conv.convert();
-		context.getProgress().inc();
+		PetriNet2Unfolding petrinet2Unfolding;
+		Object[] unfolding;
+		
+		/* Settiamo la barra progressiva */
+		setProgress(context, 0, 2);
+		
+		/* Converte la rete di Petri nella rete di unfolding */
+		writeLog(context, "Conversion of the Petri net in Unfolding net...");
+		petrinet2Unfolding = new PetriNet2Unfolding(context, petrinet);
+		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 		context.addConnection(new UnfoldingConnection((IdentificationMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));
 		
-		return new Object [] {unfolding[1], unfolding[0]} ;
+		return new Object [] {unfolding[1], unfolding[0]};
+	}
+	
+	/**
+	 * Setta gli step della barra progressiva
+	 * 
+	 * @param context contesto di ProM
+	 * @param minimun minimo valore
+	 * @param maximum massimo valore
+	 */
+	private void setProgress(PluginContext context, int minimun, int maximum)
+	{
+		context.getProgress().setMinimum(minimun);
+		context.getProgress().setMaximum(maximum);
+	}
+	
+	/**
+	 * Scrive un messaggio di log e incrementa la barra progressiva
+	 * 
+	 * @param context contesto di ProM
+	 * @param log messaggio di log
+	 */
+	private void writeLog(PluginContext context, String log)
+	{
+		context.log(log);
+		context.getProgress().inc();
 	}
 }

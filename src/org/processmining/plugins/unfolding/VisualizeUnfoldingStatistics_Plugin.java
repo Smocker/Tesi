@@ -30,16 +30,16 @@ public class VisualizeUnfoldingStatistics_Plugin
 {
 	@Plugin
 		(
-			name = "Visualize Unfolding Statistics", 
-			returnLabels = { "Visualize Unfolding Statistics" }, 
+			name = "Visualize BCS Statistics", 
+			returnLabels = { "Visualize BCS Statistics" }, 
 			parameterLabels = { "Identification Map" }, 
 			returnTypes = { JComponent.class }, 
 			userAccessible = true,
-			help = "Visualize Unfolding Statistics"
+			help = "Visualize BCS Statistics"
 		)
     @UITopiaVariant
     	(
-    		affiliation = "Universita di Pisa", 
+    		affiliation = "University of Pisa", 
     		author = "Daniele Cicciarella", 
     		email = "cicciarellad@gmail.com"
     	)
