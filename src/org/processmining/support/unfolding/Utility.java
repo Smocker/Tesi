@@ -270,4 +270,61 @@ public class Utility
 				return false;
 		return true;
 	}
+	
+	public static int isBounded(
+			LocalConfiguration cT, 
+			LocalConfiguration cT1, 
+			Petrinet N, HashMap <PetrinetNode, PetrinetNode> unf2PetriMap, 
+			Transition T, HashMap<PetrinetNode, 
+			ArrayList<PetrinetNode>> marking) 
+	{
+		ArrayList <PetrinetNode> markT = new ArrayList <PetrinetNode> (), markT1 = new ArrayList <PetrinetNode> (), mark;
+		
+		/* Calcolo il marking di t */
+		for(Transition t : cT.get())
+		{
+			for(PetrinetNode postset : Utility.getPostset(N, unf2PetriMap.get(t)))
+				markT.add(postset);
+		}
+		for(Transition t : cT.get())
+		{
+			for(PetrinetNode preset : Utility.getPreset(N, unf2PetriMap.get(t)))
+				if(markT.contains(preset))
+					markT.remove(preset);
+		}		
+		
+		/* Calcolo il marking di t1 */
+		for(Transition t : cT1.get())
+		{
+			for(PetrinetNode postset : Utility.getPostset(N, unf2PetriMap.get(t)))
+				markT1.add(postset);
+		}
+		for(Transition t : cT1.get())
+		{
+			for(PetrinetNode preset : Utility.getPreset(N, unf2PetriMap.get(t)))
+				if(markT1.contains(preset))
+					markT1.remove(preset);
+		}
+
+		/* Verifico se e' un cutoff */		
+		mark = markT;
+		for(int i = 0; i < markT1.size(); i++)
+		{
+			if(!markT.contains(markT1.get(i)))
+				return -1;
+			else
+				markT.remove(markT1.get(i));
+		}
+		
+		/* Verifico se il cutoff è unbounded */
+		if (markT.isEmpty())
+			return 0;
+		else 
+		{
+			marking.put(T, mark);
+			return 1;
+		}
+	}
+	
+	
 }

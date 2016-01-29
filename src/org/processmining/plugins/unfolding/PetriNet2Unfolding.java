@@ -279,39 +279,36 @@ public class PetriNet2Unfolding
 	/**
 	 * Verifico se una transazione provoca il cutoff
 	 * 
-	 * @param t: transazione da verificare
-	 * @param isCutOff: booleano che indica se c'è stato un cutoff
-	 * @param p: stato finale della transazione t
-	 * @return isCutoff
+	 * @param t transazione da verificare
+	 * @param placeFinal stato finale della transazione t
+	 * @return boolean
 	 */
 	private boolean isCutOff(Transition t, PetrinetNode placeFinal) 
 	{
-		int isBounded = -1;
+		int isBounded;
 		
-		for(Place history : Utility.getHistoryPlace(unfolding, t))
+		for(Place h : Utility.getHistoryPlace(unfolding, t))
 		{
-			// Se nella storia dei place di t3 esiste p allora è un ciclo
-			if(unf2PetriMap.get(history).equals(placeFinal)) 
-			{	
-				PetrinetNode transitionFinal = Utility.getPreset(unfolding, history).get(0);
-				
-				// Verifico se c'e' un cutoff e se si di che tipo e'
-				isBounded = Utility.isBounded(marking.get(t), marking.get(transitionFinal));
-				if(isBounded == 0)
-				{
-					t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-					identificationMap.insertLiveLock(t);
-					return true;
+			// Se nella storia dei place di t esiste placeFinal allora è un ciclo
+			if(unf2PetriMap.get(h).equals(placeFinal)) 
+			{						
+				for(PetrinetNode transitionFinal: Utility.getPreset(unfolding, h))
+				{					
+					isBounded = Utility.isBounded(marking.get(t), marking.get(transitionFinal));
+					if(isBounded == 0)
+					{
+						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+						identificationMap.insertLiveLock(t);
+						return true;
+					}
+					else if(isBounded > 0) 
+					{
+						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+						identificationMap.insertLiveLockUnbounded(t);
+						return true;
+					}
 				}
-				else if(isBounded > 0) 
-				{
-					t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-					identificationMap.insertLiveLockUnbounded(t);
-					return true;
-				}
-				else
-					return false;
-			}	
+			}
 		}
 		return false;
 	}
