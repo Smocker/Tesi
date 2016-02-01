@@ -16,7 +16,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 public class LocalConfiguration 
 {
 	/* Lista contenente la configurazione locale di un nodo */
-	private ArrayList <Transition> localConfiguration;
+	private ArrayList <Transition> localConfiguration = null;
 	
 	/**
 	 * Costruttore
@@ -63,7 +63,6 @@ public class LocalConfiguration
 			// La transazione è stata visitata
 			if(back.contains(pn))	
 				return;
-
 			back.add((Transition) pn);
 		}
 		

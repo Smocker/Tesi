@@ -22,162 +22,175 @@ import org.processmining.framework.util.ui.scalableview.interaction.ViewInteract
 import com.fluxicon.slickerbox.factory.SlickerDecorator;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
-public class LegendConformancePanel extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel {
+/**
+ * Costruisce la legenda della rete di unfolding
+ * 
+ * @author Daniele Cicciarella
+ */
+public class LegendConformancePanel extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
+{
+	/* serialVersionUID */
+    private static final long serialVersionUID = 5563202352636336868L;
 
-        private static final long serialVersionUID = 5563202352636336868L;
+    protected SlickerFactory factory = SlickerFactory.instance();
+    protected SlickerDecorator decorator = SlickerDecorator.instance();
+    private JComponent component;
+    private String panelName;
 
-        protected SlickerFactory factory = SlickerFactory.instance();
-        protected SlickerDecorator decorator = SlickerDecorator.instance();
-        private JComponent component;
-        private String panelName;
+    /**
+     * Costruttore 
+     * 
+     * @param panel pannello sulla quale deve essere inserito il pannello
+     * @param panelName nome del pannello 
+     */
+    public LegendConformancePanel(ScalableViewPanel panel, String panelName) 
+    {
+    	/* Si setta il layout della legenda */
+        super(new BorderLayout());
+        this.setBorder(BorderFactory.createEmptyBorder());
+        this.setOpaque(true);
+        this.setSize(new Dimension(90, 250));
+        this.addMouseMotionListener(this);
+        this.addMouseListener(this);
+        this.panelName = panelName;
+        panel.getViewport();
+        paintLegend();
+    }
 
-        /**
-         * Costruttore 
-         * 
-         * @param panel
-         * @param panelName
-         */
-        public LegendConformancePanel(ScalableViewPanel panel, String panelName) 
-        {
-                super(new BorderLayout());
-                this.setBorder(BorderFactory.createEmptyBorder());
-                this.setOpaque(true);
-                this.setSize(new Dimension(90, 250));
-                this.addMouseMotionListener(this);
-                this.addMouseListener(this);
-                panel.getViewport();
-                paintLegend();
-        }
+    /**
+     * Disegna la legenda
+     */
+    public synchronized void paintLegend() 
+    {
+    	/* Altri stili */
+        this.setBackground(new Color(30, 30, 30));
+        JPanel legendPanel = new JPanel();
+        legendPanel.setBorder(BorderFactory.createEmptyBorder());
+        legendPanel.setBackground(new Color(30, 30, 30));
+        TableLayout layout = new TableLayout(new double[][] { { 0.10, TableLayout.FILL }, {} });
+        legendPanel.setLayout(layout);
+        
+        /* Riga legenda */
+        layout.insertRow(0, 0.2);
+        int row = 1;
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JLabel legend = factory.createLabel("LEGEND");
+        legend.setForeground(Color.WHITE);
+        legendPanel.add(legend, "0,1,1,1,c, c");
+        row++;
 
-        /**
-         * Disegna la legenda
-         */
-        public synchronized void paintLegend() 
-        {
-                this.setBackground(new Color(30, 30, 30));
+        /* Riga punti di cutoff */
+        layout.insertRow(row, 0.2);
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JPanel greenPanel = new JPanel();
+        greenPanel.setBackground(Color.RED);
+        legendPanel.add(greenPanel, "0," + row + ",r, c");
+        JLabel syncLbl = factory.createLabel(" Points of Cutoff");
+        syncLbl.setForeground(Color.WHITE);
+        legendPanel.add(syncLbl, "1," + row++ + ",l, c");
 
-                JPanel legendPanel = new JPanel();
-                legendPanel.setBorder(BorderFactory.createEmptyBorder());
-                legendPanel.setBackground(new Color(30, 30, 30));
-                TableLayout layout = new TableLayout(new double[][] { { 0.10, TableLayout.FILL }, {} });
-                legendPanel.setLayout(layout);
+        /* Riga punti di deadlock */
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JPanel yellowPanel = new JPanel();
+        yellowPanel.setBackground(Color.ORANGE);
+        legendPanel.add(yellowPanel, "0," + row + ",r, c");
+        JLabel moveLogLbl = factory.createLabel(" Points of Deadlock");
+        moveLogLbl.setForeground(Color.WHITE);
+        legendPanel.add(moveLogLbl, "1," + row++ + ",l, c");
 
-                layout.insertRow(0, 0.2);
+        /* Riga vuota */
+        layout.insertRow(row, 0.2);
+        
+        /* Si settano altri stili */
+        legendPanel.setOpaque(false);
+        this.add(legendPanel, BorderLayout.WEST);
+        this.setOpaque(false);
+        this.setOpaque(false);
+    }
 
-                int row = 1;
+    public double getVisWidth() 
+    {
+        return component.getSize().getWidth();
+    }
 
-                layout.insertRow(row, TableLayout.PREFERRED);
-                JLabel legend = factory.createLabel("LEGEND");
-                legend.setForeground(Color.WHITE);
-                legendPanel.add(legend, "0,1,1,1,c, c");
-                row++;
+    public double getVisHeight() 
+    {
+        return component.getSize().getHeight();
+    }
 
-                layout.insertRow(row, 0.2);
+    @Override
+    public void paint(Graphics g) 
+    {
+    	super.paint(g);
+    }
 
-                layout.insertRow(row, TableLayout.PREFERRED);
-                JPanel greenPanel = new JPanel();
-                greenPanel.setBackground(Color.RED);
-                legendPanel.add(greenPanel, "0," + row + ",r, c");
-                JLabel syncLbl = factory.createLabel(" Punti di Livelock");
-                syncLbl.setForeground(Color.WHITE);
-                legendPanel.add(syncLbl, "1," + row++ + ",l, c");
+    public synchronized void mouseDragged(MouseEvent evt) 
+    {}
 
-                layout.insertRow(row, TableLayout.PREFERRED);
-                JPanel yellowPanel = new JPanel();
-                yellowPanel.setBackground(Color.ORANGE);
-                legendPanel.add(yellowPanel, "0," + row + ",r, c");
-                JLabel moveLogLbl = factory.createLabel(" Punti di Deadlock");
-                moveLogLbl.setForeground(Color.WHITE);
-                legendPanel.add(moveLogLbl, "1," + row++ + ",l, c");
+    public void mouseClicked(MouseEvent e) 
+    {}
 
-                layout.insertRow(row, 0.2);
+    public void mouseEntered(MouseEvent e) 
+    {}
 
-                legendPanel.setOpaque(false);
-                this.add(legendPanel, BorderLayout.WEST);
-                this.setOpaque(false);
+    public void mouseExited(MouseEvent e) 
+    {}
 
+    public void mouseMoved(MouseEvent e) 
+    {}
 
-                this.setOpaque(false);
-        }
+    public synchronized void mousePressed(MouseEvent e) 
+    {}
 
-        public double getVisWidth() {
-                return component.getSize().getWidth();
-        }
+    public synchronized void mouseReleased(MouseEvent e) 
+    {}
 
-        public double getVisHeight() {
-                return component.getSize().getHeight();
-        }
+    public void setScalableComponent(ScalableComponent scalable) 
+    {
+            this.component = scalable.getComponent();
+    }
 
-        @Override
-        public void paint(Graphics g) {
+    public void setParent(ScalableViewPanel parent) 
+    {}
 
-                super.paint(g);
-        }
+    public JComponent getComponent() 
+    {
+            return this;
+    }
 
-        public synchronized void mouseDragged(MouseEvent evt) {
-        }
+    public int getPosition() 
+    {
+        return SwingConstants.NORTH;
+    }
 
-        public void mouseClicked(MouseEvent e) {
-        }
+    public String getPanelName() 
+    {
+        return panelName;
+    }
 
-        public void mouseEntered(MouseEvent e) {
-        }
+    public void setPanelName(String name) 
+    {
+        this.panelName = name;
+    }
 
-        public void mouseExited(MouseEvent e) {
-        }
+    public void updated() 
+    {}
 
-        public void mouseMoved(MouseEvent e) {
-        }
+    public double getHeightInView() 
+    {
+        return 90;
+    }
 
-        public synchronized void mousePressed(MouseEvent e) {
+    public double getWidthInView() 
+    {
+        return 250;
+    }
 
-        }
+    public void willChangeVisibility(boolean to) 
+    {}
 
-        public synchronized void mouseReleased(MouseEvent e) {
-
-        }
-
-        public void setScalableComponent(ScalableComponent scalable) {
-                this.component = scalable.getComponent();
-        }
-
-        public void setParent(ScalableViewPanel parent) {
-
-        }
-
-        public JComponent getComponent() {
-                return this;
-        }
-
-        public int getPosition() {
-                return SwingConstants.NORTH;
-        }
-
-        public String getPanelName() {
-                return panelName;
-        }
-
-        public void setPanelName(String name) {
-                this.panelName = name;
-        }
-
-        public void updated() {
-
-        }
-
-        public double getHeightInView() {
-                return 90;
-        }
-
-        public double getWidthInView() {
-                return 250;
-        }
-
-        public void willChangeVisibility(boolean to) {
-
-        }
-
-        public void setSize(int width, int height) {
-                super.setSize(width, height);
-        }
+    public void setSize(int width, int height) 
+    {
+        super.setSize(width, height);
+    }
 }

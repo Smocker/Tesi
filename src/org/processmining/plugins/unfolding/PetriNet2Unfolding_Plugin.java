@@ -11,8 +11,10 @@ import org.processmining.support.unfolding.IdentificationMap;
  * 
  * @author Daniele Cicciarella
  */
-public class PetriNet2Unfolding_Plugin {
-	@Plugin(
+public class PetriNet2Unfolding_Plugin 
+{
+	@Plugin
+	(
 		name = "BCS Petri net to Unfolding", 
 		parameterLabels = {"Petri net"}, 
 		returnLabels = {"Identification Map", "Petri net"}, 
@@ -20,7 +22,8 @@ public class PetriNet2Unfolding_Plugin {
 		userAccessible = true, 
 		help = "Convert Petri net to Unfolding net"
 	)
-	@UITopiaVariant(
+	@UITopiaVariant
+	(
 		affiliation = "University of Pisa", 
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"

@@ -21,7 +21,7 @@ public class LocalConfigurationMap extends HashMap<PetrinetNode, LocalConfigurat
 	 * @param pn nodo da inserire
 	 * @param N rete di petri
 	 */
-	public void set(PetrinetNode pn, Petrinet N)
+	public void add(PetrinetNode pn, Petrinet N)
 	{
 		LocalConfiguration localConfiguration = new LocalConfiguration();
 		localConfiguration.set(N, pn);

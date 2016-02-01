@@ -13,9 +13,11 @@ public class PetrinetNodeTupla
 	{
 		elements = new PetrinetNode[0];
 	}
-	
+
 	/**
 	 * Costruttore
+	 * 
+	 * @param dim dimensione dell'array
 	 */
 	public PetrinetNodeTupla(int dim)
 	{
@@ -25,24 +27,24 @@ public class PetrinetNodeTupla
 	/**
 	 * Aggiunge un nuovo elemento alla tupla
 	 * 
-	 * @param pn: PetrinetNode da aggiungere
+	 * @param pn PetrinetNode da aggiungere
 	 * @return la tupla con il nuovo elemento aggiunto
 	 */
 	public PetrinetNodeTupla add(PetrinetNode pn)
 	{
-		PetrinetNodeTupla tupla = new PetrinetNodeTupla(this.elements.length+1);
-		for(int j = 0; j < this.elements.length; ++j) 
+		PetrinetNodeTupla tupla = new PetrinetNodeTupla(elements.length+1);
+		for(int j = 0; j < elements.length; ++j) 
 		{
-			tupla.elements[j] = this.elements[j];
+			tupla.elements[j] = elements[j];
 		}		
-		tupla.elements[this.elements.length] = pn;
+		tupla.elements[elements.length] = pn;
 		return tupla;
 	}
 	
 	/**
 	 * Estraggo l'array di PetrinetNode
 	 * 
-	 * @return array di PetrinetNode
+	 * @return lista di nodi
 	 */
 	public PetrinetNode[] getElements()
 	{
@@ -52,11 +54,10 @@ public class PetrinetNodeTupla
 	/**
 	 * Setto l'array di PetrinetNode
 	 * 
-	 * @param elements: array di PetrinetNode
+	 * @param elements lista di nodi
 	 */
 	public void setElements(PetrinetNode[] elements) 
 	{
 		this.elements = elements;
 	}
-
 }

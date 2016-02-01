@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.AttributeMap;
@@ -15,7 +16,6 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
 import org.processmining.support.localconfiguration.LocalConfiguration;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
-import org.processmining.support.localconfiguration.LocalConfigurationQueue;
 import org.processmining.support.unfolding.IdentificationMap;
 import org.processmining.support.unfolding.Pair;
 import org.processmining.support.unfolding.PetrinetNodeTupla;
@@ -39,7 +39,7 @@ public class PetriNet2Unfolding
 	protected Transition reset;
 		
 	/* Coda di priorità che contiene le configurazioni da analizzare */
-	protected LocalConfigurationQueue pq = new LocalConfigurationQueue();
+	protected LinkedList <LocalConfiguration> pq = new LinkedList <LocalConfiguration>();
 	
 	/* Mappa ogni nodo della rete di Petri a un uno o più nodi della rete di unfolding */
 	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
@@ -127,9 +127,9 @@ public class PetriNet2Unfolding
 				addCorrispondence(u, u1);
 			}
 
-			/* Aggiorno tutte le strutture globali e la coda*/
+			/* Aggiorno tutte le strutture globali e la coda */
 			refreshMap(t, t1);
-			pq.insert(localConfigurationMap.get(t1));
+			pq.push(localConfigurationMap.get(t1));
 		}
 	}
 
@@ -141,7 +141,7 @@ public class PetriNet2Unfolding
 		while(!pq.isEmpty())
 		{
 			/* Estraggo una configurazione c da q */
-			LocalConfiguration c = pq.remove();
+			LocalConfiguration c = pq.pop();
 			
 			/* Mappo da unfolding (t1) a petri (t) la prima transazione della configurazione */
 			Transition t1 = c.get().get(0);
@@ -212,12 +212,12 @@ public class PetriNet2Unfolding
 							if(marking.get(t3).size() == 0)
 							{
 								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-								identificationMap.insertLiveLock((Transition) t3);
+								identificationMap.addLiveLock((Transition) t3);
 							}
 							else  
 							{
 								t3.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-								identificationMap.insertLiveLockUnbounded((Transition) t3);
+								identificationMap.addLivelockUnbounded((Transition) t3);
 							}
 						}
 						else
@@ -239,7 +239,7 @@ public class PetriNet2Unfolding
 									unfolding.addArc(t3, p3);						
 									addCorrispondence(p2, p3);
 								}
-								pq.insert(localConfigurationMap.get(t3));
+								pq.push(localConfigurationMap.get(t3));
 							}
 						}
 					}
@@ -297,14 +297,12 @@ public class PetriNet2Unfolding
 					isBounded = Utility.isBounded(marking.get(t), marking.get(transitionFinal));
 					if(isBounded == 0)
 					{
-						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-						identificationMap.insertLiveLock(t);
+						identificationMap.addLiveLock(t);
 						return true;
 					}
 					else if(isBounded > 0) 
 					{
-						t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-						identificationMap.insertLiveLockUnbounded(t);
+						identificationMap.addLivelockUnbounded(t);
 						return true;
 					}
 				}
@@ -377,10 +375,10 @@ public class PetriNet2Unfolding
 	{		
 		/* Inserisco i livelock trovati in un ArrayList */
 		ArrayList <Transition> cutoff = new ArrayList <Transition> ();
-		for(int i = 0; i < identificationMap.readLiveLock().size(); i++)
-			cutoff.add(identificationMap.readLiveLock().get(i));
-		for(int i = 0; i < identificationMap.readLiveLockUnbounded().size(); i++)
-			cutoff.add(identificationMap.readLiveLockUnbounded().get(i));
+		for(int i = 0; i < identificationMap.getLivelock().size(); i++)
+			cutoff.add(identificationMap.getLivelock().get(i));
+		for(int i = 0; i < identificationMap.getLivelockUnbounded().size(); i++)
+			cutoff.add(identificationMap.getLivelockUnbounded().get(i));
 	
 		
 		ArrayList <Transition> cutoffHistory = new ArrayList <Transition> ();
@@ -395,18 +393,12 @@ public class PetriNet2Unfolding
 		}
 		
 		/* Individuo i deadlock */
-		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition(cutoffHistory));
-		
-		// Li coloro di arancione
+		ArrayList <Transition> deadlock = deleteCutOff(cutoff, getChoiceTransition(cutoffHistory));		
 		if(deadlock != null)
-		{
-			for(Transition t : deadlock)
-				t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.ORANGE);
-			identificationMap.insertDeadLock(deadlock);
-		}
+			identificationMap.setDeadlock(deadlock);
 		
 		/* Inserisco le altre statistiche */
-		identificationMap.setNetStatistics(unfolding);
+		identificationMap.setStatistic(unfolding);
 	}
 
 	/**
@@ -531,8 +523,8 @@ public class PetriNet2Unfolding
 	private void refreshMap(PetrinetNode t, PetrinetNode t1) 
 	{
 		addCorrispondence(t,t1);
-		localConfigurationMap.set(t1, unfolding);
-		marking.put(t1, Utility.setMarking(petrinet, localConfigurationMap.get(t1), unf2PetriMap));
+		localConfigurationMap.add(t1, unfolding);
+		marking.put(t1, Utility.getMarking(petrinet, localConfigurationMap.get(t1), unf2PetriMap));
 	}
 	
 	/**

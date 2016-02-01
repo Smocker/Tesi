@@ -1,7 +1,7 @@
 package org.processmining.support.unfolding;
 
 /**
- * Creare una coppia
+ * Crea una coppia
  * 
  * @author Daniele Cicciarella
  *
@@ -16,8 +16,8 @@ public class Pair<A, B>
     /**
      * Costruttore
      * 
-     * @param first: primo elemento
-     * @param second: secondo elemento
+     * @param first primo elemento
+     * @param second secondo elemento
      */
     public Pair(A first, B second) 
     {

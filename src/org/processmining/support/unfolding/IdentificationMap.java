@@ -1,10 +1,11 @@
 package org.processmining.support.unfolding;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
@@ -15,12 +16,17 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 {
-	/** serialVersionUID */
+	/* serialVersionUID */
 	private static final long serialVersionUID = 1L;
 	
+	/* Chiavi delle map */
+	private static final String LIVELOCK = "Livelock";
+	private static final String LIVELOCK_UNBOUNDED = "Livelock Unbounded";
+	private static final String DEADLOCK = "Deadlock";
+	
 	/* Variabili utilizzate per le statistiche */
-	private int sizeArcs = 0, sizePlaces = 0, sizeTransitions = 0;
-	private boolean isBoundedness;
+	private int nArcs = 0, nPlaces = 0, nTransitions = 0;
+	private boolean isSound;
 	private double startTime = System.currentTimeMillis(), time = 0;
 
 	/**
@@ -28,158 +34,160 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public IdentificationMap()
 	{
-		put("Livelock Identification", new ArrayList <Transition>());
-		put("Livelock Identification Unbounded", new ArrayList <Transition>());
-		put("DeadLock Identification", new ArrayList <Transition>());
+		put(LIVELOCK, new ArrayList <Transition>());
+		put(LIVELOCK_UNBOUNDED, new ArrayList <Transition>());
+		put(DEADLOCK, new ArrayList <Transition>());
 	}
 	
 	/**
 	 * Inserisce il livelock
 	 * 
-	 * @param t: transazione da aggiungere
+	 * @param t transazione da aggiungere
 	 */
-	public void insertLiveLock(Transition t) 
+	public void addLiveLock(Transition t) 
 	{
-		if(get("Livelock Identification").contains(t))
-			return;
-		get("Livelock Identification").add(t);
+		t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		get(LIVELOCK).add(t);
 	}
 
 	/**
 	 * Restituisce i livelock
 	 * 
-	 * @return arraylist contenente i livelock
+	 * @return lista contenente i livelock
 	 */
-	public ArrayList<Transition> readLiveLock()
+	public ArrayList<Transition> getLivelock()
 	{
-		return get("Livelock Identification");
+		return get(LIVELOCK);
 	}
 	
 	/**
 	 * Inserisce il livelock unbounded
 	 * 
-	 * @param t: transazione da aggiungere
+	 * @param t transazione da aggiungere
 	 */
-	public void insertLiveLockUnbounded(Transition t)
+	public void addLivelockUnbounded(Transition t)
 	{
-		if(get("Livelock Identification Unbounded").contains(t))
-			return;
-		get("Livelock Identification Unbounded").add(t);
+		t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		get(LIVELOCK_UNBOUNDED).add(t);
 	}
 	
 	/**
 	 * Restituisce i livelock unbounded
 	 * 
-	 * @return arraylist contenente i livelock unbounded
+	 * @return lista contenente i livelock unbounded
 	 */
-	public ArrayList<Transition> readLiveLockUnbounded()
+	public ArrayList<Transition> getLivelockUnbounded()
 	{
-		return get("Livelock Identification Unbounded");
+		return get(LIVELOCK_UNBOUNDED);
 	}
 	
 	/**
 	 * Inserisce i deadlock
 	 * 
-	 * @param t: transazione da aggiungere
+	 * @param deadlock transazioni da aggiungere
 	 */
-	public void insertDeadLock(ArrayList<Transition> t)
+	public void setDeadlock(ArrayList<Transition> deadlock)
 	{
-		put("DeadLock Identification", t);
+		for(Transition t : deadlock)
+			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.ORANGE);
+		put(DEADLOCK, deadlock);		
 	}
 	
 	/**
 	 * Restituisce i deadlock
 	 * 
-	 * @return arraylist contenente i deadlock
+	 * @return lista contenente i deadlock
 	 */
-	public ArrayList<Transition> readDeadLock()
+	public ArrayList<Transition> getDeadlock()
 	{
-		return get("DeadLock Identification");
+		return get(DEADLOCK);
 	}
 
 	/**
-	 * Prendo il tempo di esecuzione dell'unfolding
+	 * Crea le statistiche della rete
 	 * 
-	 * @return
+	 * @param N1 rete di unfolding
 	 */
-	public double getTime() 
+	public void setStatistic(Petrinet N1)
 	{
-		return time;
-	}
-
-	/**
-	 * Setto il tempo di esecuzione dell'unfolding
-	 * 
-	 * @param time
-	 */
-	public void setTime() 
-	{
+		/* Statistiche della rete */
+		nPlaces = N1.getPlaces().size();
+		nTransitions = N1.getTransitions().size();
+		for(Place p : N1.getPlaces())
+			nArcs += N1.getGraph().getInEdges(p).size() + N1.getGraph().getOutEdges(p).size();
+		
+		/* Verifico se è sound */
+		isSound = get(LIVELOCK_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();	
+		
+		/* Calcolo il tempo del plugin */
 		time = (System.currentTimeMillis() - startTime) / 1000;
-	}
-	
-	/**
-	 * Crea alcune statistiche della rete
-	 * 
-	 * @param petrinet: rete di petri 
-	 * @param unfolding: rete di unfolding
-	 * @param marking: map contenente le transazioni che provocano la rete unbounded con il rispettivo marking
-	 */
-	public void setNetStatistics(Petrinet unfolding)
-	{
-		for(Place p : unfolding.getPlaces())
-			sizeArcs += unfolding.getGraph().getInEdges(p).size() + unfolding.getGraph().getOutEdges(p).size();
-		sizePlaces = unfolding.getPlaces().size();
-		sizeTransitions = unfolding.getTransitions().size();
-		isBoundedness = get("Livelock Identification Unbounded").isEmpty() ? true : false;	
-		setTime();
 	}
 	
 	/**
 	 * Carico tutte le statistiche della rete in una stringa html
 	 * 
-	 * @return out: stringa contenente le statistiche
+	 * @return le statistiche della rete
 	 */
-	public String loadStatistics()
+	public String getStatistic()
 	{
-		String out = "<html><h1 style=\"color:red;\">Diagnosi sulla rete di unfolding</h1>";
+		String out = "<html><h1 style=\"color:red;\">Diagnosi sulla rete di Unfolding</h1>";
 		
 		/* Tempo di esecuzione dell'unfolding */
-		out += "<BR>Tempo di esecuzione del plugin: " + getTime() + "<BR><BR>";
+		out += "<BR>Tempo di esecuzione del plugin: " + time + "<BR><BR>";
 		
 		/* Carico i livelock e deadlock */
-		for(String key: this.keySet())
+		for(String key: keySet())
 		{
-			if(get(key).isEmpty())
+			switch(key)
 			{
-				if(key == "Livelock Identification")
-					out += "La rete non contiene punti di livelock<BR><BR>";
-				else if(key == "Livelock Identification Unbounded")
-					out += "La rete non contiene punti di livelock che rendono la rete unbounded<BR><BR>";
-				else if (key == "DeadLock Identification")
-					out += "La rete non contiene punti di deadlock<BR><BR>";
-			}
-			else
-			{
-				if(key == "Livelock Identification")
-					out += "La rete contiene punti di livelock:<ol>";
-				else if(key == "Livelock Identification Unbounded")
-					out += "La rete contiene punti di livelock che rendono la rete unbounded:<ol>";
-				else if (key == "DeadLock Identification")
-					out += "La rete contiene punti di deadlock:<ol>";
-				
-				for(Transition t: get(key))
-					out += "<li>" + t.getLabel() + "</li>";
-				out += "</ol><BR>";
+				case LIVELOCK:
+				{
+					if(get(key).isEmpty())
+						out += "La rete non contiene punti di cutoff<BR><BR>";
+					else
+					{
+						out += "La rete contiene " + get(key).size() + " punti di livelock:<ol>";
+						for(Transition t: get(key))
+							out += "<li>" + t.getLabel() + "</li>";
+						out += "</ol><BR>";
+					}
+					break;
+				}
+				case LIVELOCK_UNBOUNDED:
+				{
+					if(get(key).isEmpty())
+						out += "La rete non contiene punti di cutoff che rendono la rete unbounded <BR><BR>";
+					else
+					{
+						out += "La rete contiene " + get(key).size() + " punti di cutoff che rendono la rete unbounded:<ol>";
+						for(Transition t: get(key))
+							out += "<li>" + t.getLabel() + "</li>";
+						out += "</ol><BR>";
+					}
+					break;
+				}
+				case DEADLOCK:
+				{
+					if(get(key).isEmpty())
+						out += "La rete non contiene punti di deadlock<BR><BR>";
+					else
+					{
+						out += "La rete contiene " + get(key).size() + " punti di deadlock:<ol>";
+						for(Transition t: get(key))
+							out += "<li>" + t.getLabel() + "</li>";
+						out += "</ol><BR>";
+					}
+					break;
+				}
 			}
 		}
 		
 		/* Carico le altre statistiche della rete */
 		out += "<h2>Altre statistiche:</h2><ul type=\"disc\">";
-		out += "<li>Numero di piazze: " + sizePlaces + "</li>";
-		out += "<li>Numero di transazioni: " + sizeTransitions + "</li>";
-		out += "<li>Numero di archi: " + sizeArcs + "</li>";
-		out += "<li>Boundedness: " + isBoundedness + "</li></ul></html>";
-	
+		out += "<li>Numero di piazze: " + nPlaces + "</li>";
+		out += "<li>Numero di transazioni: " + nTransitions + "</li>";
+		out += "<li>Numero di archi: " + nArcs + "</li>";
+		out += "<li>Soundness: " + isSound + "</li></ul></html>";
 		return out;
 	}
 }

@@ -29,20 +29,20 @@ import info.clearthought.layout.TableLayoutConstants;
 public class VisualizeUnfoldingStatistics_Plugin 
 {
 	@Plugin
-		(
-			name = "Visualize BCS Statistics", 
-			returnLabels = { "Visualize BCS Statistics" }, 
-			parameterLabels = { "Identification Map" }, 
-			returnTypes = { JComponent.class }, 
-			userAccessible = true,
-			help = "Visualize BCS Statistics"
-		)
+	(
+		name = "Visualize BCS Statistics", 
+		returnLabels = { "Visualize BCS Statistics" }, 
+		parameterLabels = { "Identification Map" }, 
+		returnTypes = { JComponent.class }, 
+		userAccessible = true,
+		help = "Visualize BCS Statistics"
+	)
     @UITopiaVariant
-    	(
-    		affiliation = "University of Pisa", 
-    		author = "Daniele Cicciarella", 
-    		email = "cicciarellad@gmail.com"
-    	)
+	(
+		affiliation = "University of Pisa", 
+		author = "Daniele Cicciarella", 
+		email = "cicciarellad@gmail.com"
+	)
     @Visualizer
 	public JComponent runUI(UIPluginContext context, IdentificationMap output) 
 	{
@@ -62,10 +62,10 @@ public class VisualizeUnfoldingStatistics_Plugin
 			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
-			LegendConformancePanel legendPanel = new LegendConformancePanel(unfoldingPanel, "legend");
+			LegendConformancePanel legendPanel = new LegendConformancePanel(unfoldingPanel, "Legend");
 			unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
 			panel.add(unfoldingPanel, "0,1");
-			JLabel statisticsPanel = new JLabel(output.loadStatistics());
+			JLabel statisticsPanel = new JLabel(output.getStatistic());
 			statisticsPanel.setBackground(Color.WHITE);
 			JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
 			panel.add(scrollStatisticsPanel, "0,2");

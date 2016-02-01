@@ -13,20 +13,23 @@ import org.processmining.support.unfolding.IdentificationMap;
  * 
  * @author Daniele Cicciarella
  */
-public class BPMN2Unfolding_Plugin {
-	@Plugin(
+public class BPMN2Unfolding_Plugin 
+{
+	@Plugin
+	(
 		name = "BCS BPMN to Unfolding", 
 		parameterLabels = {"BPMNDiagram"},
 		returnLabels = {"Identification Map","Petri net"}, 
 		returnTypes = {IdentificationMap.class, Petrinet.class}, 
 		userAccessible = true, 
 		help = "Convert BPMN diagram to Unfolding net"
-		)
-	@UITopiaVariant(
+	)
+	@UITopiaVariant
+	(
 		affiliation = "University of Pisa", 
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"
-		)
+	)
 	public Object[] convert(PluginContext context, BPMNDiagram bpmn) 
 	{
 		Petrinet petrinet;

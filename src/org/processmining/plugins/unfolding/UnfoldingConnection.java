@@ -18,9 +18,9 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 	/**
 	 * Inserimento delle reti di petri nel connettore
 	 * 
-	 * @param identificationMap
-	 * @param petrinet
-	 * @param unfolding
+	 * @param identificationMap map contenente le statistiche della rete di Unfolding
+	 * @param petrinet rete di Petri originale
+	 * @param unfolding rete di Unfolding
 	 */
 	public UnfoldingConnection(IdentificationMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
 	{
