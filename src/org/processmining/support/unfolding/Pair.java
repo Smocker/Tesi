@@ -1,17 +1,17 @@
 package org.processmining.support.unfolding;
 
+import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
+import org.processmining.models.graphbased.directed.petrinet.elements.Place;
+
 /**
  * Crea una coppia
  * 
  * @author Daniele Cicciarella
- *
- * @param <A> 
- * @param <B>
  */
-public class Pair<A, B> 
+public class Pair
 {
-    private A first;
-    private B second;
+    private Place first;
+    private Arc second;
 
     /**
      * Costruttore
@@ -19,7 +19,7 @@ public class Pair<A, B>
      * @param first primo elemento
      * @param second secondo elemento
      */
-    public Pair(A first, B second) 
+    public Pair(Place first, Arc second) 
     {
     	super();
     	this.first = first;
@@ -31,7 +31,7 @@ public class Pair<A, B>
      * 
      * @return primo elemento
      */
-    public A getFirst() 
+    public Place getFirst() 
     {
     	return this.first;
     }
@@ -41,7 +41,7 @@ public class Pair<A, B>
      * 
      * @param first primo elemento
      */
-    public void setFirst(A first) 
+    public void setFirst(Place first) 
     {
     	this.first = first;
     }
@@ -51,7 +51,7 @@ public class Pair<A, B>
      * 
      * @return secondo elemento
      */
-    public B getSecond() 
+    public Arc getSecond() 
     {
     	return second;
     }
@@ -61,8 +61,32 @@ public class Pair<A, B>
      * 
      * @param secondo elemento
      */
-    public void setSecond(B second) 
+    public void setSecond(Arc second) 
     {
     	this.second = second;
+    }
+    
+    /**
+     * Verifica se due coppie sono in conflitto
+     * 
+     * @param pair coppia da verificare
+     * @return true se sono in conflitto, false altrimenti
+     */
+	public boolean isConflict(Pair pair)
+	{
+		return (this.first.equals(pair.first) && !this.second.equals(pair.second));
+	}
+	
+    /**
+     * Verifica se due coppie hanno gli stessi elementi 
+     */
+    public boolean equals(Object o)
+    {
+    	if(o != null && o instanceof Pair)
+    	{
+    		Pair pair = (Pair) o;
+    		return (pair.first.equals(this.first) && pair.second.equals(this.second));
+    	}	
+		return false;
     }
 }

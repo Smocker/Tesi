@@ -21,7 +21,7 @@ public class Utility
 	/**
 	 * Prende la piazza iniziale della rete di Petri
 	 *  
-	 * @param N rete di petri
+	 * @param N rete di Petri
 	 * @return pn piazza iniziale della rete di Petri o null
 	 */
 	public static PetrinetNode getStartNode(Petrinet N) 
@@ -35,7 +35,7 @@ public class Utility
 	/**
 	 * Prende la piazza finale della rete di Petri
 	 *  
-	 * @param N rete di petri
+	 * @param N rete di Petri
 	 * @return pn piazza finale della rete di Petri o null
 	 */
 	public static PetrinetNode getEndNode(Petrinet N) 
@@ -49,8 +49,8 @@ public class Utility
 	/**
 	 * Restituisce il preset di un nodo
 	 * 
-	 * @param N rete di petri
-	 * @param pn nodo di petri corrente
+	 * @param N rete di Petri
+	 * @param pn nodo di Petri corrente
 	 * @return preset arraylist contenente il preset di pn
 	 */
 	public static ArrayList<PetrinetNode> getPreset(Petrinet N, PetrinetNode pn)
@@ -67,7 +67,7 @@ public class Utility
 	/**
 	 * Restituisce il postset di un nodo
 	 * 
-	 * @param N rete di petri
+	 * @param N rete di Petri
 	 * @param pn nodo di unfolding corrente
 	 * @return postset arraylist di PetrinetNode contenente il postset di pn
 	 */
@@ -138,7 +138,7 @@ public class Utility
 	public static ArrayList<Place> getHistoryPlace(Petrinet N1, PetrinetNode pn)
 	{
 		ArrayList <Place> H = new ArrayList <Place> ();
-		getBackPlace(N1, pn, H);
+		getBackPlacePlace(N1, pn, H);
 		return H;
 	}
 
@@ -149,14 +149,20 @@ public class Utility
 	 * @param pn nodo di unfolding di partenza 
 	 * @param H lista dei place di unfolding parziali
 	 */
-	private static void getBackPlace(Petrinet N1, PetrinetNode pn, ArrayList<Place> H) 
+	private static void getBackPlacePlace(Petrinet N1, PetrinetNode pn, ArrayList<Place> H) 
 	{
-		for (Iterator<?> i = N1.getGraph().getInEdges(pn).iterator(); i.hasNext();) 
+		for (Iterator<?> preset = N1.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
 		{
+			/* Se è un place non contenuto in H lo aggiungo */
 			if(pn instanceof Place) 
-				H.add((Place) pn);
-			Arc a = (Arc) i.next();
-			getBackPlace(N1, a.getSource(), H);
+			{
+				if(!H.contains(pn))
+					H.add((Place) pn);
+				else
+					return;
+			}
+			Arc a = (Arc) preset.next();
+			getBackPlacePlace(N1, a.getSource(), H);
 		}
 	}
 	
@@ -167,16 +173,16 @@ public class Utility
 	 * @param pn nodo di unfolding di partenza 
 	 * @return H storia dei (place,arc) di pn
 	 */
-	public static ArrayList<Pair <Place, Arc>> getHistoryPlaceConflictXOR(Petrinet N1, PetrinetNode pn, Arc a)
+	public static ArrayList<Pair> getHistoryXOR(Petrinet N1, PetrinetNode pn, Arc a)
 	{
-		ArrayList <Pair <Place, Arc>> H = new ArrayList <Pair <Place, Arc>> ();
+		ArrayList <Pair> H = new ArrayList <Pair> ();
 		
 		/* Inizializzo H con il nodo iniziale se è uno xor-split */
 		if(pn instanceof Place)
 			if(N1.getGraph().getOutEdges(pn).size() > 1)
-				H.add(new Pair<Place, Arc>((Place) pn, a));
+				H.add(new Pair((Place) pn, a));
 		
-		getBackPlaceConflictXOR(N1, pn, H);
+		getBackPlaceXOR(N1, pn, H);
 		return H;
 	}
 	
@@ -187,7 +193,7 @@ public class Utility
 	 * @param pn nodo di unfolding corrente 
 	 * @param H storia parziale dei (place,arc)
 	 */
-	private static void getBackPlaceConflictXOR(Petrinet N1, PetrinetNode pn, ArrayList <Pair <Place, Arc>> H) 
+	private static void getBackPlaceXOR(Petrinet N1, PetrinetNode pn, ArrayList <Pair> H) 
 	{
 		for (Iterator<?> preset = N1.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
 		{
@@ -195,7 +201,7 @@ public class Utility
 			{
 				Arc a = (Arc) preset.next();
 				Transition t = (Transition) a.getSource();
-				getBackPlaceConflictXOR(N1, t, H);
+				getBackPlaceXOR(N1, t, H);
 			} 
 			else 
 			{
@@ -203,10 +209,15 @@ public class Utility
 				Place p = (Place) a.getSource();
 				
 				/* XOR-SPLIT */
-				if(N1.getGraph().getOutEdges(p).size() > 1)
-					H.add(new Pair<Place, Arc>(p,a));
-				
-				getBackPlaceConflictXOR(N1, p, H);
+				if(N1.getGraph().getOutEdges(p).size() > 1) 
+				{
+					Pair pa = new Pair(p,a);
+					if (!H.contains(pa))
+						H.add(pa);
+					else
+						return;
+				}
+				getBackPlaceXOR(N1, p, H);
 			}
 		}
 	}
@@ -218,13 +229,12 @@ public class Utility
 	 * @param lista degli xor-split della transazione u
 	 * @return true se condividono almeno uno xor, false altrimenti
 	 */
-	public static boolean isConflit(ArrayList <Pair <Place, Arc>> xorT, ArrayList <Pair <Place, Arc>>xorU)
+	public static boolean isConflit(ArrayList <Pair> xorT, ArrayList <Pair>xorU)
 	{		
 		/* Se hanno lo stesso place ma archi diversi è uno xor-split */
 		for(int i = 0; i < xorT.size(); i++)
 			for(int j = 0; j < xorU.size(); j++)
-				if(xorT.get(i).getFirst().equals(xorU.get(j).getFirst()) 
-						&& !xorT.get(i).getSecond().equals(xorU.get(j).getSecond()))
+				if(xorT.get(i).isConflict(xorU.get(j)))
 					return true;
 		return false;
 	}
