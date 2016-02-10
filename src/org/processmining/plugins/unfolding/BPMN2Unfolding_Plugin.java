@@ -17,9 +17,9 @@ public class BPMN2Unfolding_Plugin
 {
 	@Plugin
 	(
-		name = "BCS BPMN to Unfolding", 
+		name = "BCS BPMN to Unfolding net", 
 		parameterLabels = {"BPMNDiagram"},
-		returnLabels = {"Statistic Map","Petri net"}, 
+		returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net"}, 
 		returnTypes = {StatisticMap.class, Petrinet.class}, 
 		userAccessible = true, 
 		help = "Convert BPMN diagram to Unfolding net"

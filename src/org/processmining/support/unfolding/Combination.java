@@ -1,6 +1,7 @@
 package org.processmining.support.unfolding;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
@@ -12,14 +13,14 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  * 
  * @author Daniele Cicciarella
  */
-public class PetrinetNodeTupla
+public class Combination
 {
 	private PetrinetNode[] elements;
 	
 	/**
 	 * Costruttore
 	 */
-	public PetrinetNodeTupla()
+	public Combination()
 	{
 		elements = new PetrinetNode[0];
 	}
@@ -29,26 +30,9 @@ public class PetrinetNodeTupla
 	 * 
 	 * @param dim dimensione dell'array
 	 */
-	public PetrinetNodeTupla(int dim)
+	public Combination(int dim)
 	{
 		elements = new PetrinetNode[dim];
-	}
-				
-	/**
-	 * Aggiunge un nuovo elemento alla tupla
-	 * 
-	 * @param pn PetrinetNode da aggiungere
-	 * @return la tupla con il nuovo elemento aggiunto
-	 */
-	public PetrinetNodeTupla add(PetrinetNode pn)
-	{
-		PetrinetNodeTupla tupla = new PetrinetNodeTupla(elements.length+1);
-		for(int j = 0; j < elements.length; ++j) 
-		{
-			tupla.elements[j] = elements[j];
-		}		
-		tupla.elements[elements.length] = pn;
-		return tupla;
 	}
 	
 	/**
@@ -72,16 +56,32 @@ public class PetrinetNodeTupla
 	}
 	
 	/**
+	 * Aggiunge un nuovo elemento alla tupla
+	 * 
+	 * @param pn PetrinetNode da aggiungere
+	 * @return la tupla con il nuovo elemento aggiunto
+	 */
+	public Combination add(PetrinetNode pn)
+	{
+		Combination tupla = new Combination(elements.length+1);
+		for(int j = 0; j < elements.length; ++j) 
+		{
+			tupla.elements[j] = elements[j];
+		}		
+		tupla.elements[elements.length] = pn;
+		return tupla;
+	}
+	
+	/**
 	 * Crea tutte le possibili combinazioni
 	 * 
-	 * @param places piazza da cui creare tutte le combinazioni
+	 * @param possibleCombination piazza da cui creare tutte le combinazioni
 	 * @return result ArrayList<PetrinetNode[]> contenente le combinazioni
 	 */
-	public static ArrayList<PetrinetNodeTupla> createCombination(ArrayList<ArrayList<PetrinetNode>> places)
+	public static ArrayList<Combination> create(ArrayList<ArrayList<PetrinetNode>> possibleCombination, ArrayList <Combination> combination)
 	{
-		ArrayList<PetrinetNodeTupla> result = new ArrayList<PetrinetNodeTupla>();
-		recCombination(0, new PetrinetNodeTupla(), places, result);
-		return result;
+		rec(0, new Combination(), possibleCombination, combination);
+		return combination;
 	}
 	
 	/**
@@ -92,16 +92,16 @@ public class PetrinetNodeTupla
 	 * @param places piazze da aggiungere
 	 * @param result tupla parziale
 	 */
-	private static void recCombination(int step, PetrinetNodeTupla tupla, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<PetrinetNodeTupla> result ) 
+	private static void rec(int step, Combination tupla, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<Combination> result) 
 	{
 		int size = places.get(step).size();
 		for (int i = 0; i < size; ++i) 
 		{
-			PetrinetNodeTupla newTupla = tupla.add(places.get(step).get(i));
+			Combination newTupla = tupla.add(places.get(step).get(i));
 			if (step == places.size() - 1) 
 				result.add(newTupla);
 			else
-				recCombination(step+1, newTupla, places, result);
+				rec(step+1, newTupla, places, result);
 		}
 	}
 	
@@ -113,9 +113,9 @@ public class PetrinetNodeTupla
 	 * @param L1 mappa da rete di Petri a rete di Unfolding
 	 * @param N1 rete di unfolding
 	 */
-	public static void filterCombination(ArrayList<PetrinetNodeTupla> combination, Transition t, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
+	public static void filter(ArrayList<Combination> combination, Transition t, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
 	{
-		ArrayList <PetrinetNode> preset = null;
+		PetrinetNode [] preset = null;
 		
 		/* Se non è contenuto allora t non è stato mai inserito */
 		if(L1.containsKey(t))
@@ -123,10 +123,59 @@ public class PetrinetNodeTupla
 			for(PetrinetNode t1 : L1.get(t)) 
 			{
 				preset = Utility.getPreset(N1, t1);
-				for(int j = 0; j < combination.size(); j++)
-					if(Utility.isEquals(preset, combination.get(j)))
-						combination.remove(j);						
+				for(int i = 0; i < combination.size(); i++)
+				{
+					if(combination.get(i).isEquals(preset))
+						combination.remove(i);
+				}					
 			}
 		}
+	}
+
+	/**
+	 * Verifica se le piazze della combinazione sono in conflitto con la transizione
+	 * 
+	 * @param N1 rete di unfolding
+	 * @param t transizione da verificare
+	 * @return true se non c'e' conflitto con t, false altrimenti
+	 */
+	public boolean isConflict(Petrinet N1, Transition t) 
+	{
+		ArrayList <Pair> XOR = new ArrayList <Pair> (), nodeXOR = null;
+		
+		for(int i = 0; i < elements.length; i++)
+		{
+			nodeXOR = Utility.getHistoryXOR(N1, elements[i], N1.getArc(elements[i], t));
+			if(!nodeXOR.isEmpty())
+			{
+				/* Se due piazze condividono lo stesso xor ma provengono da percorsi diversi è un conflitto */
+				if(Utility.isConflict(XOR, nodeXOR))
+					return true;
+
+				for(int j = 0; j < nodeXOR.size(); j++)
+					if(!XOR.contains(nodeXOR.get(j)))
+						XOR.add(nodeXOR.get(j));
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Verifico se le due strutture contengono gli stessi elementi
+	 * 
+	 * @param preset arraylist di nodi
+	 * @param pnt tupla di nodi
+	 * @return true se contengono gli stessi elementi, false altrimenti
+	 */
+	private boolean isEquals(PetrinetNode[] preset)
+	{
+		/* Ordino gli array */
+		Arrays.sort(preset);
+		Arrays.sort(elements);
+		
+		for(int i = 0; i < elements.length; i++)
+			if(!preset[i].equals(elements[i]))
+				return false;
+		return true;
 	}
 }

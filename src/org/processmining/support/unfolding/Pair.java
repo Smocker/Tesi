@@ -74,7 +74,7 @@ public class Pair
      */
 	public boolean isConflict(Pair pair)
 	{
-		return (this.first.equals(pair.first) && !this.second.equals(pair.second));
+		return (first.equals(pair.first) && !second.equals(pair.second));
 	}
 	
     /**
@@ -85,7 +85,7 @@ public class Pair
     	if(o != null && o instanceof Pair)
     	{
     		Pair pair = (Pair) o;
-    		return (pair.first.equals(this.first) && pair.second.equals(this.second));
+    		return (pair.first.equals(first) && pair.second.equals(second));
     	}	
 		return false;
     }

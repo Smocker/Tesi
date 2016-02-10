@@ -25,11 +25,11 @@ public class Utility
 	 * @param N rete di Petri
 	 * @return pn piazza iniziale della rete di Petri o null
 	 */
-	public static PetrinetNode getStartNode(Petrinet N) 
+	public static Place getStartNode(Petrinet N) 
 	{		
-		for(PetrinetNode pn: N.getNodes())
-			if(N.getGraph().getInEdges(pn).isEmpty())
-				return pn;
+		for(Place p: N.getPlaces())
+			if(N.getGraph().getInEdges(p).isEmpty())
+				return p;
 		return null;
 	}
 	
@@ -39,11 +39,11 @@ public class Utility
 	 * @param N rete di Petri
 	 * @return pn piazza finale della rete di Petri o null
 	 */
-	public static PetrinetNode getEndNode(Petrinet N) 
+	public static Place getEndNode(Petrinet N) 
 	{		
-		for(PetrinetNode pn: N.getNodes())
-			if(N.getGraph().getOutEdges(pn).isEmpty())
-				return pn;
+		for(Place p: N.getPlaces())
+			if(N.getGraph().getOutEdges(p).isEmpty())
+				return p;
 		return null;
 	}
 	
@@ -52,16 +52,18 @@ public class Utility
 	 * 
 	 * @param N rete di Petri
 	 * @param pn nodo di Petri corrente
-	 * @return arraylist contenente il preset di pn
+	 * @return 
+	 * @return array contenente il preset di pn
 	 */
-	public static ArrayList<PetrinetNode> getPreset(Petrinet N, PetrinetNode pn)
+	public static PetrinetNode [] getPreset(Petrinet N, PetrinetNode pn)
 	{
-		ArrayList<PetrinetNode> preset = new ArrayList <PetrinetNode> (); 
+		int i = 0;
+		PetrinetNode [] preset = new PetrinetNode [N.getGraph().getInEdges(pn).size()];
 		
-		for (Iterator<?> i = N.getGraph().getInEdges(pn).iterator(); i.hasNext();) 
+		for(DirectedGraphEdge<?, ?> a : N.getGraph().getInEdges(pn))
 		{
-			Arc a = (Arc) i.next();
-			preset.add(a.getSource());
+			preset[i] = (PetrinetNode) a.getSource();
+			i = i + 1;
 		}
 		return preset;
 	}
@@ -71,15 +73,17 @@ public class Utility
 	 * 
 	 * @param N rete di Petri
 	 * @param pn nodo di unfolding corrente
-	 * @return arraylist di PetrinetNode contenente il postset di pn
+	 * @return array contenente il postset di pn
 	 */
-	public static ArrayList<PetrinetNode> getPostset(Petrinet N, PetrinetNode pn)
+	public static PetrinetNode [] getPostset(Petrinet N, PetrinetNode pn)
 	{
-		ArrayList<PetrinetNode> postset = new ArrayList <PetrinetNode> (); 
-		for (Iterator<?> i = N.getGraph().getOutEdges(pn).iterator(); i.hasNext();) 
+		int i = 0;
+		PetrinetNode [] postset = new PetrinetNode [N.getGraph().getOutEdges(pn).size()];
+		
+		for(DirectedGraphEdge<?, ?> a : N.getGraph().getOutEdges(pn))
 		{
-			Arc a = (Arc) i.next();
-			postset.add(a.getTarget());
+			postset[i] = (PetrinetNode) a.getTarget();
+			i = i + 1;
 		}
 		return postset;
 	}
@@ -92,13 +96,13 @@ public class Utility
 	 * @param L1 mappa da rete di Petri a rete di Unfolding
 	 * @return preset di t se è abilitata, null altrimenti
 	 */
-	public static ArrayList<PetrinetNode> isEnabled(Petrinet N, PetrinetNode t, HashMap <PetrinetNode, ArrayList<PetrinetNode>> L1)
+	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode t, HashMap <PetrinetNode, ArrayList<PetrinetNode>> L1)
 	{		
-		ArrayList <PetrinetNode> preset = getPreset(N, t); 
-		if(preset.size() > 1) 
+		PetrinetNode [] preset = getPreset(N, t); 
+		if(preset.length > 1) 
 		{
-			for(int i = 0; i < preset.size(); i++)
-				if(!L1.containsKey(preset.get(i))) 
+			for(int i = 0; i < preset.length; i++)
+				if(!L1.containsKey(preset[i])) 
 					return null;
 		}
 		return preset;
@@ -259,20 +263,5 @@ public class Utility
 			return 0;
 		else 
 			return 1;
-	}
-	
-	/**
-	 * Verifico se le due strutture contengono gli stessi elementi
-	 * 
-	 * @param al arraylist di nodi
-	 * @param pnt tupla di nodi
-	 * @return true se contengono gli stessi elementi, false altrimenti
-	 */
-	public static boolean isEquals(ArrayList <PetrinetNode> al, PetrinetNodeTupla pnt)
-	{
-		for(int i = 0; i < pnt.getElements().length; i++)
-			if(!al.contains(pnt.getElements()[i]))
-				return false;
-		return true;
 	}
 }

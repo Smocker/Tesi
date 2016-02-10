@@ -17,7 +17,7 @@ import org.processmining.support.localconfiguration.LocalConfiguration;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.Pair;
-import org.processmining.support.unfolding.PetrinetNodeTupla;
+import org.processmining.support.unfolding.Combination;
 import org.processmining.support.unfolding.Utility;
 
 /**
@@ -78,8 +78,8 @@ public class PetriNet2Unfolding
 	 */
 	public Object[] convert() 
 	{
-		i = (Place) Utility.getStartNode(petrinet); 
-		o = (Place) Utility.getEndNode(petrinet);
+		i = Utility.getStartNode(petrinet); 
+		o = Utility.getEndNode(petrinet);
 
 		/* Inizio la costruzione della rete inserendo la piazza iniziale i1 */
 		Place i1 = unfolding.addPlace("start");	
@@ -160,48 +160,51 @@ public class PetriNet2Unfolding
 				for(DirectedGraphEdge<?, ?> a2: petrinet.getGraph().getOutEdges(p))
 				{
 					Transition t2 = (Transition) a2.getTarget();
-					ArrayList<PetrinetNodeTupla> combination = null;
-					ArrayList <PetrinetNode> presetT2 = null;
-					
+					PetrinetNode [] presetT2 = null;
+					ArrayList <Combination> combination = null;
+					int sizeCombination = 1;
+
 					/* Verifico se t2 è abilitata */
 					if((presetT2 = Utility.isEnabled(petrinet, t2, petri2UnfMap)) == null)
 						continue;
 					
-					/* Calcolo tutte le combinazioni possibili in ingresso a t2 filtrando quelle usate */
-					ArrayList <ArrayList <PetrinetNode>> comb = new ArrayList <ArrayList <PetrinetNode>>();
-					for(int i = 0; i < presetT2.size(); i++)
+					/* Prendo il preset di t2 per creare tutte le combinazioni possibili */
+					ArrayList <ArrayList <PetrinetNode>> possibleCombination = new ArrayList <ArrayList <PetrinetNode>>();
+					for(int i = 0; i < presetT2.length; i++)
 					{
-						if(!unf2PetriMap.get(pi).equals(presetT2.get(i))) 
+						if(!unf2PetriMap.get(pi).equals(presetT2[i])) 
 						{
-							ArrayList <PetrinetNode> array = petri2UnfMap.get(presetT2.get(i));
-							comb.add(array);
+							ArrayList <PetrinetNode> array = petri2UnfMap.get(presetT2[i]);
+							possibleCombination.add(array);
+							sizeCombination = sizeCombination * array.size();
 						}
 						else
 						{
 							ArrayList <PetrinetNode> array = new ArrayList <PetrinetNode> ();
 							array.add(pi);
-							comb.add(array);
+							possibleCombination.add(array);
 						}
 					}
-					combination = PetrinetNodeTupla.createCombination(comb);					
-					PetrinetNodeTupla.filterCombination(combination, (Transition) t2, petri2UnfMap, unfolding);
+										
+					/* Crea le combinazioni e filtra quelle già usate */
+					combination = new ArrayList <Combination> (sizeCombination);
+					Combination.create(possibleCombination, combination);
+					Combination.filter(combination, (Transition) t2, petri2UnfMap, unfolding);
 
 					/* Per ogni combinazione rimanente */
-					for(int i = 0; i < combination.size(); i++)
-					{					
+					for(Combination comb : combination)
+					{
 						/* Aggiungo t2 all'unfolding il quale sarà collagato con le piazze che lo abilitano */
 						Transition t3 = unfolding.addTransition(t2.getLabel());
-						for(int j = 0; j < combination.get(i).getElements().length; j++)
-							unfolding.addArc((Place) combination.get(i).getElements()[j], t3);
+						for(int i = 0; i < comb.getElements().length; i++)
+							unfolding.addArc((Place) comb.getElements()[i], t3);
 						
 						// Verifico se l'inserimento di t3 provaca conflitto in tal caso la elimino
-						if(isConflict(combination.get(i).getElements(), t3))
+						if(comb.isConflict(unfolding, t3))
 						{
-							for(int j = 0; j < combination.get(i).getElements().length; j++)
-								unfolding.removeArc((Place) combination.get(i).getElements()[j], t3);
 							unfolding.removeTransition(t3);
 							continue;
-						}	
+						}
 						addCorrispondence(t2, t3);
 						
 						/* Verifico se t3 provoca cutoff */
@@ -214,16 +217,15 @@ public class PetriNet2Unfolding
 						}
 						else
 						{							
-							boolean isCutOff = false;
-							ArrayList <PetrinetNode> postset = Utility.getPostset(petrinet, t2);
+							boolean isCutoff = false;
+							PetrinetNode [] postset = Utility.getPostset(petrinet, t2);
 							
 							// Verifico se una piazza finale di t2 è condivisa da altre transizioni e se provoca cutoff
-							for(PetrinetNode p2: postset)
-								if(isCutOff = isCutOff(t3, p2))
-									break;
+							for(int i = 0; i < postset.length && !isCutoff; i++)
+								isCutoff = isCutoff(t3, postset[i]);
 							
 							// Se t3 è un punto di cutoff la configurazione non deve essere aggiunta nella coda
-							if(!isCutOff)
+							if(!isCutoff)
 							{
 								for(PetrinetNode p2: postset)
 								{
@@ -241,41 +243,13 @@ public class PetriNet2Unfolding
 	}
 	
 	/**
-	 * Verifica se i place sono in conflitto
-	 * 
-	 * @param t transizione da verificare
-	 * @param nodes array contenente i place da contrallare
-	 * @return true se sono in conflitto, false altrimenti
-	 */
-	private boolean isConflict(PetrinetNode[] nodes, Transition t) 
-	{
-		ArrayList <Pair> XOR = new ArrayList <Pair> (), nodeXOR = null;
-		
-		for(int i = 0; i < nodes.length; i++)
-		{
-			nodeXOR = Utility.getHistoryXOR(unfolding, nodes[i], unfolding.getArc(nodes[i], t));
-			if(!nodeXOR.isEmpty())
-			{
-				/* Se due piazze condividono lo stesso xor ma provengono da percorsi diversi è un conflitto */
-				if(Utility.isConflict(XOR, nodeXOR))
-					return true;
-
-				for(int j = 0; j < nodeXOR.size(); j++)
-					if(!XOR.contains(nodeXOR.get(j)))
-						XOR.add(nodeXOR.get(j));
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Verifico se una transizione provoca il cutoff
 	 * 
 	 * @param t transizione da verificare
 	 * @param placeFinal una piazza finale della transizione t
 	 * @return true se la transizione è un cutoff, false altrimenti
 	 */
-	private boolean isCutOff(Transition t, PetrinetNode placeFinal) 
+	private boolean isCutoff(Transition t, PetrinetNode placeFinal) 
 	{
 		PetrinetNode transitionFinal = null;
 		int isBounded;

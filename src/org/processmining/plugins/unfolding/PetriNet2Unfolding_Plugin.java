@@ -15,9 +15,9 @@ public class PetriNet2Unfolding_Plugin
 {
 	@Plugin
 	(
-		name = "BCS Petri net to Unfolding", 
+		name = "BCS Petri net to Unfolding net", 
 		parameterLabels = {"Petri net"}, 
-		returnLabels = {"Statistic Map", "Petri net"}, 
+		returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net"}, 
 		returnTypes = { StatisticMap.class, Petrinet.class }, 
 		userAccessible = true, 
 		help = "Convert Petri net to Unfolding net"
