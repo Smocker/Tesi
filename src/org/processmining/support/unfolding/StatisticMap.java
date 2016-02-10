@@ -14,14 +14,14 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  * 
  * @author Daniele Cicciarella
  */
-public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
+public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 {
 	/* serialVersionUID */
 	private static final long serialVersionUID = 1L;
 	
 	/* Chiavi delle map */
-	private static final String LIVELOCK = "Livelock";
-	private static final String LIVELOCK_UNBOUNDED = "Livelock Unbounded";
+	private static final String CUTOFF = "Cutoff";
+	private static final String CUTOFF_UNBOUNDED = "Cutoff Unbounded";
 	private static final String DEADLOCK = "Deadlock";
 	
 	/* Variabili utilizzate per le statistiche */
@@ -32,59 +32,59 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	/**
 	 * Costruttore
 	 */
-	public IdentificationMap()
+	public StatisticMap()
 	{
-		put(LIVELOCK, new ArrayList <Transition>());
-		put(LIVELOCK_UNBOUNDED, new ArrayList <Transition>());
-		put(DEADLOCK, new ArrayList <Transition>());
+		put(CUTOFF, new ArrayList <Transition> ());
+		put(CUTOFF_UNBOUNDED, new ArrayList <Transition> ());
+		put(DEADLOCK, new ArrayList <Transition> ());
 	}
 	
 	/**
-	 * Inserisce il livelock
+	 * Inserisce un cutoff
 	 * 
-	 * @param t transazione da aggiungere
+	 * @param cutoff cutoff da aggiungere
 	 */
-	public void addLiveLock(Transition t) 
+	public void addCutoff(Transition cutoff) 
 	{
-		t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-		get(LIVELOCK).add(t);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		get(CUTOFF).add(cutoff);
 	}
 
 	/**
-	 * Restituisce i livelock
+	 * Restituisce i cutoff
 	 * 
-	 * @return lista contenente i livelock
+	 * @return lista contenente i cutoff
 	 */
-	public ArrayList<Transition> getLivelock()
+	public ArrayList<Transition> getCutoff()
 	{
-		return get(LIVELOCK);
+		return get(CUTOFF);
 	}
 	
 	/**
-	 * Inserisce il livelock unbounded
+	 * Inserisce un cutoff unbounded
 	 * 
-	 * @param t transazione da aggiungere
+	 * @param cutoff cutoff da aggiungere
 	 */
-	public void addLivelockUnbounded(Transition t)
+	public void addCutoffUnbounded(Transition cutoff)
 	{
-		t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
-		get(LIVELOCK_UNBOUNDED).add(t);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		get(CUTOFF_UNBOUNDED).add(cutoff);
 	}
 	
 	/**
-	 * Restituisce i livelock unbounded
+	 * Restituisce i cutoff unbounded
 	 * 
-	 * @return lista contenente i livelock unbounded
+	 * @return lista contenente i cutoff unbounded
 	 */
-	public ArrayList<Transition> getLivelockUnbounded()
+	public ArrayList<Transition> getCutoffUnbounded()
 	{
-		return get(LIVELOCK_UNBOUNDED);
+		return get(CUTOFF_UNBOUNDED);
 	}
 	
 	/**
 	 * Inserisce i deadlock
 	 * 
-	 * @param deadlock transazioni da aggiungere
+	 * @param deadlock deadlock da aggiungere
 	 */
 	public void setDeadlock(ArrayList<Transition> deadlock)
 	{
@@ -117,7 +117,7 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 			nArcs += N1.getGraph().getInEdges(p).size() + N1.getGraph().getOutEdges(p).size();
 		
 		/* Verifico se è sound */
-		isSound = get(LIVELOCK_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();	
+		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();	
 		
 		/* Calcolo il tempo del plugin */
 		time = (System.currentTimeMillis() - startTime) / 1000;
@@ -130,36 +130,36 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public String getStatistic()
 	{
-		String out = "<html><h1 style=\"color:red;\">Diagnosi sulla rete di Unfolding</h1>";
+		String out = "<html><h1 style=\"color:red;\">Diagnosis on Unfolding net</h1>";
 		
-		/* Tempo di esecuzione dell'unfolding */
-		out += "<BR>Tempo di esecuzione del plugin: " + time + "<BR><BR>";
+		/* Tempo di esecuzione del plugin */
+		out += "<BR>Runtime of the plugin: " + time + "<BR><BR>";
 		
 		/* Carico i livelock e deadlock */
 		for(String key: keySet())
 		{
 			switch(key)
 			{
-				case LIVELOCK:
+				case CUTOFF:
 				{
 					if(get(key).isEmpty())
-						out += "La rete non contiene punti di cutoff<BR><BR>";
+						out += "The net does not contain the cutoff points<BR><BR>";
 					else
 					{
-						out += "La rete contiene " + get(key).size() + " punti di livelock:<ol>";
+						out += "The net contains " + get(key).size() + " cutoff points:<ol>";
 						for(Transition t: get(key))
 							out += "<li>" + t.getLabel() + "</li>";
 						out += "</ol><BR>";
 					}
 					break;
 				}
-				case LIVELOCK_UNBOUNDED:
+				case CUTOFF_UNBOUNDED:
 				{
 					if(get(key).isEmpty())
-						out += "La rete non contiene punti di cutoff che rendono la rete unbounded <BR><BR>";
+						out += "The net does not contain the cutoff points that make the unbounded net<BR><BR>";
 					else
 					{
-						out += "La rete contiene " + get(key).size() + " punti di cutoff che rendono la rete unbounded:<ol>";
+						out += "The net contains " + get(key).size() + " cutoff points that make the unbounded net:<ol>";
 						for(Transition t: get(key))
 							out += "<li>" + t.getLabel() + "</li>";
 						out += "</ol><BR>";
@@ -169,10 +169,10 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 				case DEADLOCK:
 				{
 					if(get(key).isEmpty())
-						out += "La rete non contiene punti di deadlock<BR><BR>";
+						out += "The net does not contain the deadlock points<BR><BR>";
 					else
 					{
-						out += "La rete contiene " + get(key).size() + " punti di deadlock:<ol>";
+						out += "The net contains " + get(key).size() + " deadlock points:<ol>";
 						for(Transition t: get(key))
 							out += "<li>" + t.getLabel() + "</li>";
 						out += "</ol><BR>";
@@ -183,10 +183,10 @@ public class IdentificationMap extends HashMap<String, ArrayList <Transition>>
 		}
 		
 		/* Carico le altre statistiche della rete */
-		out += "<h2>Altre statistiche:</h2><ul type=\"disc\">";
-		out += "<li>Numero di piazze: " + nPlaces + "</li>";
-		out += "<li>Numero di transazioni: " + nTransitions + "</li>";
-		out += "<li>Numero di archi: " + nArcs + "</li>";
+		out += "<h2>Other statistics:</h2><ul type=\"disc\">";
+		out += "<li>Number of places: " + nPlaces + "</li>";
+		out += "<li>Number of transitions: " + nTransitions + "</li>";
+		out += "<li>Number of arcs: " + nArcs + "</li>";
 		out += "<li>Soundness: " + isSound + "</li></ul></html>";
 		return out;
 	}

@@ -6,7 +6,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.converters.bpmn2pn.BPMN2WSConverter;
-import org.processmining.support.unfolding.IdentificationMap;
+import org.processmining.support.unfolding.StatisticMap;
 
 /**
  * Converte un BPMNDiagram in una Occurrence net with Unfolding
@@ -19,8 +19,8 @@ public class BPMN2Unfolding_Plugin
 	(
 		name = "BCS BPMN to Unfolding", 
 		parameterLabels = {"BPMNDiagram"},
-		returnLabels = {"Identification Map","Petri net"}, 
-		returnTypes = {IdentificationMap.class, Petrinet.class}, 
+		returnLabels = {"Statistic Map","Petri net"}, 
+		returnTypes = {StatisticMap.class, Petrinet.class}, 
 		userAccessible = true, 
 		help = "Convert BPMN diagram to Unfolding net"
 	)
@@ -52,7 +52,7 @@ public class BPMN2Unfolding_Plugin
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
-		context.addConnection(new UnfoldingConnection((IdentificationMap)unfolding[1], petrinet,(Petrinet) unfolding[0]));
+		context.addConnection(new UnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0]));
 		
 		return new Object [] {unfolding[1], unfolding[0]};
 	}

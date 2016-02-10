@@ -15,7 +15,7 @@ import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
-import org.processmining.support.unfolding.IdentificationMap;
+import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.LegendConformancePanel;
 
 import info.clearthought.layout.TableLayout;
@@ -32,7 +32,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 	(
 		name = "Visualize BCS Statistics", 
 		returnLabels = { "Visualize BCS Statistics" }, 
-		parameterLabels = { "Identification Map" }, 
+		parameterLabels = { "Statistic Map" }, 
 		returnTypes = { JComponent.class }, 
 		userAccessible = true,
 		help = "Visualize BCS Statistics"
@@ -44,7 +44,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 		email = "cicciarellad@gmail.com"
 	)
     @Visualizer
-	public JComponent runUI(UIPluginContext context, IdentificationMap output) 
+	public JComponent runUI(UIPluginContext context, StatisticMap output) 
 	{
 		JPanel panel = new JPanel();
 		Petrinet petrinet, unfolding;

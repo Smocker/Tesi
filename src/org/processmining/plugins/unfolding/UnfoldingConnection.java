@@ -2,7 +2,7 @@ package org.processmining.plugins.unfolding;
 
 import org.processmining.framework.connections.impl.AbstractStrongReferencingConnection;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.support.unfolding.IdentificationMap;
+import org.processmining.support.unfolding.StatisticMap;
 
 /**
  * Connettore per la visualizzazione delle rete di Petri originale, rete di Occorrenze con la tecnica dell'unfolding e le sue statistiche
@@ -22,7 +22,7 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 	 * @param petrinet rete di Petri originale
 	 * @param unfolding rete di Unfolding
 	 */
-	public UnfoldingConnection(IdentificationMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
+	public UnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
 	{
 		super("UnfoldingConnection");
 		putStrong(IDENTIFICATION_MAP, identificationMap);

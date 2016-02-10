@@ -4,7 +4,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 
 /**
- * Crea una coppia
+ * Crea una coppia (Place, Arc)
  * 
  * @author Daniele Cicciarella
  */

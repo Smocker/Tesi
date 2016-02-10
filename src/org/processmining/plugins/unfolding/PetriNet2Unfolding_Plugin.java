@@ -4,7 +4,7 @@ import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.support.unfolding.IdentificationMap;
+import org.processmining.support.unfolding.StatisticMap;
 
 /**
  * Converte un Petrinet in una Occurrence net with Unfolding
@@ -17,8 +17,8 @@ public class PetriNet2Unfolding_Plugin
 	(
 		name = "BCS Petri net to Unfolding", 
 		parameterLabels = {"Petri net"}, 
-		returnLabels = {"Identification Map", "Petri net"}, 
-		returnTypes = { IdentificationMap.class, Petrinet.class }, 
+		returnLabels = {"Statistic Map", "Petri net"}, 
+		returnTypes = { StatisticMap.class, Petrinet.class }, 
 		userAccessible = true, 
 		help = "Convert Petri net to Unfolding net"
 	)
@@ -42,7 +42,7 @@ public class PetriNet2Unfolding_Plugin
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
-		context.addConnection(new UnfoldingConnection((IdentificationMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));
+		context.addConnection(new UnfoldingConnection((StatisticMap) unfolding[1], petrinet, (Petrinet) unfolding[0]));
 		
 		return new Object [] {unfolding[1], unfolding[0]};
 	}
