@@ -23,7 +23,7 @@ public class Utility
 	 * Prende la piazza iniziale della rete di Petri
 	 *  
 	 * @param N rete di Petri
-	 * @return pn piazza iniziale della rete di Petri o null
+	 * @return piazza iniziale della rete di Petri o null
 	 */
 	public static Place getStartNode(Petrinet N) 
 	{		
@@ -37,7 +37,7 @@ public class Utility
 	 * Prende la piazza finale della rete di Petri
 	 *  
 	 * @param N rete di Petri
-	 * @return pn piazza finale della rete di Petri o null
+	 * @return piazza finale della rete di Petri o null
 	 */
 	public static Place getEndNode(Petrinet N) 
 	{		
@@ -51,9 +51,8 @@ public class Utility
 	 * Restituisce il preset di un nodo
 	 * 
 	 * @param N rete di Petri
-	 * @param pn nodo di Petri corrente
-	 * @return 
-	 * @return array contenente il preset di pn
+	 * @param pn nodo corrente
+	 * @return preset di pn
 	 */
 	public static PetrinetNode [] getPreset(Petrinet N, PetrinetNode pn)
 	{
@@ -72,8 +71,8 @@ public class Utility
 	 * Restituisce il postset di un nodo
 	 * 
 	 * @param N rete di Petri
-	 * @param pn nodo di unfolding corrente
-	 * @return array contenente il postset di pn
+	 * @param pn nodo corrente
+	 * @return postset di pn
 	 */
 	public static PetrinetNode [] getPostset(Petrinet N, PetrinetNode pn)
 	{
@@ -89,16 +88,16 @@ public class Utility
 	}
 	
 	/**
-	 * Verifica se un nodo è abilitato
+	 * Verifica se un nodo e' abilitato
 	 * 
 	 * @param N rete di Petri
-	 * @param t nodo da verificare
-	 * @param L1 mappa da rete di Petri a rete di Unfolding
-	 * @return preset di t se è abilitata, null altrimenti
+	 * @param pn nodo da verificare
+	 * @param L1 map da N a N'
+	 * @return preset di t se e' abilitata, null altrimenti
 	 */
-	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode t, HashMap <PetrinetNode, ArrayList<PetrinetNode>> L1)
+	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode pn, HashMap <PetrinetNode, ArrayList<PetrinetNode>> L1)
 	{		
-		PetrinetNode [] preset = getPreset(N, t); 
+		PetrinetNode [] preset = getPreset(N, pn); 
 		if(preset.length > 1) 
 		{
 			for(int i = 0; i < preset.length; i++)
@@ -113,7 +112,7 @@ public class Utility
 	 * 
 	 * @param N rete di Petri
 	 * @param C configurazione locale del nodo
-	 * @param L mappa da unfolding a rete di Petri
+	 * @param L mappa da N' a N
 	 * @return marking del nodo
 	 */
 	public static ArrayList <PetrinetNode> getMarking(Petrinet N, LocalConfiguration C, HashMap <PetrinetNode, PetrinetNode> L)
@@ -138,8 +137,8 @@ public class Utility
 	 * Restituisce la storia dei place di un nodo
 	 * 
 	 * @param N1 rete di unfolding
-	 * @param pn nodo di unfolding corrente 
-	 * @return H storia dei place del nodo corrente
+	 * @param pn nodo di partenza 
+	 * @return H storia dei place di pn
 	 */
 	public static ArrayList<Place> getHistoryPlace(Petrinet N1, PetrinetNode pn)
 	{
@@ -149,17 +148,17 @@ public class Utility
 	}
 
 	/**
-	 * Visita all'indietro la rete di occorrenze, salvando i place attraversati
+	 * Visita all'indietro la rete di unfolding, salvando i place attraversati
 	 * 
 	 * @param N1 rete di unfolding
-	 * @param pn nodo di unfolding di partenza 
-	 * @param H lista dei place di unfolding parziali
+	 * @param pn nodo corrente
+	 * @param H storia parziale dei place
 	 */
 	private static void getBackPlacePlace(Petrinet N1, PetrinetNode pn, ArrayList<Place> H) 
 	{
 		for (Iterator<?> preset = N1.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
 		{
-			/* Se è un place non contenuto in H lo aggiungo */
+			/* Se e' un place non contenuto in H lo aggiungo */
 			if(pn instanceof Place) 
 			{
 				if(!H.contains(pn))
@@ -167,23 +166,24 @@ public class Utility
 				else
 					return;
 			}
+			
 			Arc a = (Arc) preset.next();
 			getBackPlacePlace(N1, a.getSource(), H);
 		}
 	}
 	
 	/**
-	 * Restituisce la storia (place, arc) di un nodo dei xor-split
+	 * Restituisce la storia di un nodo dei (xor-split, arc)
 	 * 
 	 * @param N1 rete di unfolding
-	 * @param pn nodo di unfolding di partenza 
-	 * @return storia dei (place,arc) di pn
+	 * @param pn nodo di partenza 
+	 * @return storia dei (place, arc) di pn
 	 */
 	public static ArrayList<Pair> getHistoryXOR(Petrinet N1, PetrinetNode pn, Arc a)
 	{
 		ArrayList <Pair> H = new ArrayList <Pair> ();
 		
-		/* Inizializzo H con il nodo iniziale se è uno xor-split */
+		/* Inizializzo H con il nodo iniziale se e' uno xor-split */
 		if(pn instanceof Place)
 			if(N1.getGraph().getOutEdges(pn).size() > 1)
 				H.add(new Pair((Place) pn, a));
@@ -193,11 +193,11 @@ public class Utility
 	}
 	
 	/**
-	 * Visita all'indietro la rete di occorrenze, salvando i xor-split
+	 * Visita all'indietro la rete di unfolding, salvando i xor-split
 	 * 
 	 * @param N1 rete di unfolding
-	 * @param pn nodo di unfolding corrente 
-	 * @param storia parziale delle coppie (place, arc)
+	 * @param pn nodo corrente 
+	 * @param storia parziale delle coppie (xor-split, arc)
 	 */
 	private static void getBackPlaceXOR(Petrinet N1, PetrinetNode pn, ArrayList <Pair> H) 
 	{
@@ -205,7 +205,7 @@ public class Utility
 		{
 			Arc a = (Arc) preset.next();
 			
-			/* Se il nodo corrente è una transizione verifico se il suo preset contiene xor-split */
+			/* Se il nodo corrente e' una transizione verifico se il suo preset contiene xor-split */
 			if(pn instanceof Transition)
 			{
 				if(N1.getGraph().getOutEdges(a.getSource()).size() > 1)
@@ -224,13 +224,12 @@ public class Utility
 	/**
 	 * Verifico se due transazioni sono in conflitto
 	 * 
-	 * @param lista degli xor-split della transazione t
-	 * @param lista degli xor-split della transazione u
+	 * @param xorT lista degli xor-split della transazione t
+	 * @param xorU lista degli xor-split della transazione u
 	 * @return true se condividono almeno uno xor, false altrimenti
 	 */
 	public static boolean isConflict(ArrayList <Pair> xorT, ArrayList <Pair> xorU)
 	{		
-		/* Se hanno lo stesso place ma archi diversi è uno xor-split */
 		for(int i = 0; i < xorT.size(); i++)
 			for(int j = 0; j < xorU.size(); j++)
 				if(xorT.get(i).isConflict(xorU.get(j)))
@@ -239,23 +238,27 @@ public class Utility
 	}
 	
 	/**
-	 * Verifico se vi è un cutoff e se esso provoca la rete unbounded
+	 * Verifico se vi e' un cutoff e se esso provoca la rete unbounded
 	 * 
 	 * @param markingT marking della transazione t
-	 * @param markingF marking della configurazione f
-	 * @return intero che indica se c'è cutoff e di che tipo è
+	 * @param markingU marking della configurazione f
+	 * @return intero che indica se c'e' un cutoff e, in quel caso, il suo tipo
 	 */
-	public static int isBounded(ArrayList <PetrinetNode> markingT, ArrayList <PetrinetNode> markingF) 
+	public static int isBounded(ArrayList <PetrinetNode> markingT, ArrayList <PetrinetNode> markingU) 
 	{
-		ArrayList <PetrinetNode> markT = markingT, markT1 = markingF;
+		ArrayList <PetrinetNode> markT = markingT, markU = markingU;
 
-		/* Verifichiamo se t è un cutoff */
-		for(int i = 0; i < markT1.size(); i++)
+		/* La dimensione del marking di u non puo' essere maggiore della dimensione del marking di t */
+		if(markU.size() > markT.size())
+			return -1;
+		
+		/* Verifichiamo se t e' un cutoff */
+		for(int i = 0; i < markU.size(); i++)
 		{
-			if(!markT.contains(markT1.get(i)))
+			if(!markT.contains(markU.get(i)))
 				return -1;
 			else
-				markT.remove(markT1.get(i));
+				markT.remove(markU.get(i));
 		}
 		
 		/* Verifico il suo tipo */

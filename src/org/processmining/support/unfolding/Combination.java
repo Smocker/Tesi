@@ -28,17 +28,17 @@ public class Combination
 	/**
 	 * Costruttore
 	 * 
-	 * @param dim dimensione dell'array
+	 * @param length lunghezza dell'array
 	 */
-	public Combination(int dim)
+	public Combination(int length)
 	{
-		elements = new PetrinetNode[dim];
+		elements = new PetrinetNode[length];
 	}
 	
 	/**
-	 * Estraggo l'array di PetrinetNode
+	 * Estraggo la combinazione
 	 * 
-	 * @return lista di nodi
+	 * @return combinazione
 	 */
 	public PetrinetNode[] getElements()
 	{
@@ -46,9 +46,9 @@ public class Combination
 	}
 
 	/**
-	 * Setto l'array di PetrinetNode
+	 * Setto la combinazione
 	 * 
-	 * @param elements lista di nodi
+	 * @param elements combinazione
 	 */
 	public void setElements(PetrinetNode[] elements) 
 	{
@@ -56,10 +56,10 @@ public class Combination
 	}
 	
 	/**
-	 * Aggiunge un nuovo elemento alla tupla
+	 * Aggiunge un nuovo elemento alla combinazione
 	 * 
-	 * @param pn PetrinetNode da aggiungere
-	 * @return la tupla con il nuovo elemento aggiunto
+	 * @param pn nodo da aggiungere
+	 * @return la combinazione con il nuovo elemento aggiunto
 	 */
 	public Combination add(PetrinetNode pn)
 	{
@@ -75,33 +75,33 @@ public class Combination
 	/**
 	 * Crea tutte le possibili combinazioni
 	 * 
-	 * @param possibleCombination piazza da cui creare tutte le combinazioni
-	 * @return result ArrayList<PetrinetNode[]> contenente le combinazioni
+	 * @param places piazze da cui creare tutte le combinazioni
+	 * @return lista delle combinazioni
 	 */
-	public static ArrayList<Combination> create(ArrayList<ArrayList<PetrinetNode>> possibleCombination, ArrayList <Combination> combination)
+	public static ArrayList<Combination> create(ArrayList<ArrayList<PetrinetNode>> places, ArrayList <Combination> combination)
 	{
-		rec(0, new Combination(), possibleCombination, combination);
+		rec(0, new Combination(), places, combination);
 		return combination;
 	}
 	
 	/**
-	 * Costruisce in maniera ricorsiva le tuple
+	 * Costruisce in maniera ricorsiva le combinazioni
 	 * 
 	 * @param step passo corrente
-	 * @param tupla tupla corrente
+	 * @param comb combinazione corrente
 	 * @param places piazze da aggiungere
-	 * @param result tupla parziale
+	 * @param combination combinazioni parziali
 	 */
-	private static void rec(int step, Combination tupla, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<Combination> result) 
+	private static void rec(int step, Combination comb, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<Combination> combination) 
 	{
 		int size = places.get(step).size();
 		for (int i = 0; i < size; ++i) 
 		{
-			Combination newTupla = tupla.add(places.get(step).get(i));
+			Combination newComb = comb.add(places.get(step).get(i));
 			if (step == places.size() - 1) 
-				result.add(newTupla);
+				combination.add(newComb);
 			else
-				rec(step+1, newTupla, places, result);
+				rec(step+1, newComb, places, combination);
 		}
 	}
 	
@@ -109,7 +109,7 @@ public class Combination
 	 * Elimina le combinazioni già utilizzate 
 	 * 
 	 * @param combination combinazioni correnti
-	 * @param transazione da aggiungere all'unfolding
+	 * @param t transazione da aggiungere all'unfolding
 	 * @param L1 mappa da rete di Petri a rete di Unfolding
 	 * @param N1 rete di unfolding
 	 */
@@ -152,20 +152,23 @@ public class Combination
 				if(Utility.isConflict(XOR, nodeXOR))
 					return true;
 
-				for(int j = 0; j < nodeXOR.size(); j++)
-					if(!XOR.contains(nodeXOR.get(j)))
-						XOR.add(nodeXOR.get(j));
+				/* Se sono all'ultimo elemento della combinazione non ha senso aggiungere qualcosa a XOR */
+				if(i != elements.length-1)
+				{
+					for(int j = 0; j < nodeXOR.size(); j++)
+						if(!XOR.contains(nodeXOR.get(j)))
+							XOR.add(nodeXOR.get(j));
+				}
 			}
 		}
 		return false;
 	}
 	
 	/**
-	 * Verifico se le due strutture contengono gli stessi elementi
+	 * Verifico se le piazze della combinazione sono gia' state usate
 	 * 
-	 * @param preset arraylist di nodi
-	 * @param pnt tupla di nodi
-	 * @return true se contengono gli stessi elementi, false altrimenti
+	 * @param preset preset della transizione da aggiungere nell'unfolding
+	 * @return true se la combinazione e' stata usata, false altrimenti
 	 */
 	private boolean isEquals(PetrinetNode[] preset)
 	{

@@ -83,7 +83,7 @@ public class PetriNet2Unfolding
 
 		/* Inizio la costruzione della rete inserendo la piazza iniziale i1 */
 		Place i1 = unfolding.addPlace("start");	
-		addCorrispondence(i, i1);
+		refreshCorrispondence(i, i1);
 		
 		/* Trasformo la rete di Petri N in N* */
 		reset = petrinet.addTransition("reset");
@@ -124,11 +124,11 @@ public class PetriNet2Unfolding
 				Place u = (Place) a2.getTarget();
 				Place u1 = unfolding.addPlace(u.getLabel());
 				unfolding.addArc(t1, u1);				
-				addCorrispondence((PetrinetNode) u, u1);
+				refreshCorrispondence((PetrinetNode) u, u1);
 			}
 
 			/* Aggiorno tutte le strutture globali e la coda */
-			addCorrispondence(t, t1);
+			refreshCorrispondence(t, t1);
 			queue.push(localConfigurationMap.get(t1));
 		}
 	}
@@ -151,10 +151,8 @@ public class PetriNet2Unfolding
 			for(DirectedGraphEdge<?, ?> a1: petrinet.getGraph().getOutEdges(t))
 			{
 			
-				Place p = (Place) a1.getTarget(), pi = null;
-				for(int i = 0; i < petri2UnfMap.get(p).size(); i++)
-					if(unfolding.getArc(t1, petri2UnfMap.get(p).get(i)) != null)
-						pi = (Place) petri2UnfMap.get(p).get(i);
+				Place p = (Place) a1.getTarget();
+				Place pi = getPrecedent(t1, p);
 				
 				/* Per ogni transizione t2 delle rete originale attaccate a p */
 				for(DirectedGraphEdge<?, ?> a2: petrinet.getGraph().getOutEdges(p))
@@ -205,7 +203,7 @@ public class PetriNet2Unfolding
 							unfolding.removeTransition(t3);
 							continue;
 						}
-						addCorrispondence(t2, t3);
+						refreshCorrispondence(t2, t3);
 						
 						/* Verifico se t3 provoca cutoff */
 						if(t2.equals(reset))
@@ -231,7 +229,7 @@ public class PetriNet2Unfolding
 								{
 									Place p3 = unfolding.addPlace(p2.getLabel());
 									unfolding.addArc(t3, p3);						
-									addCorrispondence(p2, p3);
+									refreshCorrispondence(p2, p3);
 								}
 								queue.push(localConfigurationMap.get(t3));
 							}
@@ -246,28 +244,26 @@ public class PetriNet2Unfolding
 	 * Verifico se una transizione provoca il cutoff
 	 * 
 	 * @param t transizione da verificare
-	 * @param placeFinal una piazza finale della transizione t
+	 * @param place una piazza finale della transizione t
 	 * @return true se la transizione è un cutoff, false altrimenti
 	 */
-	private boolean isCutoff(Transition t, PetrinetNode placeFinal) 
+	private boolean isCutoff(Transition t, PetrinetNode place) 
 	{
-		PetrinetNode transitionFinal = null;
 		int isBounded;
 		
-		// Controllo se placeFinal è stato inserito
-		if(!petri2UnfMap.containsKey(placeFinal))
-			return false;
-		else
+		// Controllo se place è stato inserito nell'unfolding
+		if(petri2UnfMap.containsKey(place))
 		{
+			ArrayList<PetrinetNode> markingT = markingMap.get(t);
+			
+			// Se nella storia dei place di t esiste place allora è un ciclo
 			for(Place h : Utility.getHistoryPlace(unfolding, t))
 			{
-				// Se nella storia dei place di t esiste placeFinal allora è un ciclo
-				if(unf2PetriMap.get(h).equals(placeFinal)) 
+				if(unf2PetriMap.get(h).equals(place)) 
 				{					
 					for(DirectedGraphEdge<?, ?> a: unfolding.getGraph().getInEdges(h))
 					{
-						transitionFinal = (PetrinetNode) a.getSource();	
-						isBounded = Utility.isBounded(markingMap.get(t), markingMap.get(transitionFinal));
+						isBounded = Utility.isBounded(markingT, markingMap.get(a.getSource()));
 						if(isBounded == 0)
 						{
 							statisticMap.addCutoff(t);
@@ -281,8 +277,10 @@ public class PetriNet2Unfolding
 					}
 				}
 			}
+			return false;
 		}
-		return false;
+		else
+			return false;
 	}
 
 	
@@ -419,12 +417,30 @@ public class PetriNet2Unfolding
 	}
 	
 	/**
-	 * Aggiunge le corrispondenze delle map
+	 * Prendo la piazza che precede la transizione nell'unfolding
+	 * 
+	 * @param t transizione delle rete di Petri
+	 * @param p piazza della rete di Petri
+	 * @return la piazza della rete di unfolding che precede t
+	 */
+	private Place getPrecedent(Transition t, Place p) 
+	{
+		Place pi = null;
+		ArrayList<PetrinetNode> places = petri2UnfMap.get(p);
+		
+		for(int i = 0; i < places.size(); i++)
+			if(unfolding.getArc(t, places.get(i)) != null)
+				pi = (Place) places.get(i);
+		return pi;
+	}
+	
+	/**
+	 * Aggiorna le corrispondenze delle map
 	 * 
 	 * @param pn nodo della rete di Petri
-	 * @param pn1 nodo della rete di Unfolding
+	 * @param pn1 nodo della rete di unfolding
 	 */
-	private void addCorrispondence(PetrinetNode pn, PetrinetNode pn1)
+	private void refreshCorrispondence(PetrinetNode pn, PetrinetNode pn1)
 	{
 		/* Aggiorno le map delle corrispondenze */
 		if(!petri2UnfMap.containsKey(pn)) 

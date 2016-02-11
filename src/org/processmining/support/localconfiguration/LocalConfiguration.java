@@ -15,7 +15,6 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class LocalConfiguration 
 {
-	/* Lista contenente la configurazione locale di un nodo */
 	private ArrayList <Transition> localConfiguration = null;
 	
 	/**

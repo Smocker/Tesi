@@ -16,7 +16,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
 import org.processmining.support.unfolding.StatisticMap;
-import org.processmining.support.unfolding.LegendConformancePanel;
+import org.processmining.support.unfolding.LegendPanel;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -30,7 +30,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 {
 	@Plugin
 	(
-		name = "Visualize BCS BCS Unfolding Statistics", 
+		name = "Visualize BCS Unfolding Statistics", 
 		returnLabels = { "Visualize BCS Unfolding Statistics" }, 
 		parameterLabels = { "Visualize BCS Unfolding Statistics" }, 
 		returnTypes = { JComponent.class }, 
@@ -62,7 +62,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
-			LegendConformancePanel legendPanel = new LegendConformancePanel(unfoldingPanel, "Legend");
+			LegendPanel legendPanel = new LegendPanel(unfoldingPanel, "Legend");
 			unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
 			panel.add(unfoldingPanel, "0,1");
 			JLabel statisticsPanel = new JLabel(output.getStatistic());
