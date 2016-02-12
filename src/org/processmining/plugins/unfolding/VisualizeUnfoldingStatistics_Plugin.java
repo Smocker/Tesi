@@ -4,12 +4,15 @@ import java.awt.Color;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
+import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
@@ -29,6 +32,8 @@ import org.processmining.plugins.bpmn.diagram.BpmnDiagram;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.LegendPanel;
+
+import com.fluxicon.slickerbox.factory.SlickerDecorator;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -87,22 +92,23 @@ public class VisualizeUnfoldingStatistics_Plugin
 				panel.add(scrollStatisticsPanel, "0,2");
 			}else{
 
-				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
+				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, /*TableLayoutConstants.FILL,*/ TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
 				panel.setLayout(new TableLayout(size));
+				
 				BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
 				ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmnw);
+				LegendPanel legendPanelB = new LegendPanel(bpmnPanel, "Legend");
+				bpmnPanel.addViewInteractionPanel(legendPanelB, SwingConstants.EAST);
 				panel.add(bpmnPanel, "0,0");
 				/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 				panel.add(petrinetPanel, "0,1");*/
 				ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
-				LegendPanel legendPanel = new LegendPanel(unfoldingPanel, "Legend");
-				unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
+				LegendPanel legendPanelP = new LegendPanel(unfoldingPanel, "Legend");
+				unfoldingPanel.addViewInteractionPanel(legendPanelP, SwingConstants.EAST);
 				panel.add(unfoldingPanel, "0,1");
-				JLabel statisticsPanel = new JLabel(output.getStatistic());
-				statisticsPanel.setBackground(Color.WHITE);
-				JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
-				panel.add(scrollStatisticsPanel, "0,2");
-
+			
+				panel.add(visualizestring(output.getStatistic()), "0,2");
+				
 
 
 			}
@@ -114,6 +120,25 @@ public class VisualizeUnfoldingStatistics_Plugin
 		return panel;
 	}
 
+	public static JComponent visualizestring( String tovisualize) {
+		JScrollPane sp = new JScrollPane();
+		sp.setOpaque(false);
+		sp.getViewport().setOpaque(false);
+		sp.setBorder(BorderFactory.createEmptyBorder());
+		sp.setViewportBorder(BorderFactory.createLineBorder(new Color(10, 10, 10), 2));
+		sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		SlickerDecorator.instance().decorate(sp.getVerticalScrollBar(), new Color(0, 0, 0, 0),
+				new Color (140, 140, 140), new Color(80, 80, 80));
+		sp.getVerticalScrollBar().setOpaque(false);
+		
+		
+		JLabel l = new JLabel(tovisualize);
+		sp.setViewportView(l);
+
+		return sp;
+	}
+	
 	private BPMNNode getNodefromTransition( InfoConversionBP2PN info,  Transition t ){
 		Map<BPMNNode, Set<PetrinetNode>> nodemap = info.getNodeMap();
 		for(BPMNNode node :nodemap.keySet()){
@@ -148,7 +173,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			BPMNNode node = getNodefromTransition(info,t);
 			if(node!=null){
 				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
 			}
 		}
 
@@ -156,7 +181,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			BPMNNode node = getNodefromTransition(info,t);
 			if(node!=null){
 				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-				nodeclone.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);
 
 
 			}
@@ -167,7 +192,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			BPMNNode node = getNodefromTransition(info,t);
 			if(node!=null){
 				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-				nodeclone.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.YELLOW);
+				nodeclone.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.ORANGE);
 
 
 			}
