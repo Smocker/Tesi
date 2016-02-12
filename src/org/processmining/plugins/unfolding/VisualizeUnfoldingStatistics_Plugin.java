@@ -18,6 +18,8 @@ import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
 import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
+import org.processmining.models.graphbased.directed.bpmn.elements.Activity;
+import org.processmining.models.graphbased.directed.bpmn.elements.Gateway;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
@@ -84,11 +86,11 @@ public class VisualizeUnfoldingStatistics_Plugin
 				JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
 				panel.add(scrollStatisticsPanel, "0,2");
 			}else{
-				
+
 				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
 				panel.setLayout(new TableLayout(size));
-				insertDefect(bpmn,output, info);
-				ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmn);
+				BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
+				ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmnw);
 				panel.add(bpmnPanel, "0,0");
 				ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 				panel.add(petrinetPanel, "0,1");
@@ -100,9 +102,9 @@ public class VisualizeUnfoldingStatistics_Plugin
 				statisticsPanel.setBackground(Color.WHITE);
 				JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
 				panel.add(scrollStatisticsPanel, "0,3");
-				
-				
-				
+
+
+
 			}
 		} 
 		catch (Exception e) 
@@ -111,52 +113,70 @@ public class VisualizeUnfoldingStatistics_Plugin
 		}
 		return panel;
 	}
-	
+
 	private BPMNNode getNodefromTransition( InfoConversionBP2PN info,  Transition t ){
 		Map<BPMNNode, Set<PetrinetNode>> nodemap = info.getNodeMap();
 		for(BPMNNode node :nodemap.keySet()){
 			Set<PetrinetNode> petrinetnodes = nodemap.get(node);
 			for(PetrinetNode petrinetnode: petrinetnodes){
 				if(petrinetnode instanceof Transition)
-				if(petrinetnode.equals(t)){
-					return node;
-				}
+					if(petrinetnode.getLabel().equals(t.getLabel())){
+						return node;
+					}
 			}
 		}
-		return null;
-	}
-	
-	private BPMNNode getNodeinClone(BPMNDiagram bpmn,BPMNNode node){
-		
-		for(BPMNNode nodeclone: bpmn.getNodes()){
-			if(nodeclone.getId().equals(node.getId())){
-				return nodeclone;
-			}
-		}
-		
-		
 		return null;
 	}
 
-	private void insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map, InfoConversionBP2PN info) {
+	private BPMNNode getNodeinClone(BPMNDiagram bpmn,BPMNNode node){
+
+		for(BPMNNode nodeclone: bpmn.getNodes()){
+			if(nodeclone.getLabel().equals(node.getLabel())){
+				return nodeclone;
+			}
+		}
+
+
+		return null;
+	}
+
+	private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map, InfoConversionBP2PN info) {
 		// clona bpmn
-		BPMNDiagram bpmn = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
-		
+		BPMNDiagram bpmn = bpmnoriginal;//BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
+
 		for( Transition t: map.getCutoff()){
 			BPMNNode node = getNodefromTransition(info,t);
-			BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-			nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
+			if(node!=null){
+				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+			}
 		}
-		
+
 		for( Transition t: map.getDeadlock()){
 			BPMNNode node = getNodefromTransition(info,t);
-			BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-			nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);
+			if(node!=null){
+				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+				nodeclone.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+
+
+			}
+
 		}
 		
+		for( Transition t: map.getCutoffUnbounded()){
+			BPMNNode node = getNodefromTransition(info,t);
+			if(node!=null){
+				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+				nodeclone.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.YELLOW);
+
+
+			}
+
+		}
+
 		//activity.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);
 		//String label = "<html>"+ unsoundallert + "<html>";
-		
+
 		//f.getAttributeMap().remove(AttributeMap.TOOLTIP);
 
 		//f.getAttributeMap().put(AttributeMap.TOOLTIP, flowerr);
@@ -164,6 +184,6 @@ public class VisualizeUnfoldingStatistics_Plugin
 		//f.getAttributeMap().put(AttributeMap.SHOWLABEL, true);
 		//f.getAttributeMap().put(AttributeMap.EDGECOLOR, Color.RED);
 
-		
+		return bpmn;
 	}
 }
