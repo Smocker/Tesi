@@ -87,21 +87,21 @@ public class VisualizeUnfoldingStatistics_Plugin
 				panel.add(scrollStatisticsPanel, "0,2");
 			}else{
 
-				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
+				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
 				panel.setLayout(new TableLayout(size));
 				BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
 				ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmnw);
 				panel.add(bpmnPanel, "0,0");
-				ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
-				panel.add(petrinetPanel, "0,1");
+				/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
+				panel.add(petrinetPanel, "0,1");*/
 				ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
 				LegendPanel legendPanel = new LegendPanel(unfoldingPanel, "Legend");
 				unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
-				panel.add(unfoldingPanel, "0,2");
+				panel.add(unfoldingPanel, "0,1");
 				JLabel statisticsPanel = new JLabel(output.getStatistic());
 				statisticsPanel.setBackground(Color.WHITE);
 				JScrollPane scrollStatisticsPanel = new JScrollPane(statisticsPanel);
-				panel.add(scrollStatisticsPanel, "0,3");
+				panel.add(scrollStatisticsPanel, "0,2");
 
 
 
