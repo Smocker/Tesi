@@ -83,7 +83,7 @@ public class LegendPanel extends JPanel implements MouseListener, MouseMotionLis
         layout.insertRow(row, 0.2);
         layout.insertRow(row, TableLayout.PREFERRED);
         JPanel greenPanel = new JPanel();
-        greenPanel.setBackground(Color.RED);
+        greenPanel.setBackground(Color.BLUE);
         legendPanel.add(greenPanel, "0," + row + ",r, c");
         JLabel syncLbl = factory.createLabel(" Points of Cutoff");
         syncLbl.setForeground(Color.WHITE);
@@ -92,7 +92,7 @@ public class LegendPanel extends JPanel implements MouseListener, MouseMotionLis
         /* Riga punti di deadlock */
         layout.insertRow(row, TableLayout.PREFERRED);
         JPanel yellowPanel = new JPanel();
-        yellowPanel.setBackground(Color.ORANGE);
+        yellowPanel.setBackground(Color.RED);
         legendPanel.add(yellowPanel, "0," + row + ",r, c");
         JLabel moveLogLbl = factory.createLabel(" Points of Deadlock");
         moveLogLbl.setForeground(Color.WHITE);
