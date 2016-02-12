@@ -82,7 +82,7 @@ public class PetriNet2Unfolding
 		o = Utility.getEndNode(petrinet);
 
 		/* Inizio la costruzione della rete inserendo la piazza iniziale i1 */
-		Place i1 = unfolding.addPlace("start");	
+		Place i1 = unfolding.addPlace(i.getLabel());	
 		refreshCorrispondence(i, i1);
 		
 		/* Trasformo la rete di Petri N in N* */
@@ -290,7 +290,7 @@ public class PetriNet2Unfolding
 	private void getStatistics()
 	{		
 		/* Inserisco i livelock trovati in un lista */
-		ArrayList <Transition> cutoff = new ArrayList <Transition> ();
+		ArrayList <Transition> cutoff = new ArrayList <Transition> (statisticMap.getCutoff().size() + statisticMap.getCutoffUnbounded().size());
 		for(int i = 0; i < statisticMap.getCutoff().size(); i++)
 			cutoff.add(statisticMap.getCutoff().get(i));
 		for(int i = 0; i < statisticMap.getCutoffUnbounded().size(); i++)
@@ -387,14 +387,20 @@ public class PetriNet2Unfolding
 	 */
 	private ArrayList<Transition> getSpoilers(Transition t, ArrayList<Transition> set) 
 	{
-		ArrayList<Transition> spoilers = new ArrayList<Transition>();
-		
-		/* Se sono in conflitto le aggiungo alla nuova lista */
-		for(Transition t1: set)
-			if(Utility.isConflict(xorMap.get(t), xorMap.get(t1)))
-				spoilers.add(t1);
-		
-		return spoilers;
+		/* Se è vuota ritorna lista vuota */
+		if(set.isEmpty())
+			return new ArrayList <Transition> ();
+		else
+		{
+			ArrayList<Transition> spoilers = new ArrayList <Transition> ();
+			ArrayList<Pair> xorT = xorMap.get(t);
+	
+			/* Se sono in conflitto le aggiungo alla nuova lista */
+			for(Transition t1: set)
+				if(Utility.isConflict(xorT, xorMap.get(t1)))
+					spoilers.add(t1);	
+			return spoilers;
+		}
 	}
 	
 	/**
@@ -406,14 +412,20 @@ public class PetriNet2Unfolding
 	 */
 	private ArrayList<Transition> removeConflict(ArrayList<Transition> cutoff, Transition spoiler) 
 	{	
-		ArrayList<Transition> cutoff1 = new ArrayList<Transition>();
-		
-		/* Se le transizioni del cutoff non sono in conflitto con lo spoiler le aggiungo alla nuova lista */
-		for(Transition t: cutoff)
-			if(t != spoiler && !Utility.isConflict(xorMap.get(t), xorMap.get(spoiler)))
-				cutoff1.add(t);
-		
-		return cutoff1;
+		/* Se è vuota ritorna lista vuota */
+		if(cutoff.isEmpty())
+			return  new ArrayList<Transition>();
+		else
+		{
+			ArrayList<Transition> cutoff1 = new ArrayList <Transition> ();
+			ArrayList<Pair> xorSpoiler = xorMap.get(spoiler);
+
+			/* Se le transizioni del cutoff non sono in conflitto con lo spoiler le aggiungo alla nuova lista */
+			for(Transition t: cutoff)
+				if(t != spoiler && !Utility.isConflict(xorMap.get(t), xorSpoiler))
+					cutoff1.add(t);
+			return cutoff1;
+		}
 	}
 	
 	/**

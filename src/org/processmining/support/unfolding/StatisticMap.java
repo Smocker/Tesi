@@ -46,7 +46,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void addCutoff(Transition cutoff) 
 	{
-		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.BLUE);
 		get(CUTOFF).add(cutoff);
 	}
 
@@ -67,7 +67,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void addCutoffUnbounded(Transition cutoff)
 	{
-		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.BLUE);
 		get(CUTOFF_UNBOUNDED).add(cutoff);
 	}
 	
@@ -89,7 +89,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	public void setDeadlock(ArrayList<Transition> deadlock)
 	{
 		for(Transition t : deadlock)
-			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.ORANGE);
+			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 		put(DEADLOCK, deadlock);		
 	}
 	
