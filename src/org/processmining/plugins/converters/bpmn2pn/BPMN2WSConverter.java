@@ -636,4 +636,10 @@ public class BPMN2WSConverter
 	public List<String> getErrors() {
 		return errors;
 	}
+	
+	public InfoConversionBP2PN getInfoConversionBP2PN(){
+		InfoConversionBP2PN info = new InfoConversionBP2PN(startEventMap, endEventMap, flowMap,nodeMap);
+		return info;
+	}
+	
 }

@@ -28,7 +28,7 @@ public class Combination
 	/**
 	 * Costruttore
 	 * 
-	 * @param length lunghezza dell'array
+	 * @param length la lunghezza dell'array
 	 */
 	public Combination(int length)
 	{
@@ -36,9 +36,9 @@ public class Combination
 	}
 	
 	/**
-	 * Estraggo la combinazione
+	 * Estrae la combinazione
 	 * 
-	 * @return combinazione
+	 * @return la combinazione
 	 */
 	public PetrinetNode[] getElements()
 	{
@@ -46,9 +46,9 @@ public class Combination
 	}
 
 	/**
-	 * Setto la combinazione
+	 * Setta la combinazione
 	 * 
-	 * @param elements combinazione
+	 * @param elements la combinazione
 	 */
 	public void setElements(PetrinetNode[] elements) 
 	{
@@ -58,7 +58,7 @@ public class Combination
 	/**
 	 * Aggiunge un nuovo elemento alla combinazione
 	 * 
-	 * @param pn nodo da aggiungere
+	 * @param pn il nodo da aggiungere
 	 * @return la combinazione con il nuovo elemento aggiunto
 	 */
 	public Combination add(PetrinetNode pn)
@@ -75,8 +75,8 @@ public class Combination
 	/**
 	 * Crea tutte le possibili combinazioni
 	 * 
-	 * @param places piazze da cui creare tutte le combinazioni
-	 * @return lista delle combinazioni
+	 * @param places le piazze da cui creare tutte le combinazioni
+	 * @return la lista delle combinazioni
 	 */
 	public static ArrayList<Combination> create(ArrayList<ArrayList<PetrinetNode>> places, ArrayList <Combination> combination)
 	{
@@ -87,10 +87,10 @@ public class Combination
 	/**
 	 * Costruisce in maniera ricorsiva le combinazioni
 	 * 
-	 * @param step passo corrente
-	 * @param comb combinazione corrente
-	 * @param places piazze da aggiungere
-	 * @param combination combinazioni parziali
+	 * @param step il passo corrente
+	 * @param comb la combinazione corrente
+	 * @param places le piazze da aggiungere
+	 * @param combination le combinazioni parziali
 	 */
 	private static void rec(int step, Combination comb, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<Combination> combination) 
 	{
@@ -108,10 +108,10 @@ public class Combination
 	/**
 	 * Elimina le combinazioni già utilizzate 
 	 * 
-	 * @param combination combinazioni correnti
-	 * @param t transazione da aggiungere all'unfolding
-	 * @param L1 mappa da rete di Petri a rete di Unfolding
-	 * @param N1 rete di unfolding
+	 * @param combination le combinazioni correnti
+	 * @param t la transezione da aggiungere all'unfolding
+	 * @param L1 la map da rete di Petri a rete di Unfolding
+	 * @param N1 la rete di unfolding
 	 */
 	public static void filter(ArrayList<Combination> combination, Transition t, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
 	{
@@ -135,8 +135,8 @@ public class Combination
 	/**
 	 * Verifica se le piazze della combinazione sono in conflitto con la transizione
 	 * 
-	 * @param N1 rete di unfolding
-	 * @param t transizione da verificare
+	 * @param N1 la rete di unfolding
+	 * @param t la transizione da verificare
 	 * @return true se non c'e' conflitto con t, false altrimenti
 	 */
 	public boolean isConflict(Petrinet N1, Transition t) 
@@ -167,7 +167,7 @@ public class Combination
 	/**
 	 * Verifico se le piazze della combinazione sono gia' state usate
 	 * 
-	 * @param preset preset della transizione da aggiungere nell'unfolding
+	 * @param preset il preset della transizione da aggiungere nell'unfolding
 	 * @return true se la combinazione e' stata usata, false altrimenti
 	 */
 	private boolean isEquals(PetrinetNode[] preset)

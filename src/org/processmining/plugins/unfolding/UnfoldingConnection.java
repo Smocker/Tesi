@@ -1,7 +1,9 @@
 package org.processmining.plugins.unfolding;
 
 import org.processmining.framework.connections.impl.AbstractStrongReferencingConnection;
+import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.support.unfolding.StatisticMap;
 
 /**
@@ -14,6 +16,8 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 	public static String IDENTIFICATION_MAP = "IDENTIFICATION_MAP";
 	public static String PETRINET = "PETRINET";
 	public static String UNFOLDING = "UNFOLDING";
+	public static String BPMN = "BPMN";
+	public static String InfoCBP2PN = "INFOCONVERSION";
 
 	/**
 	 * Inserimento delle reti di petri nel connettore
@@ -28,5 +32,16 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 		putStrong(IDENTIFICATION_MAP, identificationMap);
 		putStrong(PETRINET, petrinet);
 		putStrong(UNFOLDING, unfolding);	
+	}
+	
+	public UnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding, InfoConversionBP2PN info, BPMNDiagram bpmn) 
+	{
+		super("UnfoldingConnection");
+		putStrong(IDENTIFICATION_MAP, identificationMap);
+		putStrong(PETRINET, petrinet);
+		putStrong(UNFOLDING, unfolding);
+		putStrong(BPMN, bpmn);
+		putStrong(InfoCBP2PN, info);
+		
 	}
 }
