@@ -5,7 +5,7 @@ import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.plugins.converters.bpmn2pn.BPMN2WSConverter;
+import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.support.unfolding.StatisticMap;
 
@@ -34,7 +34,7 @@ public class BPMN2Unfolding_Plugin
 	public Object[] convert(PluginContext context, BPMNDiagram bpmn) 
 	{
 		Petrinet petrinet;
-		BPMN2WSConverter bpmn2Petrinet;
+		BPMN2WorkflowSystemConverter bpmn2Petrinet;
 		PetriNet2Unfolding petrinet2Unfolding;
 		Object[] unfolding;
 		
@@ -43,7 +43,7 @@ public class BPMN2Unfolding_Plugin
 		
 		/* Converte il BPMN in rete di Petri */
 		writeLog(context, "Conversion of the BPMN in Petri net...");
-		bpmn2Petrinet = new BPMN2WSConverter(bpmn);
+		bpmn2Petrinet = new BPMN2WorkflowSystemConverter(bpmn);
 		bpmn2Petrinet.convert();
 		petrinet = bpmn2Petrinet.getPetriNet();
 		

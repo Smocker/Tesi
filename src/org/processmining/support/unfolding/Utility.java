@@ -1,9 +1,11 @@
 package org.processmining.support.unfolding;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -265,6 +267,10 @@ public class Utility
 		if (markT.isEmpty())
 			return 0;
 		else 
+		{
+			for(PetrinetNode pn : markT)
+				pn.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
 			return 1;
+		}
 	}
 }
