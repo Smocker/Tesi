@@ -251,7 +251,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//replayRuposPanel.fullrepaint();
-
+				visualizeUnfoldingStatistics_Plugin.paintfull();
 			}
 
 		});

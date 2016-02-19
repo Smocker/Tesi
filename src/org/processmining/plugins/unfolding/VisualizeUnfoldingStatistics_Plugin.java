@@ -75,7 +75,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 	{
 		panel = new JPanel();
 		Petrinet petrinet;
-		
+
 
 		this.output = output;
 		this.context = context;
@@ -104,32 +104,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 				panel.add(scrollStatisticsPanel, "0,2");
 			}else{
 
-				double size [] [] = {{TableLayoutConstants.FILL} , {/*TableLayoutConstants.FILL, TableLayoutConstants.FILL,*/ TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
-				panel.setLayout(new TableLayout(size));
-
-				BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
-				ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmnw);
-				LegendPanel legendPanelB = new LegendPanel(bpmnPanel, "Legend");
-				bpmnPanel.addViewInteractionPanel(legendPanelB, SwingConstants.EAST);
-				panel.add(bpmnPanel, "0,0");
-
-				HistoryUnfolding hu = new HistoryUnfolding(unfolding);
-				ArrayList<Collection<PetrinetNode>> result = hu.createHistory();
-
-				System.out.print(result);
-
-				TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(bpmnPanel, "History Unfolding", hu, output, this);
-				bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
-				/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
-				panel.add(petrinetPanel, "0,1");*/
-				ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
-				LegendPanel legendPanelP = new LegendPanel(unfoldingPanel, "Legend");
-				unfoldingPanel.addViewInteractionPanel(legendPanelP, SwingConstants.EAST);
-				panel.add(unfoldingPanel, "0,1");
-
-				//panel.add(visualizestring(output.getStatistic()), "0,2");
-				StringPanel sp = new StringPanel(unfoldingPanel, "Statistic Unfolding", output.getStatistic());
-				unfoldingPanel.addViewInteractionPanel(sp, SwingConstants.SOUTH);
+				paintfull();
 
 			}
 		} 
@@ -138,6 +113,43 @@ public class VisualizeUnfoldingStatistics_Plugin
 			e.printStackTrace();
 		}
 		return panel;
+	}
+
+	public void paintfull(){
+		try{
+			double size [] [] = {{TableLayoutConstants.FILL} , {/*TableLayoutConstants.FILL, TableLayoutConstants.FILL,*/ TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
+			panel.setLayout(new TableLayout(size));
+
+			BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
+			ProMJGraphPanel bpmnPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,bpmnw);
+			LegendPanel legendPanelB = new LegendPanel(bpmnPanel, "Legend");
+			bpmnPanel.addViewInteractionPanel(legendPanelB, SwingConstants.EAST);
+			panel.add(bpmnPanel, "0,0");
+
+			HistoryUnfolding hu = new HistoryUnfolding(unfolding);
+			ArrayList<Collection<PetrinetNode>> result = hu.createHistory();
+
+			System.out.print(result);
+
+			TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(bpmnPanel, "History Unfolding", hu, output, this);
+			bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
+			/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
+		panel.add(petrinetPanel, "0,1");*/
+			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
+			LegendPanel legendPanelP = new LegendPanel(unfoldingPanel, "Legend");
+			unfoldingPanel.addViewInteractionPanel(legendPanelP, SwingConstants.EAST);
+			panel.add(unfoldingPanel, "0,1");
+
+			//panel.add(visualizestring(output.getStatistic()), "0,2");
+			StringPanel sp = new StringPanel(unfoldingPanel, "Statistic Unfolding", output.getStatistic());
+			unfoldingPanel.addViewInteractionPanel(sp, SwingConstants.SOUTH);
+			panel.revalidate();
+			panel.repaint();
+		} 
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}
 	}
 
 	public static JComponent visualizestring( String tovisualize) {
@@ -234,8 +246,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 
 	public void repaint(Collection<PetrinetNode> collection) {
 		//JPanel panel = new JPanel();
-		
-		
+
+
 		try{
 			double size [] [] = {{TableLayoutConstants.FILL} , {/*TableLayoutConstants.FILL, TableLayoutConstants.FILL,*/ TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
 			panel.setLayout(new TableLayout(size));
