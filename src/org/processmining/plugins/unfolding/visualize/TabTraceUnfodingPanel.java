@@ -98,7 +98,8 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		//this.historyunf=hu;
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
-		historyPN = hu.createHistory();
+	//	historyPN = hu.createHistoryDFS();
+		historyPN =hu.createHistoryBFS();
 		historyBPMN = hu.HistoryonBP(info, bpmn);
 		panel.getViewport();
 		this.panelName = panelName;
@@ -178,13 +179,13 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 
 			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
-				return historyBPMN.get(rowIndex);// tovisualize.getList().get(rowIndex).getTracename()+"+"+tovisualize.getList().get(rowIndex).getConformance();//rowIndex;
+				return historyPN.get(rowIndex);// tovisualize.getList().get(rowIndex).getTracename()+"+"+tovisualize.getList().get(rowIndex).getConformance();//rowIndex;
 			}
 
 			@Override
 			public int getRowCount() {
 
-				return historyBPMN.size();//tovisualize.getList().size();
+				return historyPN.size();//tovisualize.getList().size();
 			}
 
 			@Override

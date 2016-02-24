@@ -129,7 +129,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			panel.add(bpmnPanel, "0,0");
 
 			HistoryUnfolding hu = new HistoryUnfolding(unfolding);
-			ArrayList<Collection<PetrinetNode>> result = hu.createHistory();
+			ArrayList<Collection<PetrinetNode>> result = hu.createHistoryDFS();
 
 			System.out.print(result);
 
