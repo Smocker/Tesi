@@ -36,6 +36,7 @@ import org.processmining.plugins.bpmn.diagram.BpmnDiagram;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.plugins.unfolding.visualize.StringPanel;
 import org.processmining.plugins.unfolding.visualize.TabTraceUnfodingPanel;
+import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.LegendPanel;
 
@@ -55,6 +56,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 	private UIPluginContext context;
 	private InfoConversionBP2PN info = null;
 	private BPMNDiagram bpmn= null;
+	private LocalConfigurationMap localConfigurationMap = null;
 	private Petrinet unfolding = null;
 	private JPanel panel;
 	@Plugin
@@ -90,6 +92,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 
 			bpmn = unfoldingConnection.getObjectWithRole(UnfoldingConnection.BPMN);
 			info = unfoldingConnection.getObjectWithRole(UnfoldingConnection.InfoCBP2PN);
+			localConfigurationMap = unfoldingConnection.getObjectWithRole(UnfoldingConnection.LOCALCCONFIGURATIONMAP);
+
 			if(bpmn==null || info == null){
 				/* Creo i pannelli per la visualizzazione */
 				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
@@ -106,8 +110,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 				panel.add(scrollStatisticsPanel, "0,2");
 			}else{
 
-				paintfull();
-
+				//paintfull();
+				repaint(null);
 			}
 		} 
 		catch (Exception e) 
@@ -117,9 +121,9 @@ public class VisualizeUnfoldingStatistics_Plugin
 		return panel;
 	}
 
-	public void paintfull(){
+	/*public void paintfull(){
 		try{
-			double size [] [] = {{TableLayoutConstants.FILL} , {/*TableLayoutConstants.FILL, TableLayoutConstants.FILL,*/ TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
+			double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL,TableLayoutConstants.FILL}};
 			panel.setLayout(new TableLayout(size));
 
 			BPMNDiagram bpmnw = insertDefect(bpmn,output, info);
@@ -128,7 +132,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 			bpmnPanel.addViewInteractionPanel(legendPanelB, SwingConstants.EAST);
 			panel.add(bpmnPanel, "0,0");
 
-			HistoryUnfolding hu = new HistoryUnfolding(unfolding);
+			HistoryUnfolding hu = new HistoryUnfolding(unfolding,localConfigurationMap);
 			ArrayList<Collection<PetrinetNode>> result = hu.createHistoryDFS();
 
 			System.out.print(result);
@@ -137,8 +141,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 
 			//panel.add(tabunf);
 			//bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
-			/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
-		panel.add(petrinetPanel, "0,1");*/
+			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
+		panel.add(petrinetPanel, "0,1");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
 			LegendPanel legendPanelP = new LegendPanel(unfoldingPanel, "Legend");
 			unfoldingPanel.addViewInteractionPanel(legendPanelP, SwingConstants.EAST);
@@ -154,7 +158,7 @@ public class VisualizeUnfoldingStatistics_Plugin
 		{
 			e.printStackTrace();
 		}
-	}
+	}*/
 
 	public static JComponent visualizestring( String tovisualize) {
 		JScrollPane sp = new JScrollPane();
@@ -262,9 +266,12 @@ public class VisualizeUnfoldingStatistics_Plugin
 			bpmnPanel.addViewInteractionPanel(legendPanelB, SwingConstants.EAST);
 			panel.add(bpmnPanel, "0,0");
 
-			HistoryUnfolding hu = new HistoryUnfolding(unfolding);
+			HistoryUnfolding hu = new HistoryUnfolding(unfolding,localConfigurationMap);
 
 
+			if(collection==null){
+				TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(context, bpmnPanel, "History Unfolding", hu, output, this, bpmn, info);
+			}
 			//TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(context, bpmnPanel, "History Unfolding", hu, output, this);
 			//bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
 			/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
@@ -289,21 +296,23 @@ public class VisualizeUnfoldingStatistics_Plugin
 	private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal,
 			Collection<PetrinetNode> collection) {
 		if(collection!=null){
-			BPMNDiagram bpmn = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
+			if(!collection.isEmpty()){
+				BPMNDiagram bpmn = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
 
-			for( PetrinetNode pnnode: collection){
-				if(pnnode instanceof Transition){
-					Transition t = (Transition) pnnode;
-					BPMNNode node = getNodefromTransition(info,t);
-					if(node!=null){
-						BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-						nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+				for( PetrinetNode pnnode: collection){
+					if(pnnode instanceof Transition){
+						Transition t = (Transition) pnnode;
+						BPMNNode node = getNodefromTransition(info,t);
+						if(node!=null){
+							BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+							nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+						}
 					}
 				}
-			}
 
-			return bpmn;
-		}else
-			return bpmnoriginal;
+				return bpmn;
+			}
+		}
+		return bpmnoriginal;
 	}
 }

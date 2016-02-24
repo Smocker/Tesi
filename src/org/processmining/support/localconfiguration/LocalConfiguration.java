@@ -15,14 +15,14 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class LocalConfiguration 
 {
-	private ArrayList <Transition> localConfiguration = null;
+	private ArrayList <PetrinetNode> localConfiguration = null;
 	
 	/**
 	 * Costruttore
 	 */
 	public LocalConfiguration()
 	{
-		localConfiguration = new ArrayList <Transition>();
+		localConfiguration = new ArrayList <PetrinetNode>();
 	}
 	
 	/**
@@ -32,7 +32,7 @@ public class LocalConfiguration
 	 * @param pn nodo corrente
 	 * @return configurazione locale di pn
 	 */
-	public ArrayList<Transition> set(Petrinet N, PetrinetNode pn) 
+	public ArrayList<PetrinetNode> set(Petrinet N, PetrinetNode pn) 
 	{
 		getLeastBackwardClosed(N, pn, localConfiguration);
 		return localConfiguration;
@@ -43,7 +43,7 @@ public class LocalConfiguration
 	 * 
 	 * @return configurazione locale
 	 */
-	public ArrayList<Transition> get() 
+	public ArrayList<PetrinetNode> get() 
 	{
 		return localConfiguration;
 	}
@@ -55,7 +55,7 @@ public class LocalConfiguration
 	 * @param pn nodo corrente
 	 * @param lista parziale delle transazioni analizzate in precendenza
 	 */
-	private void getLeastBackwardClosed(Petrinet N, PetrinetNode pn, ArrayList<Transition> back) 
+	private void getLeastBackwardClosed(Petrinet N, PetrinetNode pn, ArrayList<PetrinetNode> back) 
 	{
 		if(pn instanceof Transition)
 		{

@@ -4,6 +4,7 @@ import org.processmining.framework.connections.impl.AbstractStrongReferencingCon
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
+import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
 
 /**
@@ -14,6 +15,7 @@ import org.processmining.support.unfolding.StatisticMap;
 public class UnfoldingConnection extends AbstractStrongReferencingConnection 
 {	
 	public static String IDENTIFICATION_MAP = "IDENTIFICATION_MAP";
+	public static String LOCALCCONFIGURATIONMAP = "LOCAL_CCONFIGURATION_MAP";
 	public static String PETRINET = "PETRINET";
 	public static String UNFOLDING = "UNFOLDING";
 	public static String BPMN = "BPMN";
@@ -34,14 +36,17 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 		putStrong(UNFOLDING, unfolding);	
 	}
 	
-	public UnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding, InfoConversionBP2PN info, BPMNDiagram bpmn) 
+	public UnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding, LocalConfigurationMap lcm, InfoConversionBP2PN info, BPMNDiagram bpmn) 
 	{
 		super("UnfoldingConnection");
 		putStrong(IDENTIFICATION_MAP, identificationMap);
+		putStrong(LOCALCCONFIGURATIONMAP, lcm);
 		putStrong(PETRINET, petrinet);
 		putStrong(UNFOLDING, unfolding);
 		putStrong(BPMN, bpmn);
 		putStrong(InfoCBP2PN, info);
 		
 	}
+
+	
 }

@@ -83,7 +83,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 	//private HistoryUnfolding historyunf;
 	private ArrayList<Collection<PetrinetNode>> historyPN;
 	private ArrayList<Collection<BPMNNode>> historyBPMN;
-	private  InspectorPanel inspector;
+	private  UnfInspectorPanel inspector;
 	private StatisticMap statistiunf;
 	private VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin;
 
@@ -99,14 +99,15 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
 	//	historyPN = hu.createHistoryDFS();
-		historyPN =hu.createHistoryBFS();
-		historyBPMN = hu.HistoryonBP(info, bpmn);
+		//historyPN =hu.createHistoryBFS();
+		historyPN = hu.createHistory();
+	//	historyBPMN = hu.HistoryonBP(info, bpmn);
 		panel.getViewport();
 		this.panelName = panelName;
 		/*this.tovisualize=tpr;
 
 		replayRuposPanel=replayPRP;*/
-		inspector = new InspectorPanel(context);
+		inspector = new UnfInspectorPanel(context);
 		panel.add(inspector);
 		painttabtrace();
 		widget(this);
@@ -120,7 +121,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		// ProcessInstanceView instanceView = new ProcessInstanceView(log.get(index), info);
 		// instanceView.setAlignmentX(LEFT_ALIGNMENT);
 		JPanel comprisePanel = new JPanel();
-		comprisePanel.setName("List");
+	
 		comprisePanel.setAlignmentX(LEFT_ALIGNMENT);
 		comprisePanel.setBorder(BorderFactory.createEmptyBorder());
 		comprisePanel.setOpaque(false);
@@ -128,11 +129,11 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		//	inspector.setSize(new Dimension(160, 260));
 		comprisePanel.add(tab);
 		comprisePanel.add(Box.createHorizontalGlue());
-		inspector.setName("H");
+	
 		//	inspector = new InspectorPanel((Frame) null);
 		//	inspector.removeInfoAll(0);
 		inspector.addInfo("History Unfolding", comprisePanel);
-
+		
 
 		JButton	button2  = new AutoFocusButton("Reset");
 
@@ -149,12 +150,12 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//replayRuposPanel.fullrepaint();
-				visualizeUnfoldingStatistics_Plugin.repaint(null);
+				visualizeUnfoldingStatistics_Plugin.repaint(new ArrayList<PetrinetNode>());
 			}
 
 		});
 
-		inspector.addInfo("Reset", button2);
+		inspector.addReset("Reset", button2);
 
 		return comprisePanel;
 
@@ -331,7 +332,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				//replayRuposPanel.fullrepaint();
-				visualizeUnfoldingStatistics_Plugin.paintfull();
+				visualizeUnfoldingStatistics_Plugin.repaint(null);
 			}
 
 		});

@@ -7,6 +7,7 @@ import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
+import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
 
 /**
@@ -55,7 +56,7 @@ public class BPMN2Unfolding_Plugin
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
-		context.addConnection(new UnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0], info, bpmn));
+		context.addConnection(new UnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0], (LocalConfigurationMap) unfolding[2], info, bpmn));
 		
 		return new Object [] {unfolding[1], unfolding[0]};
 	}

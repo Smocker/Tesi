@@ -34,7 +34,7 @@ public class Utility
 				return p;
 		return null;
 	}
-	
+
 	/**
 	 * Prende la piazza finale della rete di Petri
 	 *  
@@ -48,7 +48,7 @@ public class Utility
 				return p;
 		return null;
 	}
-	
+
 	/**
 	 * Restituisce il preset di un nodo
 	 * 
@@ -60,7 +60,7 @@ public class Utility
 	{
 		int i = 0;
 		PetrinetNode [] preset = new PetrinetNode [N.getGraph().getInEdges(pn).size()];
-		
+
 		for(DirectedGraphEdge<?, ?> a : N.getGraph().getInEdges(pn))
 		{
 			preset[i] = (PetrinetNode) a.getSource();
@@ -68,7 +68,7 @@ public class Utility
 		}
 		return preset;
 	}
-	
+
 	/**
 	 * Restituisce il postset di un nodo
 	 * 
@@ -80,7 +80,7 @@ public class Utility
 	{
 		int i = 0;
 		PetrinetNode [] postset = new PetrinetNode [N.getGraph().getOutEdges(pn).size()];
-		
+
 		for(DirectedGraphEdge<?, ?> a : N.getGraph().getOutEdges(pn))
 		{
 			postset[i] = (PetrinetNode) a.getTarget();
@@ -88,7 +88,7 @@ public class Utility
 		}
 		return postset;
 	}
-	
+
 	/**
 	 * Verifica se un nodo e' abilitato
 	 * 
@@ -108,7 +108,7 @@ public class Utility
 		}
 		return preset;
 	}
-	
+
 	/**
 	 * Calcola il marking di un nodo
 	 * 
@@ -120,21 +120,25 @@ public class Utility
 	public static ArrayList <PetrinetNode> getMarking(Petrinet N, LocalConfiguration C, HashMap <PetrinetNode, PetrinetNode> L)
 	{
 		ArrayList <PetrinetNode> marking = new ArrayList <PetrinetNode> ();
-		
-		for(Transition t : C.get())
-		{
-			for(DirectedGraphEdge<?, ?> a: N.getGraph().getOutEdges(L.get(t)))
-				marking.add((PetrinetNode) a.getTarget());
+
+		for(PetrinetNode u : C.get()){
+			if(u instanceof Transition){
+				Transition t = (Transition) u;
+				for(DirectedGraphEdge<?, ?> a: N.getGraph().getOutEdges(L.get(t)))
+					marking.add((PetrinetNode) a.getTarget());
+			}
 		}
-		for(Transition t : C.get())
-		{
-			for(DirectedGraphEdge<?, ?> a: N.getGraph().getInEdges(L.get(t)))
-				if(marking.contains(a.getSource()))
-					marking.remove(a.getSource());
+		for(PetrinetNode u : C.get()){
+			if(u instanceof Transition){
+				Transition t = (Transition) u;
+				for(DirectedGraphEdge<?, ?> a: N.getGraph().getInEdges(L.get(t)))
+					if(marking.contains(a.getSource()))
+						marking.remove(a.getSource());
+			}
 		}
 		return marking;
 	}
-	
+
 	/**
 	 * Restituisce la storia dei place di un nodo
 	 * 
@@ -168,12 +172,12 @@ public class Utility
 				else
 					return;
 			}
-			
+
 			Arc a = (Arc) preset.next();
 			getBackPlacePlace(N1, a.getSource(), H);
 		}
 	}
-	
+
 	/**
 	 * Restituisce la storia di un nodo dei (xor-split, arc)
 	 * 
@@ -184,16 +188,16 @@ public class Utility
 	public static ArrayList<Pair> getHistoryXOR(Petrinet N1, PetrinetNode pn, Arc a)
 	{
 		ArrayList <Pair> H = new ArrayList <Pair> ();
-		
+
 		/* Inizializzo H con il nodo iniziale se e' uno xor-split */
 		if(pn instanceof Place)
 			if(N1.getGraph().getOutEdges(pn).size() > 1)
 				H.add(new Pair((Place) pn, a));
-		
+
 		getBackPlaceXOR(N1, pn, H);
 		return H;
 	}
-	
+
 	/**
 	 * Visita all'indietro la rete di unfolding, salvando i xor-split
 	 * 
@@ -206,7 +210,7 @@ public class Utility
 		for (Iterator<?> preset = N1.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
 		{
 			Arc a = (Arc) preset.next();
-			
+
 			/* Se il nodo corrente e' una transizione verifico se il suo preset contiene xor-split */
 			if(pn instanceof Transition)
 			{
@@ -222,7 +226,7 @@ public class Utility
 			getBackPlaceXOR(N1, a.getSource(), H);
 		}
 	}
-	
+
 	/**
 	 * Verifico se due transazioni sono in conflitto
 	 * 
@@ -238,7 +242,7 @@ public class Utility
 					return true;
 		return false;
 	}
-	
+
 	/**
 	 * Verifico se vi e' un cutoff e se esso provoca la rete unbounded
 	 * 
@@ -253,7 +257,7 @@ public class Utility
 		/* La dimensione del marking di u non puo' essere maggiore della dimensione del marking di t */
 		if(markU.size() > markT.size())
 			return -1;
-		
+
 		/* Verifichiamo se t e' un cutoff */
 		for(int i = 0; i < markU.size(); i++)
 		{
@@ -262,7 +266,7 @@ public class Utility
 			else
 				markT.remove(markU.get(i));
 		}
-		
+
 		/* Verifico il suo tipo */
 		if (markT.isEmpty())
 			return 0;
