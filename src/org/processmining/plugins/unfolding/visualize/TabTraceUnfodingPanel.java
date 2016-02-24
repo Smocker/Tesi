@@ -28,12 +28,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.AbstractDocument.Content;
 
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
+import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.ui.scalableview.ScalableComponent;
 import org.processmining.framework.util.ui.scalableview.ScalableViewPanel;
 import org.processmining.framework.util.ui.scalableview.interaction.ViewInteractionPanel;
@@ -43,8 +49,11 @@ import org.processmining.framework.util.ui.widgets.ProMPropertiesPanel;
 import org.processmining.framework.util.ui.widgets.ProMTextArea;
 //import org.processmining.plugins.log.ui.logdialog.ProcessInstanceView;
 
+import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
+import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.plugins.unfolding.HistoryUnfolding;
 import org.processmining.plugins.unfolding.VisualizeUnfoldingStatistics_Plugin;
 import org.processmining.support.unfolding.StatisticMap;
@@ -71,54 +80,82 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 	private JTable tab;
 	private String panelName;
 	//private TotalConformanceResult tovisualize;
-	private HistoryUnfolding historyunf;
-	private ArrayList<Collection<PetrinetNode>> history;
+	//private HistoryUnfolding historyunf;
+	private ArrayList<Collection<PetrinetNode>> historyPN;
+	private ArrayList<Collection<BPMNNode>> historyBPMN;
 	private  InspectorPanel inspector;
 	private StatisticMap statistiunf;
 	private VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin;
 
-	public TabTraceUnfodingPanel(ScalableViewPanel panel, String panelName,
-			HistoryUnfolding hu, StatisticMap statistiunf, VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin){
+	public TabTraceUnfodingPanel(PluginContext context, ScalableViewPanel panel, String panelName,
+			HistoryUnfolding hu, StatisticMap statistiunf, VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin, BPMNDiagram bpmn, InfoConversionBP2PN info){
 		super(new BorderLayout());
 		this.statistiunf = statistiunf;
 		this.visualizeUnfoldingStatistics_Plugin = visualizeUnfoldingStatistics_Plugin;
 		this.setBorder(BorderFactory.createEmptyBorder());
 		this.setOpaque(true);
 		this.setSize(new Dimension(160, 260));
-		this.historyunf=hu;
+		//this.historyunf=hu;
 		this.addMouseMotionListener(this);
 		this.addMouseListener(this);
-		history = hu.createHistory();
+		historyPN = hu.createHistory();
+		historyBPMN = hu.HistoryonBP(info, bpmn);
 		panel.getViewport();
 		this.panelName = panelName;
 		/*this.tovisualize=tpr;
 
-		replayRuposPanel=replayPRP;
-		inspector = new InspectorPanel();
-		 replayRuposPanel.add(inspector);*/
+		replayRuposPanel=replayPRP;*/
+		inspector = new InspectorPanel(context);
+		panel.add(inspector);
 		painttabtrace();
+		widget(this);
+
 	}
 
-	private void widget(int index){
+	public JPanel widget(JPanel panell){
 
 		// XLogInfo info = null;
 		// info = XLogInfoFactory.createLogInfo(log);
 		// ProcessInstanceView instanceView = new ProcessInstanceView(log.get(index), info);
 		// instanceView.setAlignmentX(LEFT_ALIGNMENT);
 		JPanel comprisePanel = new JPanel();
+		comprisePanel.setName("List");
 		comprisePanel.setAlignmentX(LEFT_ALIGNMENT);
 		comprisePanel.setBorder(BorderFactory.createEmptyBorder());
 		comprisePanel.setOpaque(false);
 		comprisePanel.setLayout(new BoxLayout(comprisePanel, BoxLayout.X_AXIS));
-
-		//	comprisePanel.add(instanceView);
+		//	inspector.setSize(new Dimension(160, 260));
+		comprisePanel.add(tab);
 		comprisePanel.add(Box.createHorizontalGlue());
-
-		inspector = new InspectorPanel((Frame) null);
+		inspector.setName("H");
+		//	inspector = new InspectorPanel((Frame) null);
 		//	inspector.removeInfoAll(0);
-		inspector.addInfo("Log", comprisePanel);
+		inspector.addInfo("History Unfolding", comprisePanel);
 
 
+		JButton	button2  = new AutoFocusButton("Reset");
+
+
+		button2.setOpaque(false);
+
+
+		button2.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+
+
+		button2.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				//replayRuposPanel.fullrepaint();
+				visualizeUnfoldingStatistics_Plugin.repaint(null);
+			}
+
+		});
+
+		inspector.addInfo("Reset", button2);
+
+		return comprisePanel;
 
 		//, "0, 0");
 
@@ -137,16 +174,17 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		tab = new JTable(new AbstractTableModel() {
 
 			private static final long serialVersionUID = -2176731961693608635L;
+			
 
 			@Override
 			public Object getValueAt(int rowIndex, int columnIndex) {
-				return history.get(rowIndex);// tovisualize.getList().get(rowIndex).getTracename()+"+"+tovisualize.getList().get(rowIndex).getConformance();//rowIndex;
+				return historyBPMN.get(rowIndex);// tovisualize.getList().get(rowIndex).getTracename()+"+"+tovisualize.getList().get(rowIndex).getConformance();//rowIndex;
 			}
 
 			@Override
 			public int getRowCount() {
 
-				return history.size();//tovisualize.getList().size();
+				return historyBPMN.size();//tovisualize.getList().size();
 			}
 
 			@Override
@@ -168,16 +206,18 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 		});
 		
 		tab.getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+
 			public Component getTableCellRendererComponent (JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) 
 			{
-				
+
 				Component cell = super.getTableCellRendererComponent (table, value, isSelected, hasFocus, row, column);
 				//this.scrollRectToVisible(getBounds());
+				 setToolTipText(table.getValueAt(row, column).toString());
 				ArrayList<Transition> cuttoff = statistiunf.getCutoffUnbounded();
 				ArrayList<Transition> deadlock = statistiunf.getDeadlock();
-				boolean flag = search(history.get(row), cuttoff);
-				
-				boolean flag2 = search(history.get(row), deadlock);
+				boolean flag = search(historyPN.get(row), cuttoff);
+
+				boolean flag2 = search(historyPN.get(row), deadlock);
 				if(flag2){
 					if(flag){
 						cell.setBackground( Color.orange );
@@ -198,7 +238,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 
 						cell.setBackground( Color.red );
 					}*/
-				
+
 				return cell;
 
 			}
@@ -213,10 +253,49 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 
 				return false;
 			}});
-		
+
+
+
+
+		tab.addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				JTable target = (JTable)e.getSource();
+				int row = target.getSelectedRow();
+				int column = target.getSelectedColumn();
+				visualizeUnfoldingStatistics_Plugin.repaint(historyPN.get(row));
+
+			}
+		});
 		legendPanel.setLayout(new BoxLayout(legendPanel, BoxLayout.Y_AXIS));
 		jp1.setLayout(new BoxLayout(jp1, BoxLayout.X_AXIS));
-		
+
 		JScrollPane scrollpane = new JScrollPane(tab); 
 		scrollpane.setOpaque(false);
 		scrollpane.getViewport().setOpaque(false);
@@ -274,9 +353,9 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 				if(i>=0){
 					//replayRuposPanel.onerepaint(i);
 					//widget(i);
-					visualizeUnfoldingStatistics_Plugin.repaint(history.get(i));
+					visualizeUnfoldingStatistics_Plugin.repaint(historyPN.get(i));
 					//	replayPerformanceRuposPanel.fullrepaint(tovisualize.getListperformance().get(i));
-					
+
 				}
 
 			}

@@ -13,12 +13,14 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.text.AbstractDocument.Content;
 
 import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.annotations.Plugin;
+import org.processmining.framework.util.ui.widgets.InspectorPanel;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
@@ -131,8 +133,10 @@ public class VisualizeUnfoldingStatistics_Plugin
 
 			System.out.print(result);
 
-			TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(bpmnPanel, "History Unfolding", hu, output, this);
-			bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
+			TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(context, bpmnPanel, "History Unfolding", hu, output, this, bpmn, info);
+
+			//panel.add(tabunf);
+			//bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
 			/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 		panel.add(petrinetPanel, "0,1");*/
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
@@ -261,8 +265,8 @@ public class VisualizeUnfoldingStatistics_Plugin
 			HistoryUnfolding hu = new HistoryUnfolding(unfolding);
 
 
-			TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(bpmnPanel, "History Unfolding", hu, output, this);
-			bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
+			//TabTraceUnfodingPanel tabunf = new TabTraceUnfodingPanel(context, bpmnPanel, "History Unfolding", hu, output, this);
+			//bpmnPanel.addViewInteractionPanel(tabunf, SwingConstants.SOUTH);
 			/*ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
 		panel.add(petrinetPanel, "0,1");*/
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
@@ -284,19 +288,22 @@ public class VisualizeUnfoldingStatistics_Plugin
 
 	private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal,
 			Collection<PetrinetNode> collection) {
-		BPMNDiagram bpmn = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
+		if(collection!=null){
+			BPMNDiagram bpmn = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
 
-		for( PetrinetNode pnnode: collection){
-			if(pnnode instanceof Transition){
-				Transition t = (Transition) pnnode;
-				BPMNNode node = getNodefromTransition(info,t);
-				if(node!=null){
-					BPMNNode nodeclone =  getNodeinClone(bpmn, node);
-					nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+			for( PetrinetNode pnnode: collection){
+				if(pnnode instanceof Transition){
+					Transition t = (Transition) pnnode;
+					BPMNNode node = getNodefromTransition(info,t);
+					if(node!=null){
+						BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+						nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.ORANGE);
+					}
 				}
 			}
-		}
 
-		return bpmn;
+			return bpmn;
+		}else
+			return bpmnoriginal;
 	}
 }
