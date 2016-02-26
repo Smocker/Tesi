@@ -21,11 +21,11 @@ import org.processmining.support.unfolding.Combination;
 import org.processmining.support.unfolding.Utility;
 
 /**
- * Converte un rete di Petri in una rete di unfolding
+ * Converte un rete di Petri in una BCS unfolding
  * 
  * @author Daniele Cicciarella
  */
-public class PetriNet2Unfolding 
+public class BCSUnfolding 
 {	
 	/* Contesto di ProM */
 	protected PluginContext context;
@@ -49,7 +49,7 @@ public class PetriNet2Unfolding
 	/* Mappa ogni transizione della rete di unfolding con il rispettivo marking */
 	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> markingMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
 	
-	/* Mappa ogni transizione la storia dei suoi xor-split  */
+	/* Mappa ogni transizione con storia dei suoi xor-split  */
 	protected HashMap <PetrinetNode, ArrayList<Pair>> xorMap = new HashMap <PetrinetNode, ArrayList<Pair>>();
 	
 	/* Mappa le configurazioni locali di ogni transizione delle rete di unfolding */
@@ -64,7 +64,7 @@ public class PetriNet2Unfolding
 	 * @param context contesto di ProM
 	 * @param petrinet rete di petri originale
 	 */
-	PetriNet2Unfolding(PluginContext context, Petrinet petrinet) 
+	BCSUnfolding(PluginContext context, Petrinet petrinet) 
 	{
 		this.context = context;
 		this.petrinet = petrinet;
@@ -72,9 +72,9 @@ public class PetriNet2Unfolding
 	}
 	
 	/**
-	 * Converte una rete di Petri in una rete di unfolding
+	 * Converte una rete di Petri in una rete BCS unfolding
 	 * 
-	 * @return la rete di unfolding e le sue statistiche
+	 * @return la rete BCS unfolding e le sue statistiche
 	 */
 	public Object[] convert() 
 	{
@@ -305,7 +305,7 @@ public class PetriNet2Unfolding
 			statisticMap.setDeadlock(deadlock);
 		
 		/* Inserisco le altre statistiche */
-		statisticMap.setStatistic(unfolding);
+		statisticMap.setStatistic(petrinet, unfolding, petri2UnfMap);
 	}
 
 	/**

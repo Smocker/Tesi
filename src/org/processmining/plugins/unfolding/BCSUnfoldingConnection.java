@@ -9,7 +9,7 @@ import org.processmining.support.unfolding.StatisticMap;
  * 
  * @author Daniele Cicciarella
  */
-public class UnfoldingConnection extends AbstractStrongReferencingConnection 
+public class BCSUnfoldingConnection extends AbstractStrongReferencingConnection 
 {	
 	public static String IDENTIFICATION_MAP = "IDENTIFICATION_MAP";
 	public static String PETRINET = "PETRINET";
@@ -22,7 +22,7 @@ public class UnfoldingConnection extends AbstractStrongReferencingConnection
 	 * @param petrinet rete di Petri originale
 	 * @param unfolding rete di Unfolding
 	 */
-	public UnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
+	public BCSUnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding) 
 	{
 		super("UnfoldingConnection");
 		putStrong(IDENTIFICATION_MAP, identificationMap);

@@ -16,7 +16,8 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
 import org.processmining.support.unfolding.StatisticMap;
-import org.processmining.support.unfolding.LegendPanel;
+import org.processmining.support.unfolding.LegendBCSUnfolding;
+import org.processmining.support.unfolding.LegendPetrinet;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
@@ -26,7 +27,7 @@ import info.clearthought.layout.TableLayoutConstants;
  * 
  * @author cicciarella
  */
-public class VisualizeUnfoldingStatistics_Plugin 
+public class BCSUnfoldingVisualize_Plugin 
 {
 	@Plugin
 	(
@@ -52,17 +53,19 @@ public class VisualizeUnfoldingStatistics_Plugin
 		try 
 		{	
 			/* Carico le reti utilizzando la connessione creata in precedenza */
-			UnfoldingConnection unfoldingConnection = context.getConnectionManager().getFirstConnection(UnfoldingConnection.class, context, output);
-			petrinet = unfoldingConnection.getObjectWithRole(UnfoldingConnection.PETRINET);
-		 	unfolding = unfoldingConnection.getObjectWithRole(UnfoldingConnection.UNFOLDING);
+			BCSUnfoldingConnection unfoldingConnection = context.getConnectionManager().getFirstConnection(BCSUnfoldingConnection.class, context, output);
+			petrinet = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.PETRINET);
+		 	unfolding = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.UNFOLDING);
 			 
 		 	/* Creo i pannelli per la visualizzazione */
 		 	double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
 			panel.setLayout(new TableLayout(size));
 			ProMJGraphPanel petrinetPanel = ProMJGraphVisualizer.instance().visualizeGraph(context,petrinet);
+			LegendPetrinet legendPetrinet = new LegendPetrinet(petrinetPanel, "Legend");
+			petrinetPanel.addViewInteractionPanel(legendPetrinet, SwingConstants.EAST);
 			panel.add(petrinetPanel, "0,0");
 			ProMJGraphPanel unfoldingPanel = ProMJGraphVisualizer.instance().visualizeGraph(context, unfolding);
-			LegendPanel legendPanel = new LegendPanel(unfoldingPanel, "Legend");
+			LegendBCSUnfolding legendPanel = new LegendBCSUnfolding(unfoldingPanel, "Legend");
 			unfoldingPanel.addViewInteractionPanel(legendPanel, SwingConstants.EAST);
 			panel.add(unfoldingPanel, "0,1");
 			JLabel statisticsPanel = new JLabel(output.getStatistic());
