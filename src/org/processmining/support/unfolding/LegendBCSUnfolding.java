@@ -27,7 +27,7 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
  * 
  * @author Daniele Cicciarella
  */
-public class LegendPanel extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
+public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
 {
 	/* serialVersionUID */
     private static final long serialVersionUID = 5563202352636336868L;
@@ -43,7 +43,7 @@ public class LegendPanel extends JPanel implements MouseListener, MouseMotionLis
      * @param panel pannello sulla quale deve essere inserito il pannello
      * @param panelName nome del pannello 
      */
-    public LegendPanel(ScalableViewPanel panel, String panelName) 
+    public LegendBCSUnfolding(ScalableViewPanel panel, String panelName) 
     {
     	/* Si setta il layout della legenda */
         super(new BorderLayout());

@@ -54,8 +54,8 @@ import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
+import org.processmining.plugins.unfolding.BCSUnfoldingVisualize_Plugin;
 import org.processmining.plugins.unfolding.HistoryUnfolding;
-import org.processmining.plugins.unfolding.VisualizeUnfoldingStatistics_Plugin;
 import org.processmining.support.unfolding.StatisticMap;
 
 import com.fluxicon.slickerbox.components.AutoFocusButton;
@@ -85,10 +85,10 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 	private ArrayList<Collection<BPMNNode>> historyBPMN;
 	private  UnfoldingInspectorPanel inspector;
 	private StatisticMap statistiunf;
-	private VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin;
+	private BCSUnfoldingVisualize_Plugin visualizeUnfoldingStatistics_Plugin;
 
 	public TabTraceUnfodingPanel(PluginContext context, ScalableViewPanel panel, String panelName,
-			HistoryUnfolding hu, StatisticMap statistiunf, VisualizeUnfoldingStatistics_Plugin visualizeUnfoldingStatistics_Plugin, BPMNDiagram bpmn, InfoConversionBP2PN info){
+			HistoryUnfolding hu, StatisticMap statistiunf, BCSUnfoldingVisualize_Plugin visualizeUnfoldingStatistics_Plugin, BPMNDiagram bpmn, InfoConversionBP2PN info){
 		super(new BorderLayout());
 		this.statistiunf = statistiunf;
 		this.visualizeUnfoldingStatistics_Plugin = visualizeUnfoldingStatistics_Plugin;

@@ -35,7 +35,7 @@ public class BPMN2Unfolding_Plugin
 	{
 		Petrinet petrinet;
 		BPMN2WorkflowSystemConverter bpmn2Petrinet;
-		PetriNet2Unfolding petrinet2Unfolding;
+		BCSUnfolding petrinet2Unfolding;
 		Object[] unfolding;
 		
 		/* Settiamo la barra progressiva */
@@ -51,11 +51,13 @@ public class BPMN2Unfolding_Plugin
 
 		/* Converte la rete di Petri nella rete di unfolding */
 		writeLog(context, "Conversion of the Petri net in Unfolding net...");
-		petrinet2Unfolding = new PetriNet2Unfolding(context, petrinet);
+		petrinet2Unfolding = new BCSUnfolding(context, petrinet);
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
-		context.addConnection(new UnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0], info, bpmn));
+
+		context.addConnection(new BCSUnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0],info,bpmn));
+
 		
 		return new Object [] {unfolding[1], unfolding[0]};
 	}

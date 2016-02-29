@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 
@@ -23,10 +24,12 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private static final String CUTOFF = "Cutoff";
 	private static final String CUTOFF_UNBOUNDED = "Cutoff Unbounded";
 	private static final String DEADLOCK = "Deadlock";
+	private static final String DEAD = "Dead";
+
 	
 	/* Variabili utilizzate per le statistiche */
 	private int nArcs = 0, nPlaces = 0, nTransitions = 0;
-	private boolean isSound;
+	private boolean isSound, isWeakSound;
 	private double startTime = System.currentTimeMillis(), time = 0;
 
 	/**
@@ -37,6 +40,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		put(CUTOFF, new ArrayList <Transition> ());
 		put(CUTOFF_UNBOUNDED, new ArrayList <Transition> ());
 		put(DEADLOCK, new ArrayList <Transition> ());
+		put(DEAD, new ArrayList <Transition> ());
 	}
 	
 	/**
@@ -102,13 +106,36 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	{
 		return get(DEADLOCK);
 	}
+	
+	/**
+	 * Inserisce un dead
+	 * 
+	 * @param dead dead da aggiungere
+	 */
+	public void addDead(Transition dead) 
+	{
+		dead.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		get(DEAD).add(dead);
+	}
+
+	/**
+	 * Restituisce i dead
+	 * 
+	 * @return lista contenente i dead
+	 */
+	public ArrayList<Transition> getDead()
+	{
+		return get(DEAD);
+	}
 
 	/**
 	 * Crea le statistiche della rete
 	 * 
+	 * @param N rete di petri
 	 * @param N1 rete di unfolding
+	 * @param L1 mappa da N a N' 
 	 */
-	public void setStatistic(Petrinet N1)
+	public void setStatistic(Petrinet N, Petrinet N1, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1)
 	{
 		/* Statistiche della rete */
 		nPlaces = N1.getPlaces().size();
@@ -116,8 +143,14 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		for(Place p : N1.getPlaces())
 			nArcs += N1.getGraph().getInEdges(p).size() + N1.getGraph().getOutEdges(p).size();
 		
-		/* Verifico se è sound */
-		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();	
+		/* Verifico se c'è qualche transizione dead */
+		for(Transition pn : N.getTransitions())
+			if(!L1.containsKey(pn))
+				addDead(pn);
+		
+		/* Verifico le soundness */
+		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty() && get(DEAD).isEmpty();	
+		isWeakSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();
 		
 		/* Calcolo il tempo del plugin */
 		time = (System.currentTimeMillis() - startTime) / 1000;
@@ -179,6 +212,19 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 					}
 					break;
 				}
+				case DEAD:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the dead transitions<BR><BR>";
+					else
+					{
+						out += "The net contains " + get(key).size() + " dead transitions:<ol>";
+						for(Transition t: get(key))
+							out += "<li>" + t.getLabel() + "</li>";
+						out += "</ol><BR>";
+					}
+					break;
+				}
 			}
 		}
 		
@@ -187,7 +233,9 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		out += "<li>Number of places: " + nPlaces + "</li>";
 		out += "<li>Number of transitions: " + nTransitions + "</li>";
 		out += "<li>Number of arcs: " + nArcs + "</li>";
-		out += "<li>Soundness: " + isSound + "</li></ul></html>";
+		out += "<li>Soundness: " + isSound + "</li>";
+		out += "<li>Weak soundness: " + isWeakSound + "</li></ul></html>";
+
 		return out;
 	}
 }
