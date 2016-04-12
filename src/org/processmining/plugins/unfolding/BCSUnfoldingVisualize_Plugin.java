@@ -88,9 +88,14 @@ public class BCSUnfoldingVisualize_Plugin
 			BCSUnfoldingConnection unfoldingConnection = context.getConnectionManager().getFirstConnection(BCSUnfoldingConnection.class, context, output);
 			petrinet = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.PETRINET);
 			unfolding = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.UNFOLDING);
-
-			bpmn = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.BPMN);
-			info = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.InfoCBP2PN);
+			try{
+				bpmn = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.BPMN);
+				info = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.InfoCBP2PN);
+			}catch (Exception e) 
+			{
+				bpmn = null;
+				info = null;
+			}
 			if(bpmn==null || info == null){
 				/* Creo i pannelli per la visualizzazione */
 				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
@@ -118,7 +123,7 @@ public class BCSUnfoldingVisualize_Plugin
 		return panel;
 	}
 
-	
+
 
 	public static JComponent visualizestring( String tovisualize) {
 		JScrollPane sp = new JScrollPane();

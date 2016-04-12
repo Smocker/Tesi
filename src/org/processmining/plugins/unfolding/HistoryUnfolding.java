@@ -90,7 +90,7 @@ public class HistoryUnfolding {
 
 		
 		ArrayList<PetrinetNode> ct = new ArrayList<PetrinetNode>();
-		q.add(new Pair(ct, fnode));
+		q.add(new Pair<ArrayList<PetrinetNode>, PetrinetNode>(ct, fnode));
 		cct.add(ct);
 		while (!q.isEmpty()) {
 			Pair<ArrayList<PetrinetNode>, PetrinetNode> v = q.poll();
@@ -128,7 +128,7 @@ public class HistoryUnfolding {
 				
 				
 				PetrinetNode nodet = edge.getTarget();
-				q.add(new Pair(ct, nodet));
+				q.add(new Pair<ArrayList<PetrinetNode>, PetrinetNode>(ct, nodet));
 				i++;
 			}
 			
