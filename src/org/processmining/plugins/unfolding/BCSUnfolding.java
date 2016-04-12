@@ -67,7 +67,7 @@ public class BCSUnfolding
 	BCSUnfolding(PluginContext context, Petrinet petrinet) 
 	{
 		this.context = context;
-		this.petrinet = petrinet;
+		this.petrinet =  PetrinetFactory.clonePetrinet(petrinet);
 		this.unfolding = PetrinetFactory.newPetrinet("Unfolding from Petrinet");		
 	}
 	

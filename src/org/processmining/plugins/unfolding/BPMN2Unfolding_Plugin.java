@@ -20,8 +20,8 @@ public class BPMN2Unfolding_Plugin
 	(
 		name = "BCS BPMN to Unfolding net", 
 		parameterLabels = {"BPMNDiagram"},
-		returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net"}, 
-		returnTypes = {StatisticMap.class, Petrinet.class}, 
+		returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net", "Petri net"}, 
+		returnTypes = {StatisticMap.class,Petrinet.class ,Petrinet.class}, 
 		userAccessible = true, 
 		help = "Convert BPMN diagram to Unfolding net"
 	)
@@ -59,7 +59,7 @@ public class BPMN2Unfolding_Plugin
 		context.addConnection(new BCSUnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0],info,bpmn));
 
 		
-		return new Object [] {unfolding[1], unfolding[0]};
+		return new Object [] {unfolding[1], unfolding[0], petrinet};
 	}
 	
 	/**
