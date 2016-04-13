@@ -57,11 +57,21 @@ public class BPMN2Unfolding_Plugin
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
 
 		context.addConnection(new BCSUnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0],info,bpmn));
-
+		printstatistic(context,bpmn,petrinet, (Petrinet)unfolding[0]);
 		
 		return new Object [] {unfolding[1], unfolding[0], petrinet};
 	}
 	
+	private void printstatistic(PluginContext context, BPMNDiagram bpmn, Petrinet petrinet, Petrinet unfolding) {
+		String message = String.format("Node/Flow: %s / %s", bpmn.getNodes().size(), bpmn.getFlows().size()+bpmn.getMessageFlows().size());
+		context.log(message);
+		message = String.format("T/P: %s / %s", petrinet.getTransitions().size(), petrinet.getPlaces().size());
+		context.log(message);
+		message = String.format("T/P: %s / %s", unfolding.getTransitions().size(), unfolding.getPlaces().size());
+		context.log(message);
+		
+	}
+
 	/**
 	 * Setta gli step della barra progressiva
 	 * 
