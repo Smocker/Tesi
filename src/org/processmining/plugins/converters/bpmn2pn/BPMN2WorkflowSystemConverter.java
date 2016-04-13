@@ -471,7 +471,7 @@ public class BPMN2WorkflowSystemConverter
 	{	
 		boolean convering= bpmn.getInEdges(g).size()>1;
 		boolean eventbased =g.getGatewayType().equals(GatewayType.EVENTBASED);
-		if(!convering & eventbased){
+		if((!convering)&eventbased){
 			Place src = null ;
 			for( BPMNEdge<? , ?> i: bpmn.getInEdges(g)){
 				BPMNNode source = i.getSource();
