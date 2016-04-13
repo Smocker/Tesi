@@ -21,6 +21,7 @@ import org.processmining.models.graphbased.directed.bpmn.elements.MessageFlow;
 import org.processmining.models.graphbased.directed.bpmn.elements.SubProcess;
 import org.processmining.models.graphbased.directed.bpmn.elements.Swimlane;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
@@ -37,31 +38,31 @@ public class BPMN2WorkflowSystemConverter
 	protected BPMNDiagram bpmn;
 	protected Petrinet net;
 	protected Marking m;
-	
+
 	protected List<String> warnings = new ArrayList<String>();
 	protected List<String> errors = new ArrayList<String>();
-	
+
 	/* Contains the inputs and outputs of the processes */
 	private Collection <Place> input = new ArrayList <Place> (), output  = new ArrayList <Place> ();
-	
+
 	/* Maps each start event to an arraylist of place */
 	private Map <NodeID, ArrayList <Place>> startEventMap = new HashMap <NodeID, ArrayList <Place>> ();
-	
+
 	/* Maps each end event to an arraylist of place */
 	private Map <NodeID, ArrayList <Place>> endEventMap = new HashMap <NodeID, ArrayList <Place>> ();
-	
+
 	/* Maps each BPMN control-flow edge to a place */
 	private Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap = new HashMap<BPMNEdge<BPMNNode, BPMNNode>, Place>();
-	
+
 	/* Maps each BPMN node to a set of Petri net nodes (transitions and places) */
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
-		
+
 	public BPMN2WorkflowSystemConverter(BPMNDiagram bpmn) 
 	{
 		this.bpmn = bpmn;	
 		this.net = PetrinetFactory.newPetrinet("Petri net from " + bpmn.getLabel());
 		this.m = new Marking();
-		
+
 		/* Initialize each nodeID with his arraylist */
 		for (Swimlane s : bpmn.getPools()) 
 		{
@@ -69,7 +70,7 @@ public class BPMN2WorkflowSystemConverter
 			endEventMap.put(s.getId(), new ArrayList <Place>());
 		}
 	}
-	
+
 	public boolean convert() 
 	{
 		/* Traslate BPMN to Petri net */
@@ -83,7 +84,7 @@ public class BPMN2WorkflowSystemConverter
 
 		return errors.size() == 0;
 	}
-	
+
 	/**
 	 * Translate edges of the BPMN diagram to places
 	 */
@@ -95,7 +96,7 @@ public class BPMN2WorkflowSystemConverter
 			flowMap.put(f, p);
 		}
 	}
-	
+
 	/**
 	 * Translate message flows of the BPMN diagram to places
 	 */
@@ -107,7 +108,7 @@ public class BPMN2WorkflowSystemConverter
 			flowMap.put(f, p);
 		}
 	}	
-	
+
 	/**
 	 * Translate events to Petri net patterns
 	 */
@@ -117,22 +118,22 @@ public class BPMN2WorkflowSystemConverter
 		{
 			switch (e.getEventType()) 
 			{
-				case START:
-					translateStartEvent(e);
-					break;
-				case END:
-					translateEndEvent(e);
-					break;
-				case INTERMEDIATE:
-					translateIntermediateEvent(e);
-					break;
-				default:
-					warnings.add("Unknown event type " + e.getEventType() + " for " + e.getId() + " (" + e.getLabel() + ")");
-					break;
+			case START:
+				translateStartEvent(e);
+				break;
+			case END:
+				translateEndEvent(e);
+				break;
+			case INTERMEDIATE:
+				translateIntermediateEvent(e);
+				break;
+			default:
+				warnings.add("Unknown event type " + e.getEventType() + " for " + e.getId() + " (" + e.getLabel() + ")");
+				break;
 			}
 		}
 	}
-	
+
 	/**
 	 * Translate start event to Petri net
 	 * 
@@ -143,10 +144,10 @@ public class BPMN2WorkflowSystemConverter
 		Place p = net.addPlace("p_start_" + e.getLabel());
 		Transition t = net.addTransition("t_start_"+e.getLabel());
 		net.addArc(p, t);
-		
+
 		/* Save each pool its input */
 		startEventMap.get(e.getParentPool().getId()).add(p);
-		
+
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(e)) 
 		{
@@ -159,7 +160,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(t, flowMap.get(f));
 			}
 		}
-		
+
 		// Connect transition to place of ingoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(e))
 		{
@@ -174,7 +175,7 @@ public class BPMN2WorkflowSystemConverter
 		}
 		setNodeMapFor(nodeMap, e, p, t);
 	}
-	
+
 	/**
 	 * Translate end event to Petri net
 	 * 
@@ -184,7 +185,7 @@ public class BPMN2WorkflowSystemConverter
 		Place p = net.addPlace("p_end_"+e.getLabel());
 		Transition t = net.addTransition("t_end_"+e.getLabel());
 		net.addArc(t, p);
-		
+
 		/* Save each pool its output */
 		endEventMap.get(e.getParentPool().getId()).add(p);
 
@@ -200,7 +201,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(t, flowMap.get(f));
 			}
 		}
-		
+
 		// Connect transition to place of ingoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(e)) 
 		{
@@ -215,7 +216,7 @@ public class BPMN2WorkflowSystemConverter
 		}
 		setNodeMapFor(nodeMap, e, p, t);
 	}
-	
+
 	/**
 	 * Translate intermediate event to Petri net
 	 * 
@@ -225,10 +226,10 @@ public class BPMN2WorkflowSystemConverter
 	{
 		if (e.getEventTrigger() == EventTrigger.COMPENSATION)
 			warnings.add("This translation does not support compensation events and does not preserve compensation semantics.\n The resulting Petri net should not be used for soundness chedcking.");
-		
+
 		String attachedActivity = (e.getBoundingNode() != null ? "_"+e.getBoundingNode().getLabel() : "");
 		Transition t = net.addTransition("t_ev_"+e.getEventTrigger().name()+"_"+e.getLabel()+attachedActivity);
-		
+
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(e)) 
 		{
@@ -241,7 +242,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(t, flowMap.get(f));
 			}
 		}
-		
+
 		// Connect transition to place of ingoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(e)) 
 		{
@@ -256,7 +257,7 @@ public class BPMN2WorkflowSystemConverter
 		}
 		setNodeMapFor(nodeMap, e, t);
 	}
-	
+
 	/**
 	 * Translate activities to Petri net patterns. Depending on the attributes
 	 * of the activity, it is translated as atomic (single transition), or with
@@ -270,7 +271,7 @@ public class BPMN2WorkflowSystemConverter
 		for (Activity a : bpmn.getActivities())
 			translateActivity(a);
 	}
-	
+
 	/**
 	 * Traslate activity to Petri net
 	 * 
@@ -308,20 +309,20 @@ public class BPMN2WorkflowSystemConverter
 			t_start = t_act;	// When connecting to the incoming/outgoing places
 			t_end = t_act;
 		}
-		
+
 		// There are different reasons for a structured activity
 		if (model_structured) 
 		{
-			
+
 			// Is a looped multi-instance activity
 			if (a.isBLooped()) 
 			{
 				Transition t_repeat = net.addTransition("t_act_"+a.getLabel()+"_repeat");
-				
+
 				// Loop back
 				net.addArc(p_finished, t_repeat);
 				net.addArc(t_repeat, p_ready);
-				
+
 				nodeSet.add(t_act);
 				nodeSet.add(t_start);
 				nodeSet.add(t_end);
@@ -339,7 +340,7 @@ public class BPMN2WorkflowSystemConverter
 					compensationEvent = e;
 					continue;
 				}
-				
+
 				// For each boundary event: retrieve the transition representing the event and add an arc from the activity start to the event
 				PetrinetNode e_nodes[] = nodeMap.get(e).toArray(new PetrinetNode[nodeMap.get(e).size()]);
 				net.addArc(p_ready, (Transition)e_nodes[0]);
@@ -350,21 +351,21 @@ public class BPMN2WorkflowSystemConverter
 			{
 				// Compensation events are translated not as exclusive choice, but as parallel activation
 				PetrinetNode e_nodes[] = nodeMap.get(compensationEvent).toArray(new PetrinetNode[nodeMap.get(compensationEvent).size()]);
-				
+
 				// Remember when the activity has been executed and enable compensation event correspondingly
 				Place p_act_wasExecuted = net.addPlace("t_act_"+a.getLabel()+"_wasExecuted");
 				net.addArc(t_act, p_act_wasExecuted);
 				net.addArc(p_act_wasExecuted, (Transition)e_nodes[0]);		
 				nodeSet.add(p_act_wasExecuted);
 			}
-			
+
 		} 
 		else 
 		{
 			// Default case of atomic task
 			nodeSet.add(t_act);
 		}
-		
+
 		// Connect transition to place of incoming edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(a)) 
 		{
@@ -377,7 +378,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(flowMap.get(f), t_start);
 			}
 		}
-		
+
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(a)) 
 		{
@@ -391,7 +392,7 @@ public class BPMN2WorkflowSystemConverter
 			}
 		}
 	}
-	
+
 	/**
 	 * Translate subprocesses to Petri net patterns. Currently only as atomic tasks.
 	 * 
@@ -405,7 +406,7 @@ public class BPMN2WorkflowSystemConverter
 			translateActivity(s);
 		}
 	}
-	
+
 	/**
 	 * @param a
 	 * @return true iff the activity can be translated as a single atomic
@@ -420,7 +421,7 @@ public class BPMN2WorkflowSystemConverter
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * @param a the activity
 	 * @return all events that are attached to the given activity
@@ -432,7 +433,7 @@ public class BPMN2WorkflowSystemConverter
 		}
 		return boundaryEvents;
 	}
-	
+
 	/**
 	 * Translates gateways to Petri net patterns, updated {@link #nodeMap}, reads {@link #flowMap}.
 	 */
@@ -442,24 +443,24 @@ public class BPMN2WorkflowSystemConverter
 		{
 			switch (g.getGatewayType()) 
 			{
-				case DATABASED:
-				case EVENTBASED:
-					translateXORGateway(g);
-					break;
-				case PARALLEL:
-					translateANDGateway(g);
-					break;
-				case COMPLEX:
-				case INCLUSIVE:
-					translateORGateway(g);
-					break;
-				default:
-					warnings.add("Unknown gateway type "+g.getGatewayType()+" for "+g.getId()+" ("+g.getLabel()+")");
-					break;
+			case DATABASED:
+			case EVENTBASED:
+				translateXORGateway(g);
+				break;
+			case PARALLEL:
+				translateANDGateway(g);
+				break;
+			case COMPLEX:
+			case INCLUSIVE:
+				translateORGateway(g);
+				break;
+			default:
+				warnings.add("Unknown gateway type "+g.getGatewayType()+" for "+g.getId()+" ("+g.getLabel()+")");
+				break;
 			}
 		}
 	}
-		
+
 	/**
 	 * Traslate xor-gateway to Petri net
 	 * 
@@ -467,34 +468,56 @@ public class BPMN2WorkflowSystemConverter
 	 */
 	private void translateXORGateway(Gateway g) 
 	{	
-		Place p = net.addPlace("g_xor_"+g.getLabel());
-		setNodeMapFor(nodeMap, g, p);
-		
-		// Connect transition to place of incoming edge
-		for (BPMNEdge<?, ?> f : bpmn.getInEdges(g)) 
-		{
-			if (f instanceof Flow) 
+		boolean convering= bpmn.getInEdges(g).size()>1;
+		if(!convering){
+			Place src = null ;
+			for( BPMNEdge<? , ?> i: bpmn.getInEdges(g)){
+				BPMNNode source = i.getSource();
+				src = flowMap.get(i);
+			};
+			for (BPMNEdge<?, ?> f : bpmn.getOutEdges(g)) 
 			{
-				Transition t = net.addTransition(f.getSource().getLabel()+"_merge_"+g.getLabel());
-				net.addArc(t, p);
-				net.addArc(flowMap.get(f), t);
-				nodeMap.get(g).add(t);
+				BPMNNode target = f.getTarget();
+				Place p = flowMap.get(f);
+				for(PetrinetEdge<?,?> outnet : p.getGraph().getOutEdges(p)){
+					PetrinetNode targetT = outnet.getTarget();
+					net.addArc(src, (Transition)targetT);
+					net.removeArc(p, targetT);
+				}
+				net.removePlace(p);
+				
 			}
-		}
-			
-		// Connect transition to place of outgoing edge
-		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(g)) 
-		{
-			if (f instanceof Flow) 
+		}else
+		if(convering){
+			Place p = net.addPlace("g_xor_"+g.getLabel());
+			setNodeMapFor(nodeMap, g, p);
+
+			// Connect transition to place of incoming edge
+			for (BPMNEdge<?, ?> f : bpmn.getInEdges(g)) 
 			{
-				Transition t = net.addTransition(f.getTarget().getLabel()+"_split_"+g.getLabel());
-				net.addArc(p, t);
-				net.addArc(t, flowMap.get(f));
-				nodeMap.get(g).add(t);
+				if (f instanceof Flow) 
+				{
+					Transition t = net.addTransition(f.getSource().getLabel()+"_merge_"+g.getLabel());
+					net.addArc(t, p);
+					net.addArc(flowMap.get(f), t);
+					nodeMap.get(g).add(t);
+				}
+			}
+
+			// Connect transition to place of outgoing edge
+			for (BPMNEdge<?, ?> f : bpmn.getOutEdges(g)) 
+			{
+				if (f instanceof Flow) 
+				{
+					Transition t = net.addTransition(f.getTarget().getLabel()+"_split_"+g.getLabel());
+					net.addArc(p, t);
+					net.addArc(t, flowMap.get(f));
+					nodeMap.get(g).add(t);
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Traslate and-gateway to Petri net
 	 * 
@@ -504,7 +527,7 @@ public class BPMN2WorkflowSystemConverter
 	{
 		Transition t = net.addTransition("g_and_"+g.getLabel());
 		setNodeMapFor(nodeMap, g, t);
-		
+
 		// Connect transition to place of incoming edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(g)) 
 		{
@@ -513,7 +536,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(flowMap.get(f), t);
 			}
 		}
-		
+
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(g)) 
 		{
@@ -523,7 +546,7 @@ public class BPMN2WorkflowSystemConverter
 			}
 		}
 	}
-	
+
 	/**
 	 * Traslate or-gateway to Petri net
 	 * 
@@ -533,12 +556,12 @@ public class BPMN2WorkflowSystemConverter
 	{	
 		Set<PetrinetNode> nodeSet = new HashSet<PetrinetNode>();
 		nodeMap.put(g, nodeSet);
-		
+
 		// OR-join
 		if (bpmn.getInEdges(g).size() > 1 && bpmn.getOutEdges(g).size() == 1) 
 		{
 			warnings.add("Cannot translate Inclusive-OR-Join to standard Petri nets. Translation of gateway "+g.getId()+" ("+g.getLabel()+") does not preserve the semantics.");
-			
+
 			BPMNEdge<?, ?> outEdge = (BPMNEdge<?, ?>)bpmn.getOutEdges(g).toArray()[0]; 
 			if (!(outEdge instanceof Flow)) 
 			{
@@ -546,9 +569,9 @@ public class BPMN2WorkflowSystemConverter
 				return;
 			}
 			Place p_out = flowMap.get(outEdge);
-			
+
 			// Generate a transition for each non-empty subset of the outgoing edges
-			
+
 			// Get the set of all places representing outgoing edges
 			Place p_ins[] = new Place[bpmn.getInEdges(g).size()];
 			int ik=0;
@@ -565,29 +588,29 @@ public class BPMN2WorkflowSystemConverter
 				warnings.add("Cannot translate Inclusive-OR-Join to standard Petri nets. Gateway "+g.getId()+" ("+g.getLabel()+") has no incoming control-flow edge.");
 				return;
 			}
-			
+
 			// Then compute all subsets by counting to 2^n and using the bitmask of the number to tell which places to include in the subset
 			for(int i = 0; i < (1<<n); i++){
 				List<Place> p_subset = new ArrayList<Place>();
-			    for(int j = 0; j < n; j++){
-			        if( ((i>>j) & 1) == 1) { 	// bit j is on
-			        	p_subset.add(p_ins[j]);// add place
-			        }
-			    }
-			    // Not for the emtpy subset
-			    if (p_subset.isEmpty()) continue;
-			    
-			    // Create transition for this subset and connect it to the post-places in the subset
-			    Transition t = net.addTransition("g_ior_join_"+g.getLabel()+"_"+i);
-			    nodeSet.add(t);
-			    for (Place p_in : p_subset) 
-			    {
-			    	net.addArc(p_in, t);
-			    }
-			    net.addArc(t, p_out);
+				for(int j = 0; j < n; j++){
+					if( ((i>>j) & 1) == 1) { 	// bit j is on
+						p_subset.add(p_ins[j]);// add place
+					}
+				}
+				// Not for the emtpy subset
+				if (p_subset.isEmpty()) continue;
+
+				// Create transition for this subset and connect it to the post-places in the subset
+				Transition t = net.addTransition("g_ior_join_"+g.getLabel()+"_"+i);
+				nodeSet.add(t);
+				for (Place p_in : p_subset) 
+				{
+					net.addArc(p_in, t);
+				}
+				net.addArc(t, p_out);
 			}
-			
-		// OR-split with one incoming edge
+
+			// OR-split with one incoming edge
 		} 
 		else 
 		{
@@ -598,9 +621,9 @@ public class BPMN2WorkflowSystemConverter
 				return;
 			}			
 			Place p_in = flowMap.get(inEdge);
-			
+
 			// Generate a transition for each non-empty subset of the outgoing edges
-			
+
 			// Get the set of all places representing outgoing edges
 			Place p_outs[] = new Place[bpmn.getOutEdges(g).size()];
 			int ik=0;
@@ -613,40 +636,40 @@ public class BPMN2WorkflowSystemConverter
 				warnings.add("Cannot translate Inclusive-OR-Join to standard Petri nets. Gateway "+g.getId()+" ("+g.getLabel()+") has no outgoing control-flow edge.");
 				return;
 			}
-			
+
 			// Then compute all subsets by counting to 2^n and using the bitmask of the number to tell which places to include in the subset
 			for(int i = 0; i < (1<<n); i++)
 			{
 				List<Place> p_subset = new ArrayList<Place>();
-			    for(int j = 0; j < n; j++)
-			    {
-			        if( ((i>>j) & 1) == 1) 
-			        { 	// Bit j is on
-			        	p_subset.add(p_outs[j]);// add place
-			        }
-			    }
-			    // Not for the emtpy subset
-			    if (p_subset.isEmpty()) continue;
-			    
-			    // Create transition for this subset and connect it to the post-places in the subset
-			    Transition t = net.addTransition("g_ior_split_"+g.getLabel()+"_"+i);
-			    nodeSet.add(t);
-			    for (Place p_out : p_subset) 
-			    {
-			    	net.addArc(t, p_out);
-			    }
-			    net.addArc(p_in, t);
+				for(int j = 0; j < n; j++)
+				{
+					if( ((i>>j) & 1) == 1) 
+					{ 	// Bit j is on
+						p_subset.add(p_outs[j]);// add place
+					}
+				}
+				// Not for the emtpy subset
+				if (p_subset.isEmpty()) continue;
+
+				// Create transition for this subset and connect it to the post-places in the subset
+				Transition t = net.addTransition("g_ior_split_"+g.getLabel()+"_"+i);
+				nodeSet.add(t);
+				for (Place p_out : p_subset) 
+				{
+					net.addArc(t, p_out);
+				}
+				net.addArc(p_in, t);
 			}
 		}
 	}
-	
+
 	/**
 	 * Traslate the net in a workflow system
 	 */
 	private void translateWorkflowSystem() 
 	{
 		int pool = 0;
-		
+
 		/* Create for every pool a single place of input and/or output if he has more than one */
 		for(NodeID nodeID : startEventMap.keySet()) 
 		{				
@@ -664,7 +687,7 @@ public class BPMN2WorkflowSystemConverter
 			}
 			else if(startEventMap.get(nodeID).size() == 1)
 				input.add(startEventMap.get(nodeID).get(0));
-							
+
 			/* OUTPUT. Create XOR-join */
 			if(endEventMap.get(nodeID).size() > 1) 
 			{
@@ -679,10 +702,10 @@ public class BPMN2WorkflowSystemConverter
 			}
 			else if(endEventMap.get(nodeID).size() == 1)
 				output.add(endEventMap.get(nodeID).get(0));
-			
+
 			pool++;
 		}
-		
+
 		/* Create workflow system */
 		Place i = net.addPlace("i");
 		Place o = net.addPlace("o");
@@ -691,7 +714,7 @@ public class BPMN2WorkflowSystemConverter
 		net.addArc(i, ti);
 		net.addArc(to,o);
 		m.add(i);
-		
+
 		// link the places and transitions
 		for (Place pi : input)
 			net.addArc(ti, pi);
@@ -729,20 +752,20 @@ public class BPMN2WorkflowSystemConverter
 	{
 		return m;
 	}
-	
+
 	public List<String> getWarnings() 
 	{
 		return warnings;
 	}
-	
+
 	public List<String> getErrors() 
 	{
 		return errors;
 	}
-	
+
 	public InfoConversionBP2PN getInfoConversionBP2PN(){
 		InfoConversionBP2PN info = new InfoConversionBP2PN(startEventMap, endEventMap, flowMap,nodeMap);
 		return info;
 	}
-	
+
 }
