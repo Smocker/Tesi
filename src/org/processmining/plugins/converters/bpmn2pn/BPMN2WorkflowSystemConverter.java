@@ -17,6 +17,7 @@ import org.processmining.models.graphbased.directed.bpmn.elements.Event;
 import org.processmining.models.graphbased.directed.bpmn.elements.Event.EventTrigger;
 import org.processmining.models.graphbased.directed.bpmn.elements.Flow;
 import org.processmining.models.graphbased.directed.bpmn.elements.Gateway;
+import org.processmining.models.graphbased.directed.bpmn.elements.Gateway.GatewayType;
 import org.processmining.models.graphbased.directed.bpmn.elements.MessageFlow;
 import org.processmining.models.graphbased.directed.bpmn.elements.SubProcess;
 import org.processmining.models.graphbased.directed.bpmn.elements.Swimlane;
@@ -469,7 +470,8 @@ public class BPMN2WorkflowSystemConverter
 	private void translateXORGateway(Gateway g) 
 	{	
 		boolean convering= bpmn.getInEdges(g).size()>1;
-		if(!convering){
+		boolean eventbased =g.getGatewayType().equals(GatewayType.EVENTBASED);
+		if(!convering & eventbased){
 			Place src = null ;
 			for( BPMNEdge<? , ?> i: bpmn.getInEdges(g)){
 				BPMNNode source = i.getSource();
@@ -489,8 +491,7 @@ public class BPMN2WorkflowSystemConverter
 				flowMap.put((Flow) f, src);
 				
 			}
-		}else
-		if(convering){
+		}else{
 			Place p = net.addPlace("g_xor_"+g.getLabel());
 			setNodeMapFor(nodeMap, g, p);
 
