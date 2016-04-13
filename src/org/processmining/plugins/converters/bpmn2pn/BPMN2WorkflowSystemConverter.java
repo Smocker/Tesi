@@ -485,6 +485,8 @@ public class BPMN2WorkflowSystemConverter
 					net.removeArc(p, targetT);
 				}
 				net.removePlace(p);
+				flowMap.remove(f);
+				flowMap.put((Flow) f, src);
 				
 			}
 		}else
