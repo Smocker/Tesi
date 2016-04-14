@@ -232,9 +232,9 @@ public class Utility
 	 */
 	public static boolean isConflict(ArrayList <Pair> xorT, ArrayList <Pair> xorU)
 	{		
-		for(int i = 0; i < xorT.size(); i++)
-			for(int j = 0; j < xorU.size(); j++)
-				if(xorT.get(i).isConflict(xorU.get(j)))
+		for(Pair xor : xorT )
+			for(Pair xor2 :  xorU)
+				if(xor.isConflict(xor2))
 					return true;
 		return false;
 	}

@@ -72,4 +72,11 @@ public class LocalConfiguration
 			getLeastBackwardClosed(N, a.getSource(), back);
 		}
 	}
+
+	@Override
+	public String toString() {
+		return   localConfiguration.toString();
+	}
+	
+	
 }
