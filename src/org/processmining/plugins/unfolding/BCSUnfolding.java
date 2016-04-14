@@ -187,6 +187,8 @@ public class BCSUnfolding
 					/* Crea le combinazioni e filtra quelle già usate */
 					combination = new ArrayList <Combination> (sizeCombination);
 					Combination.create(possibleCombination, combination);
+					System.out.println(possibleCombination);
+					
 					Combination.filter(combination, (Transition) t2, petri2UnfMap, unfolding);
 
 					/* Per ogni combinazione rimanente */
@@ -237,6 +239,7 @@ public class BCSUnfolding
 					}
 				}
 			}
+			System.out.println(localConfigurationMap);
 		}
 	}
 	
@@ -319,25 +322,27 @@ public class BCSUnfolding
 		/* */
 		for(Transition v: cutoff)
 		{ 
+			//cutoffHistory = new ArrayList <Transition> ();
 			for(Transition u: localConfigurationMap.get(v).get())
 				if(!cutoffHistory.contains(u))
 					cutoffHistory.add(u);
-		}
 		
+		}
 		/* */
 		for(Place p : unfolding.getPlaces())
 		{
 			if(unfolding.getGraph().getOutEdges(p).size() > 1)
 			{
-				for (Iterator<?> i = unfolding.getGraph().getOutEdges(p).iterator(); i.hasNext();) 
+				for (DirectedGraphEdge<? ,?> a : unfolding.getGraph().getOutEdges(p)) 
 				{
-					Arc a = (Arc) i.next();
-					Transition t = (Transition) a.getTarget();
+					Arc arc = (Arc) a;
+					Transition t = (Transition) arc.getTarget();
 					if(!filter.contains(t) && !cutoffHistory.contains(t))
 						filter.add(t);
 				}
 			}
 		}
+		
 		return filter;		
 	}
 
