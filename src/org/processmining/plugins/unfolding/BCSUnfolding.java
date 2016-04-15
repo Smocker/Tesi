@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.processmining.framework.plugin.PluginContext;
+import org.processmining.models.connections.petrinets.behavioral.InitialMarkingConnection;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -13,6 +14,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
+import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.support.localconfiguration.LocalConfiguration;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
@@ -68,6 +70,7 @@ public class BCSUnfolding
 	{
 		this.context = context;
 		this.petrinet =  PetrinetFactory.clonePetrinet(petrinet);
+		initialMarking(petrinet);
 		this.unfolding = PetrinetFactory.newPetrinet("Unfolding from Petrinet");		
 	}
 
@@ -99,6 +102,14 @@ public class BCSUnfolding
 		getStatistics();
 
 		return new Object [] {unfolding, statisticMap};
+	}
+	private void initialMarking(  Petrinet net) {
+		Place i = Utility.getStartNode(petrinet); 
+		if(i!=null){
+			Marking marking =new Marking();
+			marking.add(i, 1);
+			context.addConnection(new InitialMarkingConnection(net, marking));
+		}
 	}
 
 	/**
