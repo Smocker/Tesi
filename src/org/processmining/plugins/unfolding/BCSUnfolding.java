@@ -372,7 +372,7 @@ public class BCSUnfolding
 				{
 					Arc arc = (Arc) a;
 					Transition t = (Transition) arc.getTarget();
-					if(!filter.contains(t) && !cutoffHistory.contains(t))
+					if(!filter.contains(t) && !cutoffHistory.contains(t) && !(cutoff.contains(t)))
 						filter.add(t);
 				}
 			}
@@ -424,6 +424,7 @@ public class BCSUnfolding
 		Transition s = null;
 		ArrayList <Transition> deadlock = null, cutoff1 = null, spoilers2 = null;
 
+		
 		if(!cutoff.isEmpty())
 		{		
 			Transition t = cutoff.get(0);
