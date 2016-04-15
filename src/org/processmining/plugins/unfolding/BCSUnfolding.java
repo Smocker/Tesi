@@ -187,7 +187,7 @@ public class BCSUnfolding
 					/* Crea le combinazioni e filtra quelle già usate */
 					combination = new ArrayList <Combination> (sizeCombination);
 					Combination.create(possibleCombination, combination);
-					System.out.println(possibleCombination);
+					//System.out.println(possibleCombination);
 
 					Combination.filter(combination, (Transition) t2, petri2UnfMap, unfolding);
 
@@ -239,7 +239,7 @@ public class BCSUnfolding
 					}
 				}
 			}
-			System.out.println(localConfigurationMap);
+			//System.out.println(localConfigurationMap);
 		}
 	}
 

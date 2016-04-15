@@ -238,4 +238,86 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 
 		return out;
 	}
+
+	@Override
+	public String toString() {
+String out = "Diagnosis on Unfolding net\n";
+		
+		/* Tempo di esecuzione del plugin */
+		out += "Runtime of the plugin: " + time + "\n";
+		
+		/* Carico i livelock e deadlock */
+		for(String key: keySet())
+		{
+			switch(key)
+			{
+				case CUTOFF:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the cutoff points\n";
+					else
+					{
+						out += "The net contains " + get(key).size() + " cutoff points:\n";
+						for(Transition t: get(key))
+							out += "* " + t.getLabel() + "\n";
+						out += "\n";
+					}
+					break;
+				}
+				case CUTOFF_UNBOUNDED:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the cutoff points that make the unbounded net\n";
+					else
+					{
+						out += "The net contains " + get(key).size() + " cutoff points that make the unbounded net:\n";
+						for(Transition t: get(key))
+							out += "* " + t.getLabel() + "\n";
+						out += "\n";
+					}
+					break;
+				}
+				case DEADLOCK:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the deadlock points\n";
+					else
+					{
+						out += "The net contains " + get(key).size() + " deadlock points:\n";
+						for(Transition t: get(key))
+							out += "* " + t.getLabel() + "\n";
+						out += "\n";
+					}
+					break;
+				}
+				case DEAD:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the dead transitions\n";
+					else
+					{
+						out += "The net contains " + get(key).size() + " dead transitions:\n";
+						for(Transition t: get(key))
+							out += "* " + t.getLabel() + "\n";
+						out += "\n";
+					}
+					break;
+				}
+			}
+		}
+		
+		/* Carico le altre statistiche della rete */
+		out += "Other statistics:\n";
+		out += "Number of places: " + nPlaces + "\n";
+		out += "Number of transitions: " + nTransitions + "\n";
+		out += "Number of arcs: " + nArcs + "\n";
+		out += "Soundness: " + isSound + "\n";
+		out += "Weak soundness: " + isWeakSound + "\n";
+		
+		
+
+		return out;
+	}
+	
+	
 }
