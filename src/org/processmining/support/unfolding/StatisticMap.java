@@ -24,6 +24,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private static final String CUTOFF = "Cutoff";
 	private static final String CUTOFF_UNBOUNDED = "Cutoff Unbounded";
 	private static final String DEADLOCK = "Deadlock";
+	private static final String LIVELOCK = "Livelock";
 	private static final String DEAD = "Dead";
 
 	
@@ -41,6 +42,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		put(CUTOFF_UNBOUNDED, new ArrayList <Transition> ());
 		put(DEADLOCK, new ArrayList <Transition> ());
 		put(DEAD, new ArrayList <Transition> ());
+		put(LIVELOCK, new ArrayList <Transition> ());
 	}
 	
 	/**
@@ -98,6 +100,17 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	}
 	
 	/**
+	 * Inserisce i livelock
+	 * 
+	 * @param deadlock deadlock da aggiungere
+	 */
+	public void setLivelock(ArrayList<Transition> livelock)
+	{
+		for(Transition t : livelock)
+			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.red);
+		put(LIVELOCK, livelock);		
+	}
+	/**
 	 * Restituisce i deadlock
 	 * 
 	 * @return lista contenente i deadlock
@@ -149,7 +162,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 				addDead(pn);
 		
 		/* Verifico le soundness */
-		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty() && get(DEAD).isEmpty();	
+		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty() && get(DEAD).isEmpty() && get(LIVELOCK).isEmpty() ;	
 		isWeakSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();
 		
 		/* Calcolo il tempo del plugin */
@@ -206,6 +219,19 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 					else
 					{
 						out += "The net contains " + get(key).size() + " deadlock points:<ol>";
+						for(Transition t: get(key))
+							out += "<li>" + t.getLabel() + "</li>";
+						out += "</ol><BR>";
+					}
+					break;
+				}
+				case LIVELOCK:
+				{
+					if(get(key).isEmpty())
+						out += "The net does not contain the livelock points<BR><BR>";
+					else
+					{
+						out += "The net contains " + get(key).size() + " livelock points:<ol>";
 						for(Transition t: get(key))
 							out += "<li>" + t.getLabel() + "</li>";
 						out += "</ol><BR>";

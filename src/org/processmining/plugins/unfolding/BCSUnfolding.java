@@ -307,6 +307,10 @@ public class BCSUnfolding
 		if(deadlock != null)
 			statisticMap.setDeadlock(deadlock);
 		
+		ArrayList <Transition> nolive = getLivelock(cutoff, searchspoiler(cutoff));		
+		if(nolive != null)
+			statisticMap.setLivelock(nolive);
+		
 		/* Inserisco le altre statistiche */
 		statisticMap.setStatistic(petrinet, unfolding, petri2UnfMap);
 	}
@@ -343,6 +347,37 @@ public class BCSUnfolding
 			}
 		}
 		
+		return filter;		
+	}
+	
+	private ArrayList<Transition> searchspoiler(ArrayList<Transition> cutoff) 
+	{
+		ArrayList <Transition> cutoffHistory = new ArrayList <Transition> (), filter = new ArrayList <Transition>();
+
+		/* */
+		for(Transition v: cutoff)
+		{ 
+			cutoffHistory = new ArrayList <Transition> ();
+			for(Transition u: localConfigurationMap.get(v).get())
+				if(!cutoffHistory.contains(u))
+					cutoffHistory.add(u);
+		
+		
+		/* */
+		for(Place p : unfolding.getPlaces())
+		{
+			if(unfolding.getGraph().getOutEdges(p).size() > 1)
+			{
+				for (DirectedGraphEdge<? ,?> a : unfolding.getGraph().getOutEdges(p)) 
+				{
+					Arc arc = (Arc) a;
+					Transition t = (Transition) arc.getTarget();
+					if(!filter.contains(t) && !cutoffHistory.contains(t))
+						filter.add(t);
+				}
+			}
+		}
+		}
 		return filter;		
 	}
 
@@ -384,6 +419,37 @@ public class BCSUnfolding
 			return null;
 	}
 
+	private ArrayList<Transition> getLivelock(ArrayList<Transition> cutoff, ArrayList<Transition> spoilers) 
+	{
+		Transition s = null;
+		ArrayList <Transition> deadlock = null, cutoff1 = null, spoilers2 = null;
+
+		if(!cutoff.isEmpty())
+		{		
+			Transition t = cutoff.get(0);
+			ArrayList<Transition> spoilers1 = getSpoilers2(t, spoilers);	
+			while(!spoilers1.isEmpty() && deadlock == null)
+			{
+				s = spoilers1.remove(0);
+				cutoff1 = removeConflict2(cutoff, s);
+				spoilers2 = removeConflict2(spoilers, s);
+				if(cutoff1.isEmpty())
+				{
+					deadlock = new ArrayList <Transition>();
+					deadlock.add(s);
+				}
+				else
+				{
+					deadlock = getLivelock(cutoff1, spoilers2);
+					if(deadlock != null)
+						deadlock.add(s);
+				}
+			}
+			return deadlock;
+		}
+		else
+			return null;
+	}
 	/**
 	 * Prendo tutte le transizioni che sono in conflitto con il cutoff
 	 * 
@@ -398,16 +464,33 @@ public class BCSUnfolding
 		else
 		{
 			ArrayList<Transition> spoilers = new ArrayList <Transition> ();
-			ArrayList<Pair> xorT = xorMap.get(t);
+			ArrayList<Pair> xorT =   xorMap.get( t);
 	
 			/* Se sono in conflitto le aggiungo alla nuova lista */
 			for(Transition t1: set)
-				if(Utility.isConflict(xorT, xorMap.get(t1)))
+				if(Utility.isConflict(xorT,   xorMap.get( t1)))
 					spoilers.add(t1);	
 			return spoilers;
 		}
 	}
 	
+	private ArrayList<Transition> getSpoilers2(Transition t, ArrayList<Transition> set) 
+	{
+		/* Se è vuota ritorna lista vuota */
+		if(set.isEmpty())
+			return new ArrayList <Transition> ();
+		else
+		{
+			ArrayList<Transition> spoilers = new ArrayList <Transition> ();
+			ArrayList<Pair> xorT =  Utility.getHistoryXOR(unfolding, t, null);
+	
+			/* Se sono in conflitto le aggiungo alla nuova lista */
+			for(Transition t1: set)
+				if(Utility.isConflict(xorT,  Utility.getHistoryXOR(unfolding, t1, null)))
+					spoilers.add(t1);	
+			return spoilers;
+		}
+	}
 	/**
 	 * Scelto come nuovo insieme quelle che non sono in conflitto con lo spoiler
 	 * 
@@ -423,11 +506,30 @@ public class BCSUnfolding
 		else
 		{
 			ArrayList<Transition> cutoff1 = new ArrayList <Transition> ();
-			ArrayList<Pair> xorSpoiler = xorMap.get(spoiler);
+			ArrayList<Pair> xorSpoiler =  xorMap.get(spoiler);
 
 			/* Se le transizioni del cutoff non sono in conflitto con lo spoiler le aggiungo alla nuova lista */
 			for(Transition t: cutoff)
-				if(t != spoiler && !Utility.isConflict(xorMap.get(t), xorSpoiler))
+				if(t != spoiler && !Utility.isConflict( xorMap.get(t), xorSpoiler))
+					cutoff1.add(t);
+			return cutoff1;
+		}
+	}
+	
+	
+	private ArrayList<Transition> removeConflict2(ArrayList<Transition> cutoff, Transition spoiler) 
+	{	
+		/* Se è vuota ritorna lista vuota */
+		if(cutoff.isEmpty())
+			return  new ArrayList<Transition>();
+		else
+		{
+			ArrayList<Transition> cutoff1 = new ArrayList <Transition> ();
+			ArrayList<Pair> xorSpoiler =  Utility.getHistoryXOR(unfolding, spoiler, null);//xorMap.get(spoiler);
+
+			/* Se le transizioni del cutoff non sono in conflitto con lo spoiler le aggiungo alla nuova lista */
+			for(Transition t: cutoff)
+				if(t != spoiler && !Utility.isConflict( Utility.getHistoryXOR(unfolding, t, null)/*xorMap.get(t)*/, xorSpoiler))
 					cutoff1.add(t);
 			return cutoff1;
 		}
