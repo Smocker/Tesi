@@ -153,7 +153,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		isWeakSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();
 		
 		/* Calcolo il tempo del plugin */
-		time = (System.currentTimeMillis() - startTime) / 1000;
+		time = (System.currentTimeMillis() - startTime) ;
 	}
 	
 	/**
@@ -241,7 +241,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 
 	@Override
 	public String toString() {
-String out = "Diagnosis on Unfolding net\n";
+		String out = "Diagnosis on Unfolding net\n";
 		
 		/* Tempo di esecuzione del plugin */
 		out += "Runtime of the plugin: " + time + "\n";
