@@ -1,7 +1,7 @@
 print("Starting example script: BPMN to PN...");
 String testFileRoot = System.getProperty("user.dir") + "/tests/testfiles/bpmn";
 String exportFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
-//String file = "test_1.bpmn";
+
 
 File folder = new File(testFileRoot);
 File[] listOfFiles = folder.listFiles();
@@ -9,6 +9,7 @@ File[] listOfFiles = folder.listFiles();
 for (File file : listOfFiles) {
 	if (file.isFile()) {
 		String ext = file.getName().substring(file.getName().lastIndexOf('.'));
+		String name = file.getName().substring(0,file.getName().lastIndexOf('.'));
 		if(ext.equals(".bpmn")){
 			
 			print("--------******-----------");
@@ -18,13 +19,15 @@ for (File file : listOfFiles) {
 			// Converto il modello in Petrinet ed eseguo lunfolding
 			bpmn_diagram = select_bpmn_diagram(bpmn);
 			result = bcs_bpmn_to_unfolding_net(bpmn_diagram);
+			File export = new File(exportFileRoot + "/"+name+".pnml");
+			pnml_export_petri_net_(result[2], export);
 			print(file.getName());
 			//stampo statistiche
 			String message = "BPMN Node/Flow: "+ bpmn_diagram.getNodes().size()+"/"+ bpmn_diagram.getFlows().size()+bpmn_diagram.getMessageFlows().size();
 			print(message);
-			message = "T/P: "+ result[2].getTransitions().size()+"/"+ result[2].getPlaces().size();
+			message = "Petri Net T/P: "+ result[2].getTransitions().size()+"/"+ result[2].getPlaces().size();
 			print(message);
-			message = "T/P: "+ result[1].getTransitions().size()+"/"+ result[1].getPlaces().size();
+			message = "Unfolding Net T/P: "+ result[1].getTransitions().size()+"/"+ result[1].getPlaces().size();
 			print(message);
 			//stampo risultato unfoldings
 			print(result[0]);
