@@ -25,7 +25,7 @@ for (File file : listOfFiles) {
 			print(file.getName());
 			//stampo statistiche
 			
-			print(time)
+			print(time);
 			
 			print("--------******-----------");
 		}
