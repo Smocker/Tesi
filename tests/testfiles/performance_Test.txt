@@ -43,9 +43,10 @@ for (File file : listOfFiles) {
 			print(message);
 			print("+++++++++++++++++++++++++");
 			//stampo risultato unfoldings
-			String y = file.getName()+b+p+u+"|"
-			print(y);
-			array += y+result[0].getCLIstat() +"\n";
+			String y = file.getName()+"|"+bp+"|"+p+"|"+u+"|";
+			String k = result[0].getCLIstat() +"\n";
+			print(k);
+			array += y+k;
 			//print(result[0]);
 			File export = new File(exportFileRoot + "/"+name+".pnml");
 			pnml_export_petri_net_(result[2], export);
@@ -55,3 +56,4 @@ for (File file : listOfFiles) {
 }
 
 print(array);
+
