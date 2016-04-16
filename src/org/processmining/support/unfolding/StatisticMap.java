@@ -319,5 +319,77 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		return out;
 	}
 	
+	public String getCLIstat(){
+		/* Carico i livelock e deadlock */
+		boolean isBounded = false;
+		int numCutoff = 0;
+		int numDead = 0;
+		int numDeadlock = 0;
+		for(String key: keySet())
+		{
+			switch(key)
+			{
+				case CUTOFF:
+				{
+					if(get(key).isEmpty()){
+						// "The net does not contain the cutoff points\n";
+					}else
+					{
+						//out += "The net contains " + get(key).size() + " cutoff points:\n";
+						numCutoff +=  get(key).size();
+					}
+					break;
+				}
+				case CUTOFF_UNBOUNDED:
+				{
+					if(get(key).isEmpty()){
+						isBounded = true;
+					}
+						//out += "The net does not contain the cutoff points that make the unbounded net\n";
+					else
+					{
+						//out += "The net contains " + get(key).size() + " cutoff points that make the unbounded net:\n";
+						isBounded = false;
+						numCutoff +=  get(key).size();
+					}
+					break;
+				}
+				case DEADLOCK:
+				{
+					if(get(key).isEmpty()){}
+						//out += "The net does not contain the deadlock points\n";
+					else
+					{
+						//out += "The net contains " + get(key).size() + " deadlock points:\n";
+						numDeadlock +=  get(key).size();
+					}
+					break;
+				}
+				case DEAD:
+				{
+					if(get(key).isEmpty()){}
+						//out += "The net does not contain the dead transitions\n";
+					else
+					{
+						//out += "The net contains " + get(key).size() + " dead transitions:\n";
+						numDead +=  get(key).size();
+					}
+					break;
+				}
+			}
+		}
+		
+		String out = "",sound,Bounded,WeakSound = "";
+		 
+		sound  = isSound ? "True" : "False";
+		WeakSound = isWeakSound ? "True" : "False";
+		Bounded = isBounded  ? "True" : "False";
+		//out = "C  D  L  isBou isWeakSo isSound\n";
+		out += String.format("%s|%s|%s|%s|%s|%s|%s|",time, numCutoff,numDead,numDeadlock,Bounded,WeakSound,sound);
+		// isSound;
+		// isWeakSound;
+		return out;
+	}
+	
 	
 }

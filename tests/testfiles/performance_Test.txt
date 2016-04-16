@@ -5,7 +5,7 @@ String exportFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
 
 File folder = new File(testFileRoot);
 File[] listOfFiles = folder.listFiles();
-
+String array = "";
 for (File file : listOfFiles) {
 	if (file.isFile()) {
 		String ext = file.getName().substring(file.getName().lastIndexOf('.'));
@@ -20,29 +20,38 @@ for (File file : listOfFiles) {
 			// Converto il modello in Petrinet ed eseguo lunfolding
 			bpmn_diagram = select_bpmn_diagram(bpmn);
 			result = bcs_bpmn_to_unfolding_net(bpmn_diagram);
-			File export = new File(exportFileRoot + "/"+name+".pnml");
-			pnml_export_petri_net_(result[2], export);
+			
 			print("+++++++++++++++++++++++++");
 			print(file.getName());
 			//stampo statistiche
-			String message = "BPMN Node/Flow: "+ bpmn_diagram.getNodes().size()+"/"+ bpmn_diagram.getFlows().size()+bpmn_diagram.getMessageFlows().size();
+			String bp =  bpmn_diagram.getNodes().size()+"/"+ bpmn_diagram.getFlows().size()+"/"+bpmn_diagram.getMessageFlows().size();
+			String message = "BPMN Node/Flow/MFow: "+ bp;
 			print(message);
 			int nArcs = 0;
 			for(org.processmining.models.graphbased.directed.petrinet.elements.Place p : result[2].getPlaces()){
 				nArcs += result[2].getGraph().getInEdges(p).size() + result[2].getGraph().getOutEdges(p).size();
 			}
-			message = "Petri Net T/P/A: "+ result[2].getTransitions().size()+"/"+ result[2].getPlaces().size()+"/"+ nArcs;
+			String p =  result[2].getTransitions().size()+"/"+ result[2].getPlaces().size()+"/"+ nArcs;
+			message = "Petri Net T/P/A: "+ p;
 			print(message);
 			nArcs = 0;
 			for(org.processmining.models.graphbased.directed.petrinet.elements.Place p : result[1].getPlaces()){
 				nArcs += result[1].getGraph().getInEdges(p).size() + result[1].getGraph().getOutEdges(p).size();
 			}
-			message = "Unfolding Net T/P/A: "+ result[1].getTransitions().size()+"/"+ result[1].getPlaces().size()+"/"+ nArcs;
+			String u = result[1].getTransitions().size()+"/"+ result[1].getPlaces().size()+"/"+ nArcs;
+			message = "Unfolding Net T/P/A: "+ u;
 			print(message);
 			print("+++++++++++++++++++++++++");
 			//stampo risultato unfoldings
-			print(result[0]);
+			String y = file.getName()+b+p+u+"|"
+			print(y);
+			array += y+result[0].getCLIstat() +"\n";
+			//print(result[0]);
+			File export = new File(exportFileRoot + "/"+name+".pnml");
+			pnml_export_petri_net_(result[2], export);
 			print("--------******-----------");
 		}
 	}
 }
+
+print(array);
