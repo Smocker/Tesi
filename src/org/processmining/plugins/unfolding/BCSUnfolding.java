@@ -70,7 +70,6 @@ public class BCSUnfolding
 	{
 		this.context = context;
 		this.petrinet =  PetrinetFactory.clonePetrinet(petrinet);
-		initialMarking(petrinet);
 		this.unfolding = PetrinetFactory.newPetrinet("Unfolding from Petrinet");		
 	}
 
@@ -103,14 +102,7 @@ public class BCSUnfolding
 
 		return new Object [] {unfolding, statisticMap};
 	}
-	private void initialMarking(  Petrinet net) {
-		Place i = Utility.getStartNode(petrinet); 
-		if(i!=null){
-			Marking marking =new Marking();
-			marking.add(i, 1);
-			context.addConnection(new InitialMarkingConnection(net, marking));
-		}
-	}
+	
 
 	/**
 	 * Inizializzazione della coda di priorità

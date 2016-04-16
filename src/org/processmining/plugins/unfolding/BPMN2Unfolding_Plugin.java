@@ -45,7 +45,7 @@ public class BPMN2Unfolding_Plugin
 			/* Converte il BPMN in rete di Petri */
 			writeLog(context, "Conversion of the BPMN in Petri net...");
 			bpmn2Petrinet = new BPMN2WorkflowSystemConverter(bpmn);
-			bpmn2Petrinet.convert();
+			bpmn2Petrinet.convert(context);
 			petrinet = bpmn2Petrinet.getPetriNet();
 
 			InfoConversionBP2PN info = bpmn2Petrinet.getInfoConversionBP2PN();

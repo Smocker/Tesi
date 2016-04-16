@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.models.connections.petrinets.behavioral.InitialMarkingConnection;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNEdge;
@@ -28,6 +30,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
 import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.support.unfolding.Utility;
 
 /**
  * Convert a model BPMN in a Worflow System
@@ -72,7 +75,7 @@ public class BPMN2WorkflowSystemConverter
 		}
 	}
 
-	public boolean convert() 
+	public boolean convert(PluginContext context) 
 	{
 		/* Traslate BPMN to Petri net */
 		translateEdges();
@@ -81,7 +84,7 @@ public class BPMN2WorkflowSystemConverter
 		translateActivities();
 		translateSubProcesses();
 		translateGateways();
-		translateWorkflowSystem();
+		translateWorkflowSystem(context);
 
 		return errors.size() == 0;
 	}
@@ -668,8 +671,9 @@ public class BPMN2WorkflowSystemConverter
 
 	/**
 	 * Traslate the net in a workflow system
+	 * @param context 
 	 */
-	private void translateWorkflowSystem() 
+	private void translateWorkflowSystem(PluginContext context) 
 	{
 		int pool = 0;
 
@@ -723,6 +727,14 @@ public class BPMN2WorkflowSystemConverter
 			net.addArc(ti, pi);
 		for (Place po : output)
 			net.addArc(po, to);
+		
+		
+			if(i!=null){
+				Marking marking =new Marking();
+				marking.add(i, 1);
+				context.addConnection(new InitialMarkingConnection(net, marking));
+			}
+		
 	}
 
 	/**
