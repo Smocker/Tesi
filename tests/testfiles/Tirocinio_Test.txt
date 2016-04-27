@@ -1,20 +1,19 @@
 /*
- * Trasformo un file BPMN in un BPMNDiagram
+ * Trasformo un file .bpmn in un file .pnml
  */
  
- print("Start test Tirocinio_Test.txt");
- String testFileRoot = System.getProperty("user.dir") + "/tests/testfiles/BPMN";
- String exportFileRoot = System.getProperty("user.dir") + "/tests/testfiles/PN";
- String file = "9.bpmn";
+print("Starting example script: BPMN to PN...");
+String testFileRoot = System.getProperty("user.dir") + "/tests/testfiles/bpmn";
+String exportFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
+String file = "test_1.bpmn";
  
- // Trasformo il file in un oggetto Bpmn
- bpmn = import_bpmn_model_from_bpmn_2_0_file(testFileRoot + "/" + file);
+// Carico il modello BPMN
+bpmn = import_bpmn_model_from_bpmn_2_0_file(testFileRoot + "/" + file);
 
-// Trasformo l'oggetto Bpmn in PetriNets
+// Converto il modello in Petrinet
 bpmn_diagram = select_bpmn_diagram(bpmn);
 pn_marking = convert_bpmn_diagram_to_petri_net_control_flow_(bpmn_diagram);
 
-// Esporto PetriNets in un file pnml
-File export = new File(exportFileRoot + "/9.pnml");
+// Esporto Petrinet in un file .pnml
+File export = new File(exportFileRoot + "/test_1.pnml");
 epnml_export_petri_net_(pn_marking[0], export);
-print("End test Tirocinio_Test.txt");
