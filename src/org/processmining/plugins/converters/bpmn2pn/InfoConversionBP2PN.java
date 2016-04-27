@@ -31,17 +31,23 @@ public class InfoConversionBP2PN {
 	 * maps each BPMN node to a set of Petri net nodes (transitions and places)
 	 */
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
-	
+	/**
+	 * maps each Petri net nodes (transitions and places) to BPMN node
+	 */
+	private Map<PetrinetNode,NodeID> reverseMap= new HashMap<PetrinetNode,NodeID>();
 	
 	public InfoConversionBP2PN(Map<NodeID, ArrayList<Place>> startEventMap,
 			Map<NodeID, ArrayList<Place>> endEventMap,
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
-			Map<BPMNNode, Set<PetrinetNode>> nodeMap) {
+			Map<BPMNNode, Set<PetrinetNode>> nodeMap,
+			Map<PetrinetNode,NodeID> reverseMap
+			) {
 		super();
 		this.startEventMap = startEventMap;
 		this.endEventMap = endEventMap;
 		this.flowMap = flowMap;
 		this.nodeMap = nodeMap;
+		this.reverseMap = reverseMap;
 	}
 	public InfoConversionBP2PN(
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
@@ -63,6 +69,9 @@ public class InfoConversionBP2PN {
 		return nodeMap;
 	}
 	
+	public Map<PetrinetNode,NodeID> getReverseMap(){
+		return reverseMap;
+	}
 	
 	
 

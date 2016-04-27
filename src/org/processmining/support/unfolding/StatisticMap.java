@@ -9,6 +9,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
 
 /**
  * Map contenente le statistiche della rete di unfolding
@@ -26,7 +27,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private static final String DEADLOCK = "Deadlock";
 	private static final String DEAD = "Dead";
 
-	
+	static ArrayList<Transition> deadList = new ArrayList<Transition>();
 	/* Variabili utilizzate per le statistiche */
 	private int nArcs = 0, nPlaces = 0, nTransitions = 0;
 	private boolean isSound, isWeakSound;
@@ -92,11 +93,22 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void setDeadlock(ArrayList<Transition> deadlock)
 	{
-		for(Transition t : deadlock)
+		for(Transition t : deadlock){
 			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+			deadList.add(t);
+			for (Transition t1 : deadList){
+				System.out.println("Deadlist:" + t1.getId());
+			}
+			BPMN2WorkflowSystemConverter.nodeToColor(t);
+			}
+		
 		put(DEADLOCK, deadlock);		
 	}
 	
+	public static ArrayList<Transition> getDeadList(){
+		return deadList;
+	}
+
 	/**
 	 * Restituisce i deadlock
 	 * 
@@ -235,7 +247,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		out += "<li>Number of arcs: " + nArcs + "</li>";
 		out += "<li>Soundness: " + isSound + "</li>";
 		out += "<li>Weak soundness: " + isWeakSound + "</li></ul></html>";
-
+		
 		return out;
 	}
 }

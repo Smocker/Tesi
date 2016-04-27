@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNEdge;
@@ -26,6 +27,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
 import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.support.unfolding.StatisticMap;
 
 /**
  * Convert a model BPMN in a Worflow System
@@ -40,7 +42,7 @@ public class BPMN2WorkflowSystemConverter
 	
 	protected List<String> warnings = new ArrayList<String>();
 	protected List<String> errors = new ArrayList<String>();
-	
+	private static ArrayList<NodeID> toColor = new ArrayList<NodeID>();
 	/* Contains the inputs and outputs of the processes */
 	private Collection <Place> input = new ArrayList <Place> (), output  = new ArrayList <Place> ();
 	
@@ -53,9 +55,12 @@ public class BPMN2WorkflowSystemConverter
 	/* Maps each BPMN control-flow edge to a place */
 	private Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap = new HashMap<BPMNEdge<BPMNNode, BPMNNode>, Place>();
 	
-	/* Maps each BPMN node to a set of Petri net nodes (transitions and places) */
+	/* * Maps each Petri net nodes (transitions and places) to BPMN node */
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
-		
+
+	/* * Maps each Petri net nodes (transitions and places) to BPMN node */
+	private static Map<PetrinetNode,NodeID> reverseMap = new HashMap<PetrinetNode,NodeID>();	
+	
 	public BPMN2WorkflowSystemConverter(BPMNDiagram bpmn) 
 	{
 		this.bpmn = bpmn;	
@@ -80,6 +85,10 @@ public class BPMN2WorkflowSystemConverter
 		translateSubProcesses();
 		translateGateways();
 		translateWorkflowSystem();
+		System.out.println("ReverseMap size: " + reverseMap.size());		
+		for (int i = 0; i < reverseMap.size();i++){
+			System.out.println("Key:" + reverseMap.keySet().toArray()[i] + " Value:" + reverseMap.values().toArray()[i]);		
+		}
 
 		return errors.size() == 0;
 	}
@@ -143,7 +152,8 @@ public class BPMN2WorkflowSystemConverter
 		Place p = net.addPlace("p_start_" + e.getLabel());
 		Transition t = net.addTransition("t_start_"+e.getLabel());
 		net.addArc(p, t);
-		
+		//Insert transition, bmpn nodeID 
+		reverseMap.put(t, e.getId());
 		/* Save each pool its input */
 		startEventMap.get(e.getParentPool().getId()).add(p);
 		
@@ -184,7 +194,8 @@ public class BPMN2WorkflowSystemConverter
 		Place p = net.addPlace("p_end_"+e.getLabel());
 		Transition t = net.addTransition("t_end_"+e.getLabel());
 		net.addArc(t, p);
-		
+		//Insert coppia transition, bmpn nodeID
+		reverseMap.put(t, e.getId());
 		/* Save each pool its output */
 		endEventMap.get(e.getParentPool().getId()).add(p);
 
@@ -228,7 +239,7 @@ public class BPMN2WorkflowSystemConverter
 		
 		String attachedActivity = (e.getBoundingNode() != null ? "_"+e.getBoundingNode().getLabel() : "");
 		Transition t = net.addTransition("t_ev_"+e.getEventTrigger().name()+"_"+e.getLabel()+attachedActivity);
-		
+		reverseMap.put(t, e.getId());
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(e)) 
 		{
@@ -241,7 +252,7 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(t, flowMap.get(f));
 			}
 		}
-		
+		reverseMap.put(t, e.getId());
 		// Connect transition to place of ingoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(e)) 
 		{
@@ -254,6 +265,8 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(flowMap.get(f), t);
 			}
 		}
+		//Insert coppia petri place, bmpn node 
+		reverseMap.put(t, e.getId());
 		setNodeMapFor(nodeMap, e, t);
 	}
 	
@@ -280,13 +293,12 @@ public class BPMN2WorkflowSystemConverter
 	{
 		Set<PetrinetNode> nodeSet = new HashSet<PetrinetNode>();
 		nodeMap.put(a, nodeSet);
-
 		Transition t_act = net.addTransition("t_act_" + a.getLabel());
 		Transition t_start = null;
 		Transition t_end = null;
 		Place p_ready = null;
 		Place p_finished = null;
-
+		reverseMap.put(t_act, a.getId());
 		// Create atomic or structured activity
 		boolean model_structured = !translateActivityAtomic(a);
 		if (model_structured) 
@@ -301,14 +313,16 @@ public class BPMN2WorkflowSystemConverter
 			net.addArc(p_ready, t_act);
 			net.addArc(t_act, p_finished);
 			net.addArc(p_finished, t_end);
-
+			reverseMap.put(t_start,a.getId());
+			reverseMap.put(t_end,a.getId());
+			//reverseMap.put(p_ready,a.getId());
+			//reverseMap.put(p_finished,a.getId());
 		} 
 		else 
 		{
 			t_start = t_act;	// When connecting to the incoming/outgoing places
 			t_end = t_act;
 		}
-		
 		// There are different reasons for a structured activity
 		if (model_structured) 
 		{
@@ -328,6 +342,12 @@ public class BPMN2WorkflowSystemConverter
 				nodeSet.add(t_repeat);
 				nodeSet.add(p_ready);
 				nodeSet.add(p_finished);
+				reverseMap.put(t_act, a.getId());
+				reverseMap.put(t_start,a.getId());
+				reverseMap.put(t_end,a.getId());
+				reverseMap.put(t_repeat,a.getId());
+				//reverseMap.put(p_ready,a.getId());
+				//reverseMap.put(p_finished,a.getId());	
 			}
 
 			// Has attached events
@@ -363,6 +383,7 @@ public class BPMN2WorkflowSystemConverter
 		{
 			// Default case of atomic task
 			nodeSet.add(t_act);
+			reverseMap.put(t_act,a.getId());
 		}
 		
 		// Connect transition to place of incoming edge
@@ -468,8 +489,7 @@ public class BPMN2WorkflowSystemConverter
 	private void translateXORGateway(Gateway g) 
 	{	
 		Place p = net.addPlace("g_xor_"+g.getLabel());
-		setNodeMapFor(nodeMap, g, p);
-		
+		setNodeMapFor(nodeMap, g, p);	
 		// Connect transition to place of incoming edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(g)) 
 		{
@@ -479,6 +499,8 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(t, p);
 				net.addArc(flowMap.get(f), t);
 				nodeMap.get(g).add(t);
+				reverseMap.put(t, g.getId());
+				System.out.println("Gateway: transizione merge aggiunta");
 			}
 		}
 			
@@ -491,6 +513,8 @@ public class BPMN2WorkflowSystemConverter
 				net.addArc(p, t);
 				net.addArc(t, flowMap.get(f));
 				nodeMap.get(g).add(t);
+				reverseMap.put(t, g.getId());
+				System.out.println("Gateway: transizione split aggiunta");
 			}
 		}
 	}
@@ -504,7 +528,7 @@ public class BPMN2WorkflowSystemConverter
 	{
 		Transition t = net.addTransition("g_and_"+g.getLabel());
 		setNodeMapFor(nodeMap, g, t);
-		
+		reverseMap.put(t, g.getId());
 		// Connect transition to place of incoming edge
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(g)) 
 		{
@@ -580,6 +604,7 @@ public class BPMN2WorkflowSystemConverter
 			    // Create transition for this subset and connect it to the post-places in the subset
 			    Transition t = net.addTransition("g_ior_join_"+g.getLabel()+"_"+i);
 			    nodeSet.add(t);
+			    reverseMap.put(t, g.getId());
 			    for (Place p_in : p_subset) 
 			    {
 			    	net.addArc(p_in, t);
@@ -631,6 +656,7 @@ public class BPMN2WorkflowSystemConverter
 			    // Create transition for this subset and connect it to the post-places in the subset
 			    Transition t = net.addTransition("g_ior_split_"+g.getLabel()+"_"+i);
 			    nodeSet.add(t);
+			    reverseMap.put(t, g.getId());
 			    for (Place p_out : p_subset) 
 			    {
 			    	net.addArc(t, p_out);
@@ -713,7 +739,25 @@ public class BPMN2WorkflowSystemConverter
 			nodeSet.add(n2);
 		nodeMap.put(n, nodeSet);
 	}
-
+	/**
+	 * Fill a array list that contains BPMN NodeID to color
+	 * @param pn Unfolding petrinet
+	 */
+	public static void nodeToColor (PetrinetNode pn){
+		ArrayList<Transition> deadList = StatisticMap.getDeadList();	
+		if (deadList.size() > 0){
+			for(Transition t : deadList){
+				toColor.add(reverseMap.get(t));
+				}
+		}
+	}
+	/**
+	 * 
+	 * @return list of BMPN NodeID to color
+	 */
+	public static ArrayList<NodeID> nodeToColorInBPMN(){
+		return toColor;
+	}
 	/**
 	 * @return resulting Petri net
 	 */
@@ -741,7 +785,7 @@ public class BPMN2WorkflowSystemConverter
 	}
 	
 	public InfoConversionBP2PN getInfoConversionBP2PN(){
-		InfoConversionBP2PN info = new InfoConversionBP2PN(startEventMap, endEventMap, flowMap,nodeMap);
+		InfoConversionBP2PN info = new InfoConversionBP2PN(startEventMap, endEventMap, flowMap,nodeMap,reverseMap);
 		return info;
 	}
 	
