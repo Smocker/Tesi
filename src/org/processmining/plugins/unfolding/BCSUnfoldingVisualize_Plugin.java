@@ -13,32 +13,25 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import javax.swing.text.AbstractDocument.Content;
 
-import org.deckfour.uitopia.api.event.TaskListener.InteractionResult;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.annotations.Plugin;
-import org.processmining.framework.util.ui.widgets.InspectorPanel;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
 import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
-import org.processmining.models.graphbased.directed.bpmn.elements.Activity;
-import org.processmining.models.graphbased.directed.bpmn.elements.Gateway;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
-import org.processmining.plugins.bpmn.diagram.BpmnDiagram;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.plugins.unfolding.visualize.StringPanel;
 import org.processmining.plugins.unfolding.visualize.TabTraceUnfodingPanel;
-import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.LegendBCSUnfolding;
-import org.processmining.support.unfolding.LegendPetrinet;
+import org.processmining.support.unfolding.StatisticMap;
 
 import com.fluxicon.slickerbox.factory.SlickerDecorator;
 
@@ -88,9 +81,14 @@ public class BCSUnfoldingVisualize_Plugin
 			BCSUnfoldingConnection unfoldingConnection = context.getConnectionManager().getFirstConnection(BCSUnfoldingConnection.class, context, output);
 			petrinet = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.PETRINET);
 			unfolding = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.UNFOLDING);
-
-			bpmn = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.BPMN);
-			info = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.InfoCBP2PN);
+			try{
+				bpmn = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.BPMN);
+				info = unfoldingConnection.getObjectWithRole(BCSUnfoldingConnection.InfoCBP2PN);
+			}catch (Exception e) 
+			{
+				bpmn = null;
+				info = null;
+			}
 			if(bpmn==null || info == null){
 				/* Creo i pannelli per la visualizzazione */
 				double size [] [] = {{TableLayoutConstants.FILL} , {TableLayoutConstants.FILL, TableLayoutConstants.FILL, TableLayoutConstants.FILL}};
@@ -118,7 +116,7 @@ public class BCSUnfoldingVisualize_Plugin
 		return panel;
 	}
 
-	
+
 
 	public static JComponent visualizestring( String tovisualize) {
 		JScrollPane sp = new JScrollPane();
@@ -156,6 +154,7 @@ public class BCSUnfoldingVisualize_Plugin
 	private BPMNNode getNodeinClone(BPMNDiagram bpmn,BPMNNode node){
 
 		for(BPMNNode nodeclone: bpmn.getNodes()){
+			if(nodeclone.getLabel()!=null)
 			if(nodeclone.getLabel().equals(node.getLabel())){
 				return nodeclone;
 			}
@@ -173,6 +172,7 @@ public class BCSUnfoldingVisualize_Plugin
 			BPMNNode node = getNodefromTransition(info,t);
 			if(node!=null){
 				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+				if(nodeclone!=null)
 				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
 			}
 		}
@@ -181,6 +181,7 @@ public class BCSUnfoldingVisualize_Plugin
 			BPMNNode node = getNodefromTransition(info,t);
 			if(node!=null){
 				BPMNNode nodeclone =  getNodeinClone(bpmn, node);
+				if(nodeclone!=null)
 				nodeclone.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);
 
 

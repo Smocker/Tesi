@@ -132,7 +132,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 	
 		//	inspector = new InspectorPanel((Frame) null);
 		//	inspector.removeInfoAll(0);
-		inspector.addInfo("History Unfolding", comprisePanel);
+		inspector.addInfo("Unfolding History", comprisePanel);
 		
 
 		JButton	button2  = new AutoFocusButton("Reset");

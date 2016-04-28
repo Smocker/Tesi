@@ -4,3 +4,7 @@ class
 out
 .DS_Store
 *.class
+dist
+latestrelease
+ivy
+*.pnml

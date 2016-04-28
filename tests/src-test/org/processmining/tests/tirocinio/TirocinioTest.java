@@ -28,7 +28,7 @@ public class TirocinioTest extends TestCase
   public void testTirocinio2() throws Throwable 
   {
     String testFileRoot = System.getProperty("test.testFileRoot", "./tests/testfiles");
-    String args[] = new String[] {"-f", testFileRoot+"/Tirocinio_Test.txt"};
+    String args[] = new String[] {"-f", testFileRoot+"/performance_Test.txt"};
     CLI.main(args);
   }
   

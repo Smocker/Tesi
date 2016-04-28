@@ -89,4 +89,11 @@ public class Pair
     	}	
 		return false;
     }
+
+	@Override
+	public String toString() {
+		return "Pair [first=" + first + ", second=" + second + "]";
+	}
+    
+    
 }

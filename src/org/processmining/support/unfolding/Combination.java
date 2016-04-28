@@ -155,9 +155,9 @@ public class Combination
 				/* Se sono all'ultimo elemento della combinazione non ha senso aggiungere qualcosa a XOR */
 				if(i != elements.length-1)
 				{
-					for(int j = 0; j < nodeXOR.size(); j++)
-						if(!XOR.contains(nodeXOR.get(j)))
-							XOR.add(nodeXOR.get(j));
+					for(Pair node : nodeXOR)
+						if(!XOR.contains(node))
+							XOR.add(node);
 				}
 			}
 		}
@@ -181,4 +181,11 @@ public class Combination
 				return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "Combination " + Arrays.toString(elements);
+	}
+	
+	
 }

@@ -1,4 +1,4 @@
-<project name="GettingStarted" default="Compile Sources" basedir=".">
+<project name="PetrinetUnfolding" default="Compile Sources" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 		<!-- set global properties for this build -->
 		<property environment="env" />
 		<property name="src" location="src" />
@@ -8,10 +8,18 @@
 		<property name="dist" location="dist" />
 		<property name="release" location="latestrelease" />
 		<property name="version" value="6.1.${env.BUILD_NUMBER}" />
-		<property name="project" value="GettingStarted" />
+		<property name="project" value="PetrinetUnfolding" />
+
+		<property name="author" value="BCS" />
+		<property name="organization" value="University of Pisa" />
+		<property name="description" value="BPMN and PetrinetUnfolding" />
+		<property name="license" value="L-GPL" />
+		<property name="logo" value="http://www.promtools.org/prom6/packages/prom_subtitle_hat_300.png" />
 
 		<!-- Set the os to win32, win64, lin32, lin64, mac, or all -->
 		<property name="os" value="all" />
+	
+		<property name="ivy.lib.dir" value="ivy" />
 
 		<!-- Compilation macro
 		 This Macro compiles the sources is one ${src}-... folder.
@@ -22,6 +30,7 @@
  			<pathelement path="${build}" />
  			<pathelement path="${java.class.path}" />
  			<fileset dir=".">
+ 				<include name="ivy/**/*.jar" />
  				<include name="lib/**/*.jar" />
  				<include name="stdlib/**/*.jar" />
  				<include name="packagelib/**/*.jar" />
@@ -31,7 +40,7 @@
 		<macrodef name="compile">
 			<sequential>
 				<!-- Compile the java code from ${src}-@{module} into ${build} -->
-				<javac srcdir="${src}" classpathref="classpath" destdir="${build}" nowarn="false" verbose="no" debug="true" debuglevel="lines,vars,source" deprecation="yes" source="1.6" target="1.6">
+				<javac srcdir="${src}" classpathref="classpath" destdir="${build}" nowarn="false" verbose="no" debug="true" debuglevel="lines,vars,source" deprecation="yes" source="1.7" target="1.7">
 					<!-- Check for unsafe operations -->
 					<compilerarg value="-Xlint:unchecked" />
 				</javac>
@@ -115,33 +124,28 @@
 				<copy todir="${release}/lib" overwrite="true">
 					<fileset dir="${lib}"/>
 				</copy>
-				<echoxml file="${release}/packages.xml">
-									<packages>
-										<package 
-											name="${project}" 
-											version="${version}" 
-											os="all" 
-											url="http://www.promtools.org/prom6/packages/${project}/${project}-${version}-${os}.zip"
-											desc="Petri nets"
-											org="Eindhoven University of Technology" 
-											license="LGPL" 
-											author="H.M.W. Verbeek"
-											auto="false"
-											hasPlugins="true"
-											logo="http://www.promtools.org/prom6/packages/prom_subtitle_hat_300.png"
-										>
-											<dependency name="ApacheUtils"/>
-											<dependency name="PetriNets"/>
-											<dependency name="BPMN"/>
-											<dependency name="BPMNConversions"/>
-											<dependency name="Widgets"/>
-										</package>
-									</packages>
-								</echoxml>
+				<exec executable="grep">
+												<redirector output="ivypack.xml" />
+												<arg value="&lt;dependency .*org=&quot;prom&quot; " />
+												<arg value="ivy.xml" />
+								</exec>
+								<echo file="${release}/packages.xml">
+													&lt;packages&gt;
+														&lt;package name="${project}" version="${version}" os="${os}" url="http://www.promtools.org/prom6/packages/${project}/${project}-${version}-${os}.zip" desc="${description}" org="${organization}" license="${license}" author="${author}" auto="false" hasPlugins="true" logo="${logo}"&gt;
+												</echo>
+											<concat destfile="${release}/packages.xml" append="true">
+												<filelist files="ivypack.xml" />
+											</concat>
+											<echo file="${release}/packages.xml" append="true">
+														&lt;/package&gt;
+													&lt;/packages&gt;
+												</echo>
+											<copy file="ivy.xml" tofile="${release}/ivy.xml" overwrite="true" />
+											<replace file="${release}/ivy.xml" token="VERSION" value="${version}" />
 			</sequential>
 		</target>
 
-		<target name="Compile Sources">
+		<target name="Compile Sources" depends="resolve">
 			<!-- Create the build directory structure used by compile -->
 			<!-- Create the time stamp -->
 			<tstamp />
@@ -152,7 +156,14 @@
 			<echo message="Making jar" />
 			<makejar />
 		</target>
-
+	<target name="resolve">
+				<ivy:retrieve />
+				<!--copy todir="lib" overwrite="true">
+					<fileset dir="ivy">
+						<include name="xxx.jar" />
+					</fileset>
+				</copy-->
+			</target>
 
 	</project>
 

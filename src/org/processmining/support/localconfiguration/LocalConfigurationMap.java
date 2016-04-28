@@ -1,5 +1,6 @@
 package org.processmining.support.localconfiguration;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
@@ -27,4 +28,15 @@ public class LocalConfigurationMap extends HashMap<PetrinetNode, LocalConfigurat
 		localConfiguration.set(N, pn);
 		put(pn, localConfiguration);
 	}
+
+	@Override
+	public String toString() {
+		String stringa = "";
+		for(PetrinetNode key: this.keySet()){
+			stringa += key + "-" + this.get(key);
+		}
+		return stringa;
+	}
+	
+	
 }
