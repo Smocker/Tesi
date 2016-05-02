@@ -11,5 +11,7 @@
 	<classpathentry kind="lib" path="stdlib/ProM-Framework.jar"/>
 	<classpathentry kind="lib" path="stdlib/ProM-Models.jar"/>
 	<classpathentry kind="lib" path="stdlib/ProM-Plugins.jar"/>
+	<classpathentry kind="lib" path="stdlib/Uitopia.jar"/>
+	<classpathentry kind="lib" path="stdlib/UITopiaResources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
