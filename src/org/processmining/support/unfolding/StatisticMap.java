@@ -11,6 +11,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
 
 /**
  * Map contenente le statistiche della rete di unfolding
