@@ -3,10 +3,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" output="tests/bin-test" path="tests/src-test"/>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=PetrinetUnfolding&amp;ivyXmlPath=ivy.xml&amp;confs=*&amp;ivySettingsPath=ivysettings.xml&amp;loadSettingsOnDemand=false&amp;ivyUserDir=&amp;propertyFiles="/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/slickerbox1.0rc1.jar"/>
-	<classpathentry kind="lib" path="lib/TableLayout-20050920.jar"/>
 	<classpathentry kind="lib" path="stdlib/ProM-Contexts.jar"/>
 	<classpathentry kind="lib" path="stdlib/ProM-Framework.jar"/>
 	<classpathentry kind="lib" path="stdlib/ProM-Models.jar"/>
@@ -62,5 +60,6 @@
 	<classpathentry kind="lib" path="stdlib/slickerbox1.0rc1.jar"/>
 	<classpathentry kind="lib" path="stdlib/Spex.jar"/>
 	<classpathentry kind="lib" path="stdlib/weka.jar"/>
+	<classpathentry kind="lib" path="TableLayout-20050920.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,8 +3,10 @@ package org.processmining.support.unfolding;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.processmining.models.graphbased.AttributeMap;
+import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
@@ -31,6 +33,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private int nArcs = 0, nPlaces = 0, nTransitions = 0;
 	private boolean isSound, isWeakSound;
 	private double startTime = System.currentTimeMillis(), time = 0;
+	private Map<PetrinetNode,BPMNNode> reverseMap = new HashMap<PetrinetNode,BPMNNode>();
 
 	/**
 	 * Costruttore
@@ -41,6 +44,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		put(CUTOFF_UNBOUNDED, new ArrayList <Transition> ());
 		put(DEADLOCK, new ArrayList <Transition> ());
 		put(DEAD, new ArrayList <Transition> ());
+		reverseMap = BPMN2WorkflowSystemConverter.getReverseMap();
 	}
 	
 	/**

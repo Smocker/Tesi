@@ -32,23 +32,27 @@ public class InfoConversionBP2PN {
 	 */
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
 	
-	
+	/*Maps Petri net node to BPMN node*/
+	private Map<PetrinetNode,BPMNNode> reverseMap = new HashMap<PetrinetNode,BPMNNode>();
+		
 	public InfoConversionBP2PN(Map<NodeID, ArrayList<Place>> startEventMap,
 			Map<NodeID, ArrayList<Place>> endEventMap,
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
-			Map<BPMNNode, Set<PetrinetNode>> nodeMap) {
+			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNode,BPMNNode> reverseMap) {
 		super();
 		this.startEventMap = startEventMap;
 		this.endEventMap = endEventMap;
 		this.flowMap = flowMap;
 		this.nodeMap = nodeMap;
+		this.reverseMap = reverseMap;
 	}
 	public InfoConversionBP2PN(
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
-			Map<BPMNNode, Set<PetrinetNode>> nodeMap) {
+			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNode,BPMNNode> reverseMap) {
 		super();
 		this.flowMap = flowMap;
 		this.nodeMap = nodeMap;
+		this.reverseMap = reverseMap;
 	}
 	public Map<NodeID, ArrayList<Place>> getStartEventMap() {
 		return startEventMap;
@@ -62,8 +66,10 @@ public class InfoConversionBP2PN {
 	public Map<BPMNNode, Set<PetrinetNode>> getNodeMap() {
 		return nodeMap;
 	}
-	
-	
+
+	public Map<PetrinetNode,BPMNNode> getReverseMap() {
+		return reverseMap;
+	}
 	
 
 }
