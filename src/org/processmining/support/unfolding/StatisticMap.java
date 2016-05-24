@@ -17,6 +17,7 @@ package org.processmining.support.unfolding;
 	/**
 	 * Map contenente le statistiche della rete di unfolding
 	 * 
+	 * @author Daniele Cicciarella and Francesco Boscia
 	 */
 
 	public class StatisticMap extends HashMap<String, ArrayList <Transition>>
