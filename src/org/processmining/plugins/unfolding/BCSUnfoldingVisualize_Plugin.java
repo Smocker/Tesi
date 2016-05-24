@@ -51,7 +51,7 @@ public class BCSUnfoldingVisualize_Plugin
 	private BPMNDiagram bpmn= null;
 	private Petrinet unfolding = null;
 	private JPanel panel;
-	@Plugin
+	/*@Plugin
 	(
 			name = "Visualize BCS Unfolding Statistics", 
 			returnLabels = { "Visualize BCS Unfolding Statistics" }, 
@@ -66,7 +66,7 @@ public class BCSUnfoldingVisualize_Plugin
 			author = "Daniele Cicciarella", 
 			email = "cicciarellad@gmail.com"
 			)
-	@Visualizer
+	@Visualizer*/
 	public JComponent runUI(UIPluginContext context, StatisticMap output) 
 	{
 		panel = new JPanel();

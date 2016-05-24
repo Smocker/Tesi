@@ -214,7 +214,7 @@ public class TabTraceUnfodingPanel extends JPanel implements MouseListener, Mous
 
 				Component cell = super.getTableCellRendererComponent (table, value, isSelected, hasFocus, row, column);
 				//this.scrollRectToVisible(getBounds());
-				 setToolTipText(table.getValueAt(row, column).toString());
+				// setToolTipText(table.getValueAt(row, column).toString());
 				ArrayList<Transition> cuttoff = statistiunf.getCutoffUnbounded();
 				ArrayList<Transition> deadlock = statistiunf.getDeadlock();
 				boolean flag = search(historyPN.get(row), cuttoff);
