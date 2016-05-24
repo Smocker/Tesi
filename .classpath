@@ -60,6 +60,6 @@
 	<classpathentry kind="lib" path="stdlib/slickerbox1.0rc1.jar"/>
 	<classpathentry kind="lib" path="stdlib/Spex.jar"/>
 	<classpathentry kind="lib" path="stdlib/weka.jar"/>
-	<classpathentry kind="lib" path="TableLayout-20050920.jar"/>
+	<classpathentry kind="lib" path="lib/TableLayout-20050920.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
