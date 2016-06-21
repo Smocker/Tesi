@@ -1,0 +1,31 @@
+print("Starting example script  PN...");
+String pnFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
+
+
+File folder = new File(pnFileRoot);
+File[] listOfFiles = folder.listFiles();
+
+for (File file : listOfFiles) {
+	if (file.isFile()) {
+		String ext = file.getName().substring(file.getName().lastIndexOf('.'));
+		if(ext.equals(".pnml")){
+			
+			print("--------******-----------");
+			// Carico il modello PNML
+			pn = import_petri_net_from_pnml_file(pnFileRoot + "/" + file.getName());
+
+			
+			result = bcs_petri_net_to_unfolding_net(pn);
+			print(file.getName());
+			//stampo statistiche
+			
+			message = "T/P: "+ pn.getTransitions().size()+"/"+ pn.getPlaces().size();
+			print(message);
+			message = "T/P: "+ result[1].getTransitions().size()+"/"+ result[1].getPlaces().size();
+			print(message);
+			//stampo risultato unfoldings
+			print(result[0]);
+			print("--------******-----------");
+		}
+	}
+}
