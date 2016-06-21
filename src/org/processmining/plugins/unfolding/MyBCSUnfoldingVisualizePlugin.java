@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.JComponent;
@@ -34,6 +35,8 @@ import org.processmining.support.unfolding.StatisticMap;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
+import javassist.bytecode.Descriptor.Iterator;
+
 
 public class MyBCSUnfoldingVisualizePlugin {
 
@@ -45,7 +48,8 @@ public class MyBCSUnfoldingVisualizePlugin {
 	private Petrinet unfolding = null;
 	private JPanel panel;
 	private Map<PetrinetNode,BPMNNode> reverseMap;
-
+//	class summary = new int[4];
+	
 	@Plugin
 	(
 			name = "Updated Visualization BCS Unfolding Statistics", 
@@ -143,13 +147,46 @@ public class MyBCSUnfoldingVisualizePlugin {
  * @return BPMNNode
  */
 	public BPMNNode getBPMNNodeFromReverseMap(PetrinetNode pn){
-		return reverseMap.get(pn);
+		BPMNNode nod = null;
+		for (PetrinetNode element : reverseMap.keySet()) {
+			if (confrontoPetrinetNode(element,pn)) 
+			{
+				System.out.println("ReverseMap contiene pn"); 
+				nod = reverseMap.get(element);
+				break;
+			}
+			else System.out.println("Elementi Diversi");
+		}
+		
+		
+	/*	java.util.Iterator<Entry<PetrinetNode, BPMNNode>> it = reverseMap.entrySet().iterator();
+		while(it.hasNext()){
+			Map.Entry<PetrinetNode,BPMNNode> entry = it.next();
+			if (confrontoPetrinetNode(entry.getKey(),pn)) 
+				{
+					System.out.println("ReverseMap contiene pn"); 
+					nod = entry.getValue();
+				}
+			else System.out.println("Elementi Diversi");
+		}	*/
+		return nod;
+	}
+	
+	private boolean confrontoPetrinetNode(PetrinetNode petrinetNode, PetrinetNode pn){
+		if ((petrinetNode.getLabel()).equals(pn.getLabel())) return true;
+		return false;
+	}
+	
+	private boolean confrontoBPMNnode(BPMNNode bpmnNode, BPMNNode bn){
+		if ((bpmnNode.getLabel()).equals(bn.getLabel())) return true;
+			return false;
 	}
 	
 	private BPMNNode getNodeinClone(BPMNDiagram bpmn,BPMNNode node){
-		for(BPMNNode nodeclone: bpmn.getNodes()){
+		Set<BPMNNode> elenco = bpmn.getNodes();
+		for(BPMNNode nodeclone: elenco){
 			if(nodeclone.getLabel()!=null)
-				if(nodeclone.getLabel().equals(node.getLabel())){
+				if(confrontoBPMNnode(nodeclone,node)){
 					return nodeclone;
 			}
 		}
@@ -158,35 +195,28 @@ public class MyBCSUnfoldingVisualizePlugin {
 
 	
 	BPMNNode getNodefromCopia(BPMNDiagram copia, BPMNNode bpmnnode){
-	
 	return bpmnnode;
 	}
 	
 private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map) {
 		//Clono il BPMN diagram
 		BPMNDiagram bpmncopia = BPMNDiagramFactory.cloneBPMNDiagram(bpmnoriginal);
-		
+		 
 		for( Transition t: map.getCutoff()){
+			//prendo l'elenco dei BPMN corrispondenti ai cutoff (corrispondenza 1 a 1?)
 			BPMNNode bpnode = getBPMNNodeFromReverseMap(t);
-			if(bpnode!=null){
-				Set<BPMNNode> E = bpmncopia.getNodes();
-				for (BPMNNode d:E){
-					if (d.equals(bpnode)){
-						d.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
-					}
-				}
-			}
+			if (bpnode != null){
+			getNodeinClone(bpmncopia,bpnode).getAttributeMap().put(AttributeMap.STROKECOLOR, Color.BLUE);}
+			else System.out.println("vuoto");
+			
 		}
 		for( Transition t: map.getDeadlock()){
 			BPMNNode bpnode = getBPMNNodeFromReverseMap(t);
-			if(bpnode!=null){
-				Set<BPMNNode> E = bpmncopia.getNodes();
-				for (BPMNNode d:E){
-					if (d.equals(bpnode)){
-						d.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
-					}
-				}
-			}
+			if (bpnode != null){
+				getNodeinClone(bpmncopia,bpnode).getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);}
+				else System.out.println("vuoto");
+				
+			
 		}
 
 		for( Transition t: map.getCutoffUnbounded()){
@@ -195,14 +225,14 @@ private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map) {
 				Set<BPMNNode> E = bpmncopia.getNodes();
 				for (BPMNNode d:E){
 					if (d.equals(bpnode)){
-						d.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.YELLOW);
+						d.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.BLUE);
 					}
 				}
 			}
 		}
 
 
-		return bpmn;
+		return bpmncopia;
 	
 }
 }
