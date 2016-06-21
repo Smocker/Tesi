@@ -47,7 +47,7 @@ public class MyBCSUnfoldingVisualizePlugin {
 	private BPMNDiagram bpmn= null;
 	private Petrinet unfolding = null;
 	private JPanel panel;
-	private Map<PetrinetNode,BPMNNode> reverseMap;
+	private Map<PetrinetNodeMod,BPMNNode> reverseMap;
 //	class summary = new int[4];
 	
 	@Plugin
@@ -148,7 +148,17 @@ public class MyBCSUnfoldingVisualizePlugin {
  */
 	public BPMNNode getBPMNNodeFromReverseMap(PetrinetNode pn){
 		BPMNNode nod = null;
-		for (PetrinetNode element : reverseMap.keySet()) {
+		PetrinetNodeMod pnm = new PetrinetNodeMod(pn);
+		if(reverseMap.containsKey(pnm)){
+			
+				System.out.println("ReverseMap contiene pn"); 
+				nod = reverseMap.get(pnm);
+				
+			
+			
+		}
+		
+		/*for (PetrinetNode element : reverseMap.keySet()) {
 			if (confrontoPetrinetNode(element,pn)) 
 			{
 				System.out.println("ReverseMap contiene pn"); 
@@ -156,7 +166,7 @@ public class MyBCSUnfoldingVisualizePlugin {
 				break;
 			}
 			else System.out.println("Elementi Diversi");
-		}
+		}*/
 		
 		
 	/*	java.util.Iterator<Entry<PetrinetNode, BPMNNode>> it = reverseMap.entrySet().iterator();

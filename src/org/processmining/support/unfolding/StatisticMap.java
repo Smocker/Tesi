@@ -13,6 +13,7 @@ package org.processmining.support.unfolding;
 	import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 	import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 	import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
+import org.processmining.plugins.unfolding.PetrinetNodeMod;
 
 	/**
 	 * Map contenente le statistiche della rete di unfolding
@@ -36,7 +37,7 @@ package org.processmining.support.unfolding;
 		private int nArcs = 0, nPlaces = 0, nTransitions = 0;
 		private boolean isSound, isWeakSound;
 		private double startTime = System.currentTimeMillis(), time = 0;
-		private Map<PetrinetNode,BPMNNode> reverseMap = new HashMap<PetrinetNode,BPMNNode>();
+		private Map<PetrinetNodeMod,BPMNNode> reverseMap = new HashMap<PetrinetNodeMod,BPMNNode>();
 
 		/**
 		 * Costruttore
@@ -53,7 +54,7 @@ package org.processmining.support.unfolding;
 		 * Ritorna la reverseMap
 		 * 
 		 */
-		public Map<PetrinetNode,BPMNNode> getReverseMap(){
+		public Map<PetrinetNodeMod,BPMNNode> getReverseMap(){
 			return reverseMap;
 		}
 		

@@ -30,6 +30,7 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
 import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.plugins.unfolding.PetrinetNodeMod;
 
 /**
  * Convert a model BPMN in a Worflow System
@@ -61,7 +62,7 @@ public class BPMN2WorkflowSystemConverter
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
 	
 	/*Maps Petri net node to BPMN node*/
-	private static Map<PetrinetNode,BPMNNode> reverseMap = new HashMap<PetrinetNode,BPMNNode>();
+	private static Map<PetrinetNodeMod,BPMNNode> reverseMap = new HashMap<PetrinetNodeMod,BPMNNode>();
 	
 	public BPMN2WorkflowSystemConverter(BPMNDiagram bpmn) 
 	{
@@ -148,7 +149,7 @@ public class BPMN2WorkflowSystemConverter
 	{
 		Place p = net.addPlace("p_start_" + e.getLabel());
 		Transition t = net.addTransition("t_start_"+e.getLabel());
-		reverseMap.put(t, e);
+		reverseMap.put(new PetrinetNodeMod(t), e);
 		net.addArc(p, t);
 		
 		/* Save each pool its input */
@@ -190,7 +191,7 @@ public class BPMN2WorkflowSystemConverter
 	private void translateEndEvent(Event e) {
 		Place p = net.addPlace("p_end_"+e.getLabel());
 		Transition t = net.addTransition("t_end_"+e.getLabel());
-		reverseMap.put(t, e);
+		reverseMap.put(new PetrinetNodeMod(t), e);
 		net.addArc(t, p);
 
 		/* Save each pool its output */
@@ -294,7 +295,7 @@ public class BPMN2WorkflowSystemConverter
 		Transition t_end = null;
 		Place p_ready = null;
 		Place p_finished = null;
-		reverseMap.put(t_act, a);
+		reverseMap.put(new PetrinetNodeMod(t_act), a);
 		// Create atomic or structured activity
 		boolean model_structured = !translateActivityAtomic(a);
 		if (model_structured) 
@@ -303,8 +304,8 @@ public class BPMN2WorkflowSystemConverter
 			t_end = net.addTransition("t_act_"+a.getLabel()+"_complete");
 			p_ready = net.addPlace("p_act_"+a.getLabel()+"_ready");
 			p_finished = net.addPlace("p_act_"+a.getLabel()+"_finished");
-			reverseMap.put(t_start, a);
-			reverseMap.put(t_end, a);
+			reverseMap.put(new PetrinetNodeMod(t_start), a);
+			reverseMap.put(new PetrinetNodeMod(t_end), a);
 			// Connect start/end with activity
 			net.addArc(t_start, p_ready);
 			net.addArc(p_ready, t_act);
@@ -488,7 +489,7 @@ public class BPMN2WorkflowSystemConverter
 			{
 				BPMNNode target = f.getTarget();
 				Place p = flowMap.get(f);
-				reverseMap.put(p, g);
+				reverseMap.put(new PetrinetNodeMod(p), g);
 				for(PetrinetEdge<?,?> outnet : p.getGraph().getOutEdges(p)){
 					PetrinetNode targetT = outnet.getTarget();
 					net.addArc(src, (Transition)targetT);
@@ -509,7 +510,7 @@ public class BPMN2WorkflowSystemConverter
 				if (f instanceof Flow) 
 				{
 					Transition t = net.addTransition(f.getSource().getLabel()+"_merge_"+g.getLabel());
-					reverseMap.put(t, g);
+					reverseMap.put(new PetrinetNodeMod(t), g);
 					net.addArc(t, p);
 					net.addArc(flowMap.get(f), t);
 					nodeMap.get(g).add(t);
@@ -522,7 +523,7 @@ public class BPMN2WorkflowSystemConverter
 				if (f instanceof Flow) 
 				{
 					Transition t = net.addTransition(f.getTarget().getLabel()+"_split_"+g.getLabel());
-					reverseMap.put(t, g);
+					reverseMap.put(new PetrinetNodeMod(t), g);
 					net.addArc(p, t);
 					net.addArc(t, flowMap.get(f));
 					nodeMap.get(g).add(t);
@@ -539,7 +540,7 @@ public class BPMN2WorkflowSystemConverter
 	private void translateANDGateway(Gateway g) 
 	{
 		Transition t = net.addTransition("g_and_"+g.getLabel());
-		reverseMap.put(t, g);
+		reverseMap.put(new PetrinetNodeMod(t), g);
 		setNodeMapFor(nodeMap, g, t);
 
 		// Connect transition to place of incoming edge
@@ -616,7 +617,7 @@ public class BPMN2WorkflowSystemConverter
 
 				// Create transition for this subset and connect it to the post-places in the subset
 				Transition t = net.addTransition("g_ior_join_"+g.getLabel()+"_"+i);
-				reverseMap.put(t, g);
+				reverseMap.put(new PetrinetNodeMod(t), g);
 				nodeSet.add(t);
 				for (Place p_in : p_subset) 
 				{
@@ -669,7 +670,7 @@ public class BPMN2WorkflowSystemConverter
 				// Create transition for this subset and connect it to the post-places in the subset
 				Transition t = net.addTransition("g_ior_split_"+g.getLabel()+"_"+i);
 				nodeSet.add(t);
-				reverseMap.put(t, g);
+				reverseMap.put(new PetrinetNodeMod(t), g);
 				for (Place p_out : p_subset) 
 				{
 					net.addArc(t, p_out);
@@ -788,7 +789,7 @@ public class BPMN2WorkflowSystemConverter
 		return errors;
 	}
 
-	public 	static Map<PetrinetNode,BPMNNode> getReverseMap(){
+	public 	static Map<PetrinetNodeMod,BPMNNode> getReverseMap(){
 		return reverseMap;
 	}
 	

@@ -10,6 +10,7 @@ import org.processmining.models.graphbased.directed.bpmn.BPMNEdge;
 import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
+import org.processmining.plugins.unfolding.PetrinetNodeMod;
 
 public class InfoConversionBP2PN {
 	
@@ -33,12 +34,12 @@ public class InfoConversionBP2PN {
 	private Map<BPMNNode, Set<PetrinetNode>> nodeMap = new HashMap<BPMNNode, Set<PetrinetNode>>();
 	
 	/*Maps Petri net node to BPMN node*/
-	private Map<PetrinetNode,BPMNNode> reverseMap = new HashMap<PetrinetNode,BPMNNode>();
+	private Map<PetrinetNodeMod,BPMNNode> reverseMap = new HashMap<PetrinetNodeMod,BPMNNode>();
 		
 	public InfoConversionBP2PN(Map<NodeID, ArrayList<Place>> startEventMap,
 			Map<NodeID, ArrayList<Place>> endEventMap,
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
-			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNode,BPMNNode> reverseMap) {
+			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNodeMod,BPMNNode> reverseMap) {
 		super();
 		this.startEventMap = startEventMap;
 		this.endEventMap = endEventMap;
@@ -48,7 +49,7 @@ public class InfoConversionBP2PN {
 	}
 	public InfoConversionBP2PN(
 			Map<BPMNEdge<BPMNNode, BPMNNode>, Place> flowMap,
-			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNode,BPMNNode> reverseMap) {
+			Map<BPMNNode, Set<PetrinetNode>> nodeMap,Map<PetrinetNodeMod,BPMNNode> reverseMap) {
 		super();
 		this.flowMap = flowMap;
 		this.nodeMap = nodeMap;
@@ -67,7 +68,7 @@ public class InfoConversionBP2PN {
 		return nodeMap;
 	}
 
-	public Map<PetrinetNode,BPMNNode> getReverseMap() {
+	public Map<PetrinetNodeMod,BPMNNode> getReverseMap() {
 		return reverseMap;
 	}
 	

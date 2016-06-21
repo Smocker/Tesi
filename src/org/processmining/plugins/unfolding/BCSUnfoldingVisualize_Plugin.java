@@ -15,9 +15,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
-import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
-import org.processmining.contexts.uitopia.annotations.Visualizer;
-import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
@@ -199,16 +196,6 @@ public class BCSUnfoldingVisualize_Plugin
 			}
 
 		}
-
-		//activity.getAttributeMap().put(AttributeMap.STROKECOLOR, Color.RED);
-		//String label = "<html>"+ unsoundallert + "<html>";
-
-		//f.getAttributeMap().remove(AttributeMap.TOOLTIP);
-
-		//f.getAttributeMap().put(AttributeMap.TOOLTIP, flowerr);
-		//f.getAttributeMap().remove(AttributeMap.SHOWLABEL);
-		//f.getAttributeMap().put(AttributeMap.SHOWLABEL, true);
-		//f.getAttributeMap().put(AttributeMap.EDGECOLOR, Color.RED);
 
 		return bpmn;
 	}
