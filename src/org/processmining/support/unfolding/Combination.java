@@ -2,7 +2,9 @@ package org.processmining.support.unfolding;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
@@ -16,14 +18,14 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class Combination
 {
-	private PetrinetNode[] elements;
+	private List<PetrinetNode> elements;
 	
 	/**
 	 * Costruttore
 	 */
 	public Combination()
 	{
-		elements = new PetrinetNode[0];
+		elements = new ArrayList<PetrinetNode>();
 	}
 
 	/**
@@ -33,7 +35,7 @@ public class Combination
 	 */
 	public Combination(int length)
 	{
-		elements = new PetrinetNode[length];
+		elements =  new ArrayList<PetrinetNode>(length);
 	}
 	
 	/**
@@ -41,7 +43,7 @@ public class Combination
 	 * 
 	 * @return la combinazione
 	 */
-	public PetrinetNode[] getElements()
+	public List<PetrinetNode> getElements()
 	{
 		return elements;
 	}
@@ -51,7 +53,7 @@ public class Combination
 	 * 
 	 * @param elements la combinazione
 	 */
-	public void setElements(PetrinetNode[] elements) 
+	public void setElements(List<PetrinetNode> elements) 
 	{
 		this.elements = elements;
 	}
@@ -64,12 +66,12 @@ public class Combination
 	 */
 	public Combination add(PetrinetNode pn)
 	{
-		Combination tupla = new Combination(elements.length+1);
-		for(int j = 0; j < elements.length; ++j) 
+		Combination tupla = new Combination(elements.size()+1);
+		for(int j = 0; j < elements.size(); ++j) 
 		{
-			tupla.elements[j] = elements[j];
+			tupla.elements.add(elements.get(j));
 		}		
-		tupla.elements[elements.length] = pn;
+		tupla.elements.add(pn);
 		return tupla;
 	}
 	
@@ -144,9 +146,9 @@ public class Combination
 	{
 		ArrayList <Pair> XOR = new ArrayList <Pair> (), nodeXOR = null;
 		
-		for(int i = 0; i < elements.length; i++)
+		for(int i = 0; i < elements.size(); i++)
 		{
-			nodeXOR = Utility.getHistoryXOR(N1, elements[i], N1.getArc(elements[i], t));
+			nodeXOR = Utility.getHistoryXOR(N1, elements.get(i), N1.getArc(elements.get(i), t));
 			if(!nodeXOR.isEmpty())
 			{
 				/* Se due piazze condividono lo stesso xor ma provengono da percorsi diversi è un conflitto */
@@ -154,7 +156,7 @@ public class Combination
 					return true;
 
 				/* Se sono all'ultimo elemento della combinazione non ha senso aggiungere qualcosa a XOR */
-				if(i != elements.length-1)
+				if(i != elements.size()-1)
 				{
 					for(Pair node : nodeXOR)
 						if(!XOR.contains(node))
@@ -175,17 +177,18 @@ public class Combination
 	{
 		/* Ordino gli array */
 		Arrays.sort(preset);
-		Arrays.sort(elements);
+		//Arrays.sort(elements);
+		Collections.sort(elements);
 		
-		for(int i = 0; i < elements.length; i++)
-			if(!preset[i].equals(elements[i]))
+		for(int i = 0; i < elements.size(); i++)
+			if(!preset[i].equals(elements.get(i)))
 				return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Combination " + Arrays.toString(elements);
+		return "Combination " + (elements);
 	}
 	
 	

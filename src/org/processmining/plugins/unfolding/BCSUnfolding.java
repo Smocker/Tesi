@@ -218,8 +218,8 @@ public class BCSUnfolding
 						/* Aggiungo t2 all'unfolding il quale sarà collagato con le piazze che lo abilitano */
 						Transition t3 = unfolding.addTransition(t2.getLabel());
 						t3.getAttributeMap().put("Original id",id);		
-						for(int i = 0; i < comb.getElements().length; i++)
-							unfolding.addArc((Place) comb.getElements()[i], t3);
+						for(int i = 0; i < comb.getElements().size(); i++)
+							unfolding.addArc((Place) comb.getElements().get(i), t3);
 
 						// Verifico se l'inserimento di t3 provaca conflitto in tal caso la elimino
 						if(comb.isConflict(unfolding, t3))
