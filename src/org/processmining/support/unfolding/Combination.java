@@ -81,7 +81,7 @@ public class Combination
 	 * @param places le piazze da cui creare tutte le combinazioni
 	 * @return la lista delle combinazioni
 	 */
-	public static ArrayList<Combination> create(ArrayList<ArrayList<PetrinetNode>> places, ArrayList <Combination> combination)
+	public static List<Combination> create(List<List<PetrinetNode>> places, List <Combination> combination)
 	{
 		rec(0, new Combination(), places, combination);
 		return combination;
@@ -95,7 +95,7 @@ public class Combination
 	 * @param places le piazze da aggiungere
 	 * @param combination le combinazioni parziali
 	 */
-	private static void rec(int step, Combination comb, ArrayList<ArrayList<PetrinetNode>> places, ArrayList<Combination> combination) 
+	private static void rec(int step, Combination comb, List<List<PetrinetNode>> places, List<Combination> combination) 
 	{
 		int size = places.get(step).size();
 		for (int i = 0; i < size; ++i) 
@@ -118,7 +118,7 @@ public class Combination
 	 */
 	public static void filter(ArrayList<Combination> combination, Transition t, Map<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
 	{
-		PetrinetNode [] preset = null;
+		List<PetrinetNode> preset = null;
 		
 		/* Se non è contenuto allora t non è stato mai inserito */
 		if(L1.containsKey(t))
@@ -173,15 +173,16 @@ public class Combination
 	 * @param preset il preset della transizione da aggiungere nell'unfolding
 	 * @return true se la combinazione e' stata usata, false altrimenti
 	 */
-	private boolean isEquals(PetrinetNode[] preset)
+	private boolean isEquals(List<PetrinetNode> preset)
 	{
 		/* Ordino gli array */
-		Arrays.sort(preset);
+		//Arrays.sort(preset);
 		//Arrays.sort(elements);
+		Collections.sort(preset);
 		Collections.sort(elements);
 		
 		for(int i = 0; i < elements.size(); i++)
-			if(!preset[i].equals(elements.get(i)))
+			if(!preset.get(i).equals(elements.get(i)))
 				return false;
 		return true;
 	}

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.processmining.models.graphbased.AttributeMap;
@@ -57,14 +58,14 @@ public class Utility
 	 * @param pn nodo corrente
 	 * @return preset di pn
 	 */
-	public static PetrinetNode [] getPreset(Petrinet N, PetrinetNode pn)
+	public static List<PetrinetNode> getPreset(Petrinet N, PetrinetNode pn)
 	{
 		int i = 0;
-		PetrinetNode [] preset = new PetrinetNode [N.getGraph().getInEdges(pn).size()];
+		List<PetrinetNode> preset = new ArrayList<PetrinetNode> (N.getGraph().getInEdges(pn).size());
 		
 		for(DirectedGraphEdge<?, ?> a : N.getGraph().getInEdges(pn))
 		{
-			preset[i] = (PetrinetNode) a.getSource();
+			preset.add((PetrinetNode) a.getSource());
 			i = i + 1;
 		}
 		return preset;
@@ -77,14 +78,14 @@ public class Utility
 	 * @param pn nodo corrente
 	 * @return postset di pn
 	 */
-	public static PetrinetNode [] getPostset(Petrinet N, PetrinetNode pn)
+	public static List<PetrinetNode> getPostset(Petrinet N, PetrinetNode pn)
 	{
 		int i = 0;
-		PetrinetNode [] postset = new PetrinetNode [N.getGraph().getOutEdges(pn).size()];
+		List<PetrinetNode>  postset = new ArrayList<PetrinetNode>(N.getGraph().getOutEdges(pn).size());
 		
 		for(DirectedGraphEdge<?, ?> a : N.getGraph().getOutEdges(pn))
 		{
-			postset[i] = (PetrinetNode) a.getTarget();
+			postset.add((PetrinetNode) a.getTarget());
 			i = i + 1;
 		}
 		return postset;
@@ -98,13 +99,13 @@ public class Utility
 	 * @param L1 map da N a N'
 	 * @return preset di t se e' abilitata, null altrimenti
 	 */
-	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode pn, Map <PetrinetNode, ArrayList<PetrinetNode>> L1)
+	public static List<PetrinetNode> isEnabled(Petrinet N, PetrinetNode pn, Map <PetrinetNode, ArrayList<PetrinetNode>> L1)
 	{		
-		PetrinetNode [] preset = getPreset(N, pn); 
-		if(preset.length > 1) 
+		List<PetrinetNode> preset = getPreset(N, pn); 
+		if(preset.size() > 1) 
 		{
-			for(int i = 0; i < preset.length; i++)
-				if(!L1.containsKey(preset[i])) 
+			for(int i = 0; i < preset.size(); i++)
+				if(!L1.containsKey(preset.get(i))) 
 					return null;
 		}
 		return preset;
