@@ -150,7 +150,14 @@ public class BPMN2WorkflowSystemConverter
 		net.addArc(p, t);
 
 		/* Save each pool its input */
-		startEventMap.get(e.getParentPool().getId()).add(p);
+		if(e.getGraph().getInEdges(e).isEmpty()){
+			startEventMap.get(e.getParentPool().getId()).add(p);
+		}else{
+			startEventMap.remove(e.getParentPool().getId());
+			net.removeArc(p, t);
+			net.removePlace(p);
+
+		}
 
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(e)) 
@@ -191,7 +198,17 @@ public class BPMN2WorkflowSystemConverter
 		net.addArc(t, p);
 
 		/* Save each pool its output */
-		endEventMap.get(e.getParentPool().getId()).add(p);
+		//endEventMap.get(e.getParentPool().getId()).add(p);
+		
+		/* Save each pool its input */
+		if(e.getGraph().getInEdges(e).isEmpty()){
+			endEventMap.get(e.getParentPool().getId()).add(p);
+		}else{
+			endEventMap.remove(e.getParentPool().getId());
+			net.removeArc(p, t);
+			net.removePlace(p);
+
+		}
 
 		// Connect transition to place of outgoing edge
 		for (BPMNEdge<?, ?> f : bpmn.getOutEdges(e)) 
@@ -370,12 +387,25 @@ public class BPMN2WorkflowSystemConverter
 			nodeSet.add(t_act);
 		}
 
+		int i = 0;
 		// Connect transition to place of incoming edge
+		Place p=null;
 		for (BPMNEdge<?, ?> f : bpmn.getInEdges(a)) 
 		{
-			if (f instanceof Flow) 
-			{
-				net.addArc(flowMap.get(f), t_start);
+			
+			if (f instanceof Flow)
+			{	
+				if(i==0){
+					p= flowMap.get(f);
+					net.addArc(p, t_start);
+				}else{
+					if(p!=null){
+					 Transition	t = net.addTransition("merging");
+					 net.addArc(t, p);
+					 net.addArc(flowMap.get(f), t);
+					}
+				}
+				i++;
 			}
 			if (f instanceof MessageFlow) 
 			{
@@ -492,7 +522,7 @@ public class BPMN2WorkflowSystemConverter
 				net.removePlace(p);
 				flowMap.remove(f);
 				flowMap.put((Flow) f, src);
-				
+
 			}
 		}else{
 			Place p = net.addPlace("g_xor_"+g.getLabel());
@@ -695,6 +725,9 @@ public class BPMN2WorkflowSystemConverter
 			else if(startEventMap.get(nodeID).size() == 1)
 				input.add(startEventMap.get(nodeID).get(0));
 
+		}
+		for(NodeID nodeID : endEventMap.keySet()) 
+		{
 			/* OUTPUT. Create XOR-join */
 			if(endEventMap.get(nodeID).size() > 1) 
 			{
@@ -711,8 +744,8 @@ public class BPMN2WorkflowSystemConverter
 				output.add(endEventMap.get(nodeID).get(0));
 
 			pool++;
-		}
 
+		}
 		/* Create workflow system */
 		Place i = net.addPlace("i");
 		Place o = net.addPlace("o");
@@ -727,14 +760,14 @@ public class BPMN2WorkflowSystemConverter
 			net.addArc(ti, pi);
 		for (Place po : output)
 			net.addArc(po, to);
-		
-		
-			if(i!=null){
-				Marking marking =new Marking();
-				marking.add(i, 1);
-				context.addConnection(new InitialMarkingConnection(net, marking));
-			}
-		
+
+
+		if(i!=null){
+			Marking marking =new Marking();
+			marking.add(i, 1);
+			context.addConnection(new InitialMarkingConnection(net, marking));
+		}
+
 	}
 
 	/**
