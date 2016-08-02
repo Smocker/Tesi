@@ -27,6 +27,11 @@ public class UnfoldingInspectorPanel extends InspectorPanel {
 		inspector.addGroup(reset, header, component);
 		
 	}
-	
+	public void addExport(final String header, final JComponent component) {
+		Inspector inspector = this.getInspector();
+		JPanel export = inspector.addTab("Export");
+		inspector.addGroup(export, header, component);
+		
+	}
 
 }

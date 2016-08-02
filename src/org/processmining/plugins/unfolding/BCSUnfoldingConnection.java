@@ -34,14 +34,12 @@ public class BCSUnfoldingConnection extends AbstractStrongReferencingConnection
 		putStrong(UNFOLDING, unfolding);	
 	}
 	
-	public BCSUnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding, InfoConversionBP2PN info, BPMNDiagram bpmn) 
+	public BCSUnfoldingConnection(StatisticMap identificationMap, Petrinet petrinet, Petrinet unfolding, BPMNDiagram bpmn) 
 	{
 		super("UnfoldingConnection");
 		putStrong(IDENTIFICATION_MAP, identificationMap);
 		putStrong(PETRINET, petrinet);
 		putStrong(UNFOLDING, unfolding);
-		putStrong(BPMN, bpmn);
-		putStrong(InfoCBP2PN, info);
-		
+		putStrong(BPMN, bpmn);		
 	}
 }

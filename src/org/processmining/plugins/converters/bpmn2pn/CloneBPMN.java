@@ -1,13 +1,13 @@
 package org.processmining.plugins.converters.bpmn2pn;
 
 
-
 import java.util.HashMap;
+import java.util.Map;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.DirectedGraph;
 import org.processmining.models.graphbased.directed.DirectedGraphElement;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
-import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
+import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramImpl;
 import org.processmining.models.graphbased.directed.bpmn.BPMNEdge;
 import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.bpmn.elements.Activity;
@@ -21,16 +21,19 @@ import org.processmining.models.graphbased.directed.bpmn.elements.MessageFlow;
 import org.processmining.models.graphbased.directed.bpmn.elements.SubProcess;
 import org.processmining.models.graphbased.directed.bpmn.elements.Swimlane;
 
-public class CloneBPMN  {
+public class CloneBPMN extends  BPMNDiagramImpl {
 
-	private static HashMap<DirectedGraphElement, DirectedGraphElement> mapping = new HashMap<DirectedGraphElement, DirectedGraphElement>();
+	HashMap<DirectedGraphElement, DirectedGraphElement> mapping = new HashMap<DirectedGraphElement, DirectedGraphElement>();
 
+	public CloneBPMN(String label) {
+		super(label);
+	}
 	
-	
-	public static BPMNDiagram cloneFrom(
+	@Override
+	public Map<DirectedGraphElement, DirectedGraphElement> cloneFrom(
 			DirectedGraph<BPMNNode, BPMNEdge<? extends BPMNNode, ? extends BPMNNode>> graph) {
 		BPMNDiagram bpmndiagram = (BPMNDiagram) graph;
-		BPMNDiagram clonebpmndiagram = BPMNDiagramFactory.newBPMNDiagram("clone_"+bpmndiagram.getLabel());
+		
 		boolean newSwimlanes = true;
 		while (newSwimlanes) {
 			newSwimlanes = false;
@@ -42,10 +45,10 @@ public class CloneBPMN  {
 					Swimlane parentSwimlane = s.getParentSwimlane();
 					// If there is no parent or parent has been added, add swimlane
 					if (parentSwimlane == null) {
-						ss = clonebpmndiagram.addSwimlane(s.getLabel(), parentSwimlane, s.getSwimlaneType());
+						ss = addSwimlane(s.getLabel(), parentSwimlane, s.getSwimlaneType());
 						mapping.put(s, ss);
 					} else if (mapping.containsKey(parentSwimlane)) {
-						ss = clonebpmndiagram.addSwimlane(s.getLabel(), (Swimlane) mapping.get(parentSwimlane), 
+						ss = addSwimlane(s.getLabel(), (Swimlane) mapping.get(parentSwimlane), 
 								s.getSwimlaneType());
 						mapping.put(s,ss);
 					}
@@ -65,20 +68,20 @@ public class CloneBPMN  {
 					newSubprocesses = true;
 					if (s.getParentSubProcess() != null) {
 						if (mapping.containsKey(s.getParentSubProcess())) {
-							sb = clonebpmndiagram.addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
+							sb = addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
 									s.isBMultiinstance(), s.isBCollapsed(),
 									(SubProcess) mapping.get(s.getParentSubProcess()));
 									mapping.put(s,sb);							
 						}
 					} else if (s.getParentSwimlane() != null) {
 						if (mapping.containsKey(s.getParentSwimlane())) {
-							sb  = clonebpmndiagram.addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
+							sb  = addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
 									s.isBMultiinstance(), s.isBCollapsed(),
 									(Swimlane) mapping.get(s.getParentSwimlane()));
 							mapping.put(s,sb);
 						}
 					} else{
-						sb = clonebpmndiagram.addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
+						sb = addSubProcess(s.getLabel(), s.isBLooped(), s.isBAdhoc(), s.isBCompensation(),
 								s.isBMultiinstance(), s.isBCollapsed());
 						mapping.put(s,sb);}
 				sb.getAttributeMap().put("Original id", s.getAttributeMap().get("Original id"));
@@ -90,7 +93,7 @@ public class CloneBPMN  {
 			Activity aa = null; 
 			if (a.getParentSubProcess() != null) {
 				if (mapping.containsKey(a.getParentSubProcess())) {
-				aa= 	clonebpmndiagram.addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+				aa= 	addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
 						a.isBMultiinstance(), a.isBCollapsed(),
 						(SubProcess) mapping.get(a.getParentSubProcess()));
 						mapping.put(
@@ -99,7 +102,7 @@ public class CloneBPMN  {
 				}
 			} else if (a.getParentSwimlane() != null) {
 				if (mapping.containsKey(a.getParentSwimlane())) {
-					aa= 	clonebpmndiagram.addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+					aa= 	addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
 									a.isBMultiinstance(), a.isBCollapsed(),
 									(Swimlane) mapping.get(a.getParentSwimlane()));
 					mapping.put(
@@ -107,7 +110,7 @@ public class CloneBPMN  {
 							aa);
 				}
 			} else{
-				aa= clonebpmndiagram.addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+				aa= addActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
 						a.isBMultiinstance(), a.isBCollapsed());
 				mapping.put(
 						a,
@@ -121,20 +124,20 @@ public class CloneBPMN  {
         	CallActivity aa = null;
         	if (a.getParentSubProcess() != null) {
                 if (mapping.containsKey(a.getParentSubProcess())) {
-                    aa = clonebpmndiagram.addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+                    aa = addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
                             a.isBMultiinstance(), a.isBCollapsed(),
                             (SubProcess) mapping.get(a.getParentSubProcess()));
                 	mapping.put(a,aa);
                 }
             } else if (a.getParentSwimlane() != null) {
                 if (mapping.containsKey(a.getParentSwimlane())) {
-                    aa = clonebpmndiagram.addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+                    aa = addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
                             a.isBMultiinstance(), a.isBCollapsed(),
                             (Swimlane) mapping.get(a.getParentSwimlane()));
                 	mapping.put(a,aa);
                 }
             } else {
-            	aa = clonebpmndiagram.addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
+            	aa = addCallActivity(a.getLabel(), a.isBLooped(), a.isBAdhoc(), a.isBCompensation(),
                         a.isBMultiinstance(), a.isBCollapsed());
                 mapping.put(a,aa);
             }
@@ -145,18 +148,18 @@ public class CloneBPMN  {
 			Event ee = null; 
 			if (e.getParentSubProcess() != null) {
 				if (mapping.containsKey(e.getParentSubProcess())) {
-					ee =	clonebpmndiagram.addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
+					ee =	addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
 							(SubProcess) mapping.get(e.getParentSubProcess()), e.getBoundingNode());
 						mapping.put(e,ee);
 				}
 			} else if (e.getParentSwimlane() != null) {
 				if (mapping.containsKey(e.getParentSwimlane())) {
-					ee =	clonebpmndiagram.addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
+					ee =	addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
 							(Swimlane) mapping.get(e.getParentSwimlane()), e.getBoundingNode());
 							mapping.put(e,ee);
 				}
 			} else{
-				ee =	clonebpmndiagram.addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
+				ee =	addEvent(e.getLabel(), e.getEventType(), e.getEventTrigger(), e.getEventUse(),
 						e.getBoundingNode());
 				mapping.put(e,ee);
 			}
@@ -166,17 +169,17 @@ public class CloneBPMN  {
 			Gateway gg = null; 
 			if (g.getParentSubProcess() != null) {
 				if (mapping.containsKey(g.getParentSubProcess())) {
-				gg = clonebpmndiagram.addGateway(g.getLabel(), g.getGatewayType(),
+				gg = addGateway(g.getLabel(), g.getGatewayType(),
 						(SubProcess) mapping.get(g.getParentSubProcess()));
 				mapping.put(g,gg);
 				}
 			} else if (g.getParentSwimlane() != null) {
 				if (mapping.containsKey(g.getParentSwimlane())) {
-					gg = clonebpmndiagram.addGateway(g.getLabel(), g.getGatewayType(), (Swimlane) mapping.get(g.getParentSwimlane()));
+					gg = addGateway(g.getLabel(), g.getGatewayType(), (Swimlane) mapping.get(g.getParentSwimlane()));
 					mapping.put(g,gg);
 				}
 			} else{
-				gg = clonebpmndiagram.addGateway(g.getLabel(), g.getGatewayType());
+				gg = addGateway(g.getLabel(), g.getGatewayType());
 				mapping.put(g, gg);
 			}
 			
@@ -184,34 +187,34 @@ public class CloneBPMN  {
 		}
 		
 		for (DataObject d : bpmndiagram.getDataObjects()) {
-				mapping.put(d, clonebpmndiagram.addDataObject(d.getLabel()));
+				mapping.put(d, addDataObject(d.getLabel()));
 		}
 
 		for (Flow f : bpmndiagram.getFlows()) {
-			Flow ff = clonebpmndiagram.addFlow((BPMNNode) mapping.get(f.getSource()), 
+			Flow ff = addFlow((BPMNNode) mapping.get(f.getSource()), 
 					(BPMNNode) mapping.get(f.getTarget()), f.getLabel());
 			mapping.put(f, ff);
 			ff.getAttributeMap().put("Original id", f.getAttributeMap().get("Original id"));
 		}
 		for (MessageFlow f : bpmndiagram.getMessageFlows()) {
-			MessageFlow mf = clonebpmndiagram.addMessageFlow((BPMNNode) mapping.get(f.getSource()), 
+			MessageFlow mf = addMessageFlow((BPMNNode) mapping.get(f.getSource()), 
 					(BPMNNode) mapping.get(f.getTarget()), f.getLabel());
 			mapping.put(f, mf);
 			mf.getAttributeMap().put("Original id", f.getAttributeMap().get("Original id"));
 		}
 		for (DataAssociation a : bpmndiagram.getDataAssociations()) {
-			DataAssociation da = clonebpmndiagram.addDataAssociation((BPMNNode) mapping.get(a.getSource()), 
+			DataAssociation da = addDataAssociation((BPMNNode) mapping.get(a.getSource()), 
 					(BPMNNode) mapping.get(a.getTarget()), a.getLabel()); 
 			mapping.put(a, da);
 			da.getAttributeMap().put("Original id", a.getAttributeMap().get("Original id"));
 		}
 
-		clonebpmndiagram.getAttributeMap().clear();
+		getAttributeMap().clear();
 		AttributeMap map = bpmndiagram.getAttributeMap();
 		for (String key : map.keySet()) {
-			clonebpmndiagram.getAttributeMap().put(key, map.get(key));
+			getAttributeMap().put(key, map.get(key));
 		}
-		return clonebpmndiagram;
+		return mapping;
 	}
 
 	public HashMap<DirectedGraphElement, DirectedGraphElement> getMapping() {

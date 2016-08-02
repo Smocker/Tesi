@@ -3,6 +3,7 @@ package org.processmining.support.unfolding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -113,7 +114,7 @@ public class Combination
 	 * @param L1 la map da rete di Petri a rete di Unfolding
 	 * @param N1 la rete di unfolding
 	 */
-	public static void filter(ArrayList<Combination> combination, Transition t, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
+	public static void filter(ArrayList<Combination> combination, Transition t, Map<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
 	{
 		PetrinetNode [] preset = null;
 		

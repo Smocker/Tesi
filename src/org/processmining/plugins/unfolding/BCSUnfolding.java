@@ -2,11 +2,10 @@ package org.processmining.plugins.unfolding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.processmining.framework.plugin.PluginContext;
-import org.processmining.models.connections.petrinets.behavioral.InitialMarkingConnection;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -14,12 +13,12 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Arc;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
-import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.plugins.converters.bpmn2pn.ClonePetrinet;
 import org.processmining.support.localconfiguration.LocalConfiguration;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
-import org.processmining.support.unfolding.StatisticMap;
-import org.processmining.support.unfolding.Pair;
 import org.processmining.support.unfolding.Combination;
+import org.processmining.support.unfolding.Pair;
+import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.Utility;
 
 /**
@@ -43,13 +42,13 @@ public class BCSUnfolding
 	protected LinkedList <LocalConfiguration> queue = new LinkedList <LocalConfiguration>();
 
 	/* Mappa ogni nodo della rete di Petri a un uno o più nodi della rete di unfolding */
-	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
+	protected Map <PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
 
 	/* Mappa ogni nodo della rete di unfolding a un nodo della rete di Petri */
-	protected HashMap <PetrinetNode, PetrinetNode> unf2PetriMap = new HashMap <PetrinetNode, PetrinetNode>();
+	protected Map <PetrinetNode, PetrinetNode> unf2PetriMap = new HashMap <PetrinetNode, PetrinetNode>();
 
 	/* Mappa ogni transizione della rete di unfolding con il rispettivo marking */
-	protected HashMap <PetrinetNode, ArrayList<PetrinetNode>> markingMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
+	protected Map <PetrinetNode, ArrayList<PetrinetNode>> markingMap = new HashMap <PetrinetNode, ArrayList<PetrinetNode>>();
 
 	/* Mappa ogni transizione con storia dei suoi xor-split  */
 	//protected HashMap <PetrinetNode, ArrayList<Pair>> xorMap = new HashMap <PetrinetNode, ArrayList<Pair>>();
@@ -70,6 +69,9 @@ public class BCSUnfolding
 	{
 		this.context = context;
 		this.petrinet =  PetrinetFactory.clonePetrinet(petrinet);
+		ClonePetrinet pnc = new ClonePetrinet(petrinet.getLabel());
+		pnc.cloneFrom(petrinet, true, true, true, false, false);
+		this.petrinet = pnc;
 		this.unfolding = PetrinetFactory.newPetrinet("Unfolding from Petrinet");		
 	}
 
@@ -117,7 +119,14 @@ public class BCSUnfolding
 		{
 			/* Creo una transizione t1 nell'unfolding e attacco p1 con t1 */
 			Transition t = (Transition) a1.getTarget();
+			String id = "";
+			try{
+				id = t.getAttributeMap().get("Original id").toString();
+			}catch(NullPointerException e){
+				id = "_not_present";
+			}
 			Transition t1 = unfolding.addTransition(t.getLabel());
+			t1.getAttributeMap().put("Original id", id);
 			unfolding.addArc(p1, t1);			
 
 			/* Per tutti i place u delle rete di petri attaccate a t */
@@ -126,6 +135,7 @@ public class BCSUnfolding
 				// Creo un place u1 nell'unfolding e attacco t1 con u1
 				Place u = (Place) a2.getTarget();
 				Place u1 = unfolding.addPlace(u.getLabel());
+				u1.getAttributeMap().put("Original id", u.getAttributeMap().get("Original id"));
 				unfolding.addArc(t1, u1);				
 				refreshCorrispondence((PetrinetNode) u, u1);
 			}
@@ -194,11 +204,20 @@ public class BCSUnfolding
 
 					Combination.filter(combination, (Transition) t2, petri2UnfMap, unfolding);
 
+					String id = "";
+					try{
+						id = t2.getAttributeMap().get("Original id").toString();
+					}catch(NullPointerException e){
+						id = "_not_present";
+					}
 					/* Per ogni combinazione rimanente */
 					for(Combination comb : combination)
 					{
+						
+						
 						/* Aggiungo t2 all'unfolding il quale sarà collagato con le piazze che lo abilitano */
 						Transition t3 = unfolding.addTransition(t2.getLabel());
+						t3.getAttributeMap().put("Original id",id);		
 						for(int i = 0; i < comb.getElements().length; i++)
 							unfolding.addArc((Place) comb.getElements()[i], t3);
 
@@ -233,6 +252,7 @@ public class BCSUnfolding
 								for(PetrinetNode p2: postset)
 								{
 									Place p3 = unfolding.addPlace(p2.getLabel());
+									p3.getAttributeMap().put("Original id",p2.getAttributeMap().get("Original id"));
 									unfolding.addArc(t3, p3);						
 									refreshCorrispondence(p2, p3);
 								}
@@ -311,7 +331,8 @@ public class BCSUnfolding
 			statisticMap.setDeadlock(deadlock);
 
 		/* Inserisco le altre statistiche */
-		statisticMap.setStatistic(petrinet, unfolding, petri2UnfMap);
+		statisticMap.setStatistic(petrinet, unfolding, petri2UnfMap, localConfigurationMap);
+		
 	}
 
 	/**
@@ -488,4 +509,11 @@ public class BCSUnfolding
 		context.log(log);
 		context.getProgress().inc();
 	}
+
+	public LocalConfigurationMap getLocalConfigurationMap() {
+		return localConfigurationMap;
+	}
+	
+	
+	
 }

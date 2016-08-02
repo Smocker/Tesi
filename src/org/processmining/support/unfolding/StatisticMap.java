@@ -3,12 +3,19 @@ package org.processmining.support.unfolding;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.processmining.models.graphbased.AttributeMap;
+import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
+import org.processmining.models.graphbased.directed.bpmn.BPMNEdge;
+import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.plugins.converters.bpmn2pn.EPetrinetNode;
+import org.processmining.plugins.unfolding.visualize.UtilitiesforMapping;
+import org.processmining.support.localconfiguration.LocalConfigurationMap;
 
 /**
  * Map contenente le statistiche della rete di unfolding
@@ -31,6 +38,10 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private int nArcs = 0, nPlaces = 0, nTransitions = 0;
 	private boolean isSound, isWeakSound;
 	private double startTime = System.currentTimeMillis(), time = 0;
+
+	private LocalConfigurationMap localConfigurationMap;
+	private Map<EPetrinetNode,BPMNNode> reverseMap;
+	private Map<EPetrinetNode, BPMNEdge<BPMNNode, BPMNNode>> flowMapPNtoBP;
 
 	/**
 	 * Costruttore
@@ -134,9 +145,11 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 * @param N rete di petri
 	 * @param N1 rete di unfolding
 	 * @param L1 mappa da N a N' 
+	 * @param localConfigurationMap 
 	 */
-	public void setStatistic(Petrinet N, Petrinet N1, HashMap<PetrinetNode, ArrayList<PetrinetNode>> L1)
+	public void setStatistic(Petrinet N, Petrinet N1, Map<PetrinetNode, ArrayList<PetrinetNode>> L1, LocalConfigurationMap localConfigurationMap)
 	{
+		this.localConfigurationMap=localConfigurationMap;
 		/* Statistiche della rete */
 		nPlaces = N1.getPlaces().size();
 		nTransitions = N1.getTransitions().size();
@@ -391,5 +404,190 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		return out;
 	}
 	
+	public void setLocalConfigurationMap(LocalConfigurationMap l ){
+		this.localConfigurationMap=l;
+	}
+	
+	public LocalConfigurationMap getLocalConfigurationMap(){
+		return localConfigurationMap;
+	}
+
+	public Map<EPetrinetNode, BPMNNode> getReverseMap() {
+		return reverseMap;
+	}
+
+	public void setReverseMap(Map<EPetrinetNode, BPMNNode> reverseMap) {
+		this.reverseMap=reverseMap;
+	}
+	
+	public void setFlowMap(Map<EPetrinetNode, BPMNEdge<BPMNNode, BPMNNode>> map) {
+		
+		this.flowMapPNtoBP=map;
+	}
+
+
+	public Map<EPetrinetNode, BPMNEdge<BPMNNode, BPMNNode>> getflowMapPNtoBP() {
+		return flowMapPNtoBP;
+	}
+
+	
+	
+	public String getBPMNStatistic(BPMNDiagram bpmn)
+	{
+		/* Statistiche della rete */
+		int nArcsBPMN = bpmn.getEdges().size(); 
+		int nGateway = bpmn.getGateways().size(); 
+		int nActivity = bpmn.getActivities().size();
+		
+		int nEvents = bpmn.getEvents().size(); 
+		int nMessageFlow = bpmn.getMessageFlows().size(); 
+		int nPool = bpmn.getPools().size();
+		
+		/* Verifico le soundness */
+		isSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty() && get(DEAD).isEmpty();	
+		isWeakSound = get(CUTOFF_UNBOUNDED).isEmpty() && get(DEADLOCK).isEmpty();
+		
+		/* Calcolo il tempo del plugin */
+		time = (System.currentTimeMillis() - startTime) ;
+		
+		String out = "<html><h1 style=\"color:red;\">Diagnosis on BPMN graph</h1>";
+		
+		/* Tempo di esecuzione del plugin */
+		out += "<BR>Runtime of the plugin: " + time + "<BR><BR>";
+		
+		
+		/* Carico i livelock e deadlock */
+		for(String key: keySet())
+		{
+			switch(key)
+			{
+				case CUTOFF:
+				{
+					if(get(key).isEmpty())
+						out += "The graph does not contain cutoff points<BR><BR>";
+					else	{	
+						String temp = "";
+						int element = 0;
+						for(Transition t: get(key))
+							if (!(t.getLabel().equals("reset") || t.getLabel().equals("to") || t.getLabel().equals("ti"))){
+								element++;
+								BPMNNode fromReverseMap = UtilitiesforMapping.getBPMNNodeFromReverseMap(reverseMap, t);
+								String l= "";
+								if (fromReverseMap !=null){
+									l = fromReverseMap.getLabel();} 
+								else
+									{l = "missing";}
+								temp += "<li>" + l + "</li>";
+								}							
+						if (element == 0){
+							out += "The graph does not contain cutoff points<BR><BR>";
+						} else {
+							switch(element){
+							case 0:{out += "The graph does not contain cutoff points<BR><BR>"; break;}
+							case 1:{out += "The graph contains " + element + " cutoff point:<ol>"; 
+							temp += "</ol><BR>";out += temp; break;}
+							default:{out += "The graph contains " + element + " cutoff points:<ol>";
+							temp += "</ol><BR>";out += temp; break;}	
+							}
+						}	
+					}
+					break;
+				}
+				case CUTOFF_UNBOUNDED:
+				{
+					if(get(key).isEmpty())
+						out += "The graph does not contain the cutoff points that make the unbounded graph<BR><BR>";
+					else
+					{	
+						String temp = "";
+						int element = 0;
+						for(Transition t: get(key))
+							if (!(t.getLabel().equals("reset") || t.getLabel().equals("to") || t.getLabel().equals("ti"))){
+								element++;
+								String l = UtilitiesforMapping.getBPMNNodeFromReverseMap(reverseMap, t).getLabel();
+								temp += "<li>" + l + "</li>";
+								}											
+						switch(element){
+						case 0:{out += "The graph does not contain the cutoff points that make the unbounded graph<BR><BR>"; break;}
+						case 1:{out += "The graph contains " + element + " cutoff point that make the unbounded graph:<ol>"; 
+						temp += "</ol><BR>";out += temp; break;}
+						default:{out += "The graph contains " + element + " cutoff points that make the unbounded graph::<ol>";
+						temp += "</ol><BR>";out += temp; break;}	
+						}
+
+					}
+					break;
+				}
+				
+				case DEADLOCK:
+				{
+					if(get(key).isEmpty())
+						out += "The graph does not contain the deadlock points<BR><BR>";
+					else	{	
+							String temp = "";
+							int element = 0;
+							for(Transition t: get(key))
+								if (!(t.getLabel().equals("reset") || t.getLabel().equals("to") || t.getLabel().equals("ti"))){
+									element++;
+									String l = UtilitiesforMapping.getBPMNNodeFromReverseMap(reverseMap, t).getLabel();
+									temp += "<li>" + l + "</li>";
+									}							
+							switch(element){
+								case 0:{out += "The graph does not contain deadlock points<BR><BR>"; break;}
+								case 1:{out += "The graph contains " + element + " deadlock point:<ol>"; 
+								temp += "</ol><BR>"; out += temp; break;}
+								default:{out += "The graph contains " + element + " deadlock points:<ol>";
+								temp += "</ol><BR>";out += temp; break;}	
+								}
+							
+					}
+						break;	
+				}
+				
+			case DEAD:
+				{
+					if(get(key).isEmpty())
+						out += "The graph does not contain dead nodes<BR><BR>";
+					else	{	
+						String temp = "";
+						int element = 0;
+						for(Transition t: get(key))
+							if (!(t.getLabel().equals("reset") || t.getLabel().equals("to") || t.getLabel().equals("ti"))){
+								element++;
+								BPMNNode bnode = UtilitiesforMapping.getBPMNNodeFromReverseMap(reverseMap, t);
+								if(bnode!=null){
+									String l = UtilitiesforMapping.getBPMNNodeFromReverseMap(reverseMap, t).getLabel();
+									temp += "<li>" + l + "</li>";
+									}else{
+									System.out.print("");
+								}
+								}							
+						switch(element){
+						case 0:{out += "The graph does not contain dead nodes<BR><BR>"; break;}
+						case 1:{out += "The graph contains " + element + " dead node:<ol>"; 
+						temp += "</ol><BR>"; out += temp; break;}
+						default:{out += "The graph contains " + element + " dead nodes:<ol>";
+						temp += "</ol><BR>"; out += temp; break;}	
+						}
+
+					}
+					break;
+				}
+			}
+		}
+		
+		/* Carico le altre statistiche della rete */
+		out += "<h2>Other statistics:</h2><ul type=\"disc\">";			
+		out += "<li>Number of arcs: " + nArcsBPMN + "</li>";
+		out += "<li>Number of gateway: " + nGateway + "</li>";
+		out += "<li>Number of activity: " + nActivity + "</li>";
+		out += "<li>Number of events: " + nEvents + "</li>";
+		out += "<li>Number of message flow: " + nMessageFlow + "</li>";
+		out += "<li>Number of pool: " + nPool + "</li>";
+		out += "<li>Soundness: " + isSound + "</li>";
+		out += "<li>Weak soundness: " + isWeakSound + "</li></ul></html>";
+
+		return out;
+	}
 	
 }

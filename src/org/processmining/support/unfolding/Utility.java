@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
@@ -97,7 +98,7 @@ public class Utility
 	 * @param L1 map da N a N'
 	 * @return preset di t se e' abilitata, null altrimenti
 	 */
-	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode pn, HashMap <PetrinetNode, ArrayList<PetrinetNode>> L1)
+	public static PetrinetNode [] isEnabled(Petrinet N, PetrinetNode pn, Map <PetrinetNode, ArrayList<PetrinetNode>> L1)
 	{		
 		PetrinetNode [] preset = getPreset(N, pn); 
 		if(preset.length > 1) 
@@ -117,7 +118,7 @@ public class Utility
 	 * @param L mappa da N' a N
 	 * @return marking del nodo
 	 */
-	public static ArrayList <PetrinetNode> getMarking(Petrinet N, LocalConfiguration C, HashMap <PetrinetNode, PetrinetNode> L)
+	public static ArrayList <PetrinetNode> getMarking(Petrinet N, LocalConfiguration C, Map <PetrinetNode, PetrinetNode> L)
 	{
 		ArrayList <PetrinetNode> marking = new ArrayList <PetrinetNode> ();
 		
