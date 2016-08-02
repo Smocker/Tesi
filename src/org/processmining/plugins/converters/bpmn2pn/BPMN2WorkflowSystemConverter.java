@@ -547,6 +547,7 @@ public class BPMN2WorkflowSystemConverter
 					PetrinetNode targetT = outnet.getTarget();
 					net.addArc(src, (Transition)targetT);
 					net.removeArc(p, targetT);
+					flowMapPNtoBP.put(new EPetrinetNode(targetT),(BPMNEdge<BPMNNode, BPMNNode>) f);
 				}
 				net.removePlace(p);
 				flowMap.remove(f);

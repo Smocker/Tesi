@@ -1,6 +1,5 @@
 package org.processmining.support.unfolding;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Place;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.plugins.converters.bpmn2pn.EPetrinetNode;
+import org.processmining.plugins.unfolding.visualize.Palette;
 import org.processmining.plugins.unfolding.visualize.UtilitiesforMapping;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
 
@@ -32,6 +32,8 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	private static final String CUTOFF_UNBOUNDED = "Cutoff Unbounded";
 	private static final String DEADLOCK = "Deadlock";
 	private static final String DEAD = "Dead";
+	
+	private Palette pal = new Palette();
 
 	
 	/* Variabili utilizzate per le statistiche */
@@ -61,7 +63,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void addCutoff(Transition cutoff) 
 	{
-		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.BLUE);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, pal.getCutColor());
 		get(CUTOFF).add(cutoff);
 	}
 
@@ -82,7 +84,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void addCutoffUnbounded(Transition cutoff)
 	{
-		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.BLUE);
+		cutoff.getAttributeMap().put(AttributeMap.FILLCOLOR, pal.getCutColor());
 		get(CUTOFF_UNBOUNDED).add(cutoff);
 	}
 	
@@ -104,7 +106,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	public void setDeadlock(ArrayList<Transition> deadlock)
 	{
 		for(Transition t : deadlock)
-			t.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+			t.getAttributeMap().put(AttributeMap.FILLCOLOR, pal.getDeadColor());
 		put(DEADLOCK, deadlock);		
 	}
 	
@@ -125,7 +127,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 */
 	public void addDead(Transition dead) 
 	{
-		dead.getAttributeMap().put(AttributeMap.FILLCOLOR, Color.RED);
+		dead.getAttributeMap().put(AttributeMap.FILLCOLOR, pal.getDeadColor());
 		get(DEAD).add(dead);
 	}
 

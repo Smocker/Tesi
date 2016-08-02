@@ -1,4 +1,4 @@
-package org.processmining.support.unfolding;
+package org.processmining.plugins.unfolding.visualize;
 
 import info.clearthought.layout.TableLayout;
 
@@ -27,7 +27,7 @@ import com.fluxicon.slickerbox.factory.SlickerFactory;
  * 
  * @author Daniele Cicciarella
  */
-public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
+public class LegendPetrinet extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
 {
 	/* serialVersionUID */
     private static final long serialVersionUID = 5563202352636336868L;
@@ -36,6 +36,8 @@ public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMo
     protected SlickerDecorator decorator = SlickerDecorator.instance();
     private JComponent component;
     private String panelName;
+    private Palette pal = new Palette();
+
 
     /**
      * Costruttore 
@@ -43,7 +45,7 @@ public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMo
      * @param panel pannello sulla quale deve essere inserito il pannello
      * @param panelName nome del pannello 
      */
-    public LegendBCSUnfolding(ScalableViewPanel panel, String panelName) 
+    public LegendPetrinet(ScalableViewPanel panel, String panelName) 
     {
     	/* Si setta il layout della legenda */
         super(new BorderLayout());
@@ -79,22 +81,22 @@ public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMo
         legendPanel.add(legend, "0,1,1,1,c, c");
         row++;
 
-        /* Riga punti di cutoff */
+        /* Riga piazze unbounded */
         layout.insertRow(row, 0.2);
         layout.insertRow(row, TableLayout.PREFERRED);
         JPanel greenPanel = new JPanel();
-        greenPanel.setBackground(Color.BLUE);
+        greenPanel.setBackground(pal.getCutColor());
         legendPanel.add(greenPanel, "0," + row + ",r, c");
-        JLabel syncLbl = factory.createLabel(" Points of Cutoff");
+        JLabel syncLbl = factory.createLabel(" Places unbounded");
         syncLbl.setForeground(Color.WHITE);
         legendPanel.add(syncLbl, "1," + row++ + ",l, c");
 
-        /* Riga punti di deadlock */
+        /* Riga transizioni dead */
         layout.insertRow(row, TableLayout.PREFERRED);
         JPanel yellowPanel = new JPanel();
-        yellowPanel.setBackground(Color.RED);
+        yellowPanel.setBackground(pal.getDeadColor());
         legendPanel.add(yellowPanel, "0," + row + ",r, c");
-        JLabel moveLogLbl = factory.createLabel(" Points of Deadlock");
+        JLabel moveLogLbl = factory.createLabel(" Dead transitions");
         moveLogLbl.setForeground(Color.WHITE);
         legendPanel.add(moveLogLbl, "1," + row++ + ",l, c");
 
@@ -186,8 +188,7 @@ public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMo
         return 250;
     }
 
-    public void willChangeVisibility(boolean to) 
-    {}
+    public void willChangeVisibility(boolean to) {}
 
     public void setSize(int width, int height) 
     {

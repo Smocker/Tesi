@@ -30,13 +30,13 @@ import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
 import org.processmining.plugins.converters.bpmn2pn.CloneBPMN;
 import org.processmining.plugins.converters.bpmn2pn.EPetrinetNode;
 import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
+import org.processmining.plugins.unfolding.visualize.LegendBCSUnfolding;
+import org.processmining.plugins.unfolding.visualize.LegendPetrinet;
 import org.processmining.plugins.unfolding.visualize.Palette;
 import org.processmining.plugins.unfolding.visualize.StringPanel;
 import org.processmining.plugins.unfolding.visualize.TabTraceUnfodingPanel;
 import org.processmining.plugins.unfolding.visualize.UtilitiesforMapping;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
-import org.processmining.support.unfolding.LegendBCSUnfolding;
-import org.processmining.support.unfolding.LegendPetrinet;
 import org.processmining.support.unfolding.StatisticMap;
 
 import com.fluxicon.slickerbox.factory.SlickerDecorator;

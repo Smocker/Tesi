@@ -1,4 +1,4 @@
-package org.processmining.support.unfolding;
+package org.processmining.plugins.unfolding.visualize;
 
 import info.clearthought.layout.TableLayout;
 
@@ -22,12 +22,9 @@ import org.processmining.framework.util.ui.scalableview.interaction.ViewInteract
 import com.fluxicon.slickerbox.factory.SlickerDecorator;
 import com.fluxicon.slickerbox.factory.SlickerFactory;
 
-/**
- * Costruisce la legenda della rete di unfolding
- * 
- * @author Daniele Cicciarella
- */
-public class LegendPetrinet extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
+
+ 
+public class LegendBCSUnfolding extends JPanel implements MouseListener, MouseMotionListener, ViewInteractionPanel 
 {
 	/* serialVersionUID */
     private static final long serialVersionUID = 5563202352636336868L;
@@ -36,14 +33,14 @@ public class LegendPetrinet extends JPanel implements MouseListener, MouseMotion
     protected SlickerDecorator decorator = SlickerDecorator.instance();
     private JComponent component;
     private String panelName;
-
+    private Palette pal = new Palette();
     /**
      * Costruttore 
      * 
      * @param panel pannello sulla quale deve essere inserito il pannello
      * @param panelName nome del pannello 
      */
-    public LegendPetrinet(ScalableViewPanel panel, String panelName) 
+    public LegendBCSUnfolding(ScalableViewPanel panel, String panelName) 
     {
     	/* Si setta il layout della legenda */
         super(new BorderLayout());
@@ -79,25 +76,55 @@ public class LegendPetrinet extends JPanel implements MouseListener, MouseMotion
         legendPanel.add(legend, "0,1,1,1,c, c");
         row++;
 
-        /* Riga piazze unbounded */
+        /* Riga punti di cutoff */
         layout.insertRow(row, 0.2);
         layout.insertRow(row, TableLayout.PREFERRED);
-        JPanel greenPanel = new JPanel();
-        greenPanel.setBackground(Color.RED);
-        legendPanel.add(greenPanel, "0," + row + ",r, c");
-        JLabel syncLbl = factory.createLabel(" Places unbounded");
-        syncLbl.setForeground(Color.WHITE);
-        legendPanel.add(syncLbl, "1," + row++ + ",l, c");
+        JPanel bluePanel = new JPanel();
+        bluePanel.setBackground(pal.getCutColor());
+        legendPanel.add(bluePanel, "0," + row + ",r, c");
+        JLabel lb1 = factory.createLabel(" Points of Cutoff");
+        lb1.setForeground(Color.WHITE);
+        legendPanel.add(lb1, "1," + row++ + ",l, c");
 
-        /* Riga transizioni dead */
+        /* Riga punti di deadlock */
         layout.insertRow(row, TableLayout.PREFERRED);
-        JPanel yellowPanel = new JPanel();
-        yellowPanel.setBackground(Color.RED);
-        legendPanel.add(yellowPanel, "0," + row + ",r, c");
-        JLabel moveLogLbl = factory.createLabel(" Dead transitions");
-        moveLogLbl.setForeground(Color.WHITE);
-        legendPanel.add(moveLogLbl, "1," + row++ + ",l, c");
+        JPanel redPanel = new JPanel();
+        redPanel.setBackground(pal.getDeadColor());
+        legendPanel.add(redPanel, "0," + row + ",r, c");
+        JLabel lb2 = factory.createLabel(" Points or arcs of Deadlock");
+        lb2.setForeground(Color.WHITE);
+        legendPanel.add(lb2, "1," + row++ + ",l, c");
+        
+        /* Riga punti di cutoff e deadlock*/
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JPanel violetPanel = new JPanel();
+        violetPanel.setBackground(pal.getBothCutoffDead());
+        legendPanel.add(violetPanel, "0," + row + ",r, c");
+        JLabel lb3 = factory.createLabel(" Points of Cutoff and deadlock");
+        lb3.setForeground(Color.WHITE);
+        legendPanel.add(lb3, "1," + row++ + ",l, c");
+        
+        /* Riga label archi*/
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JLabel arcNumberLabel = factory.createLabel(" 1 ");
+        arcNumberLabel.setForeground(pal.getArcLabelColor());
+        Dimension n = arcNumberLabel.getSize();
+        
+        arcNumberLabel.setSize(n);
+        legendPanel.add(arcNumberLabel, "0," + row + ",r, c");
+        JLabel arcLabel = factory.createLabel("Order activities");
+        arcLabel.setForeground(Color.WHITE);
+        legendPanel.add(arcLabel, "1," + row++ + ",l, c");
 
+        /*Riga nodi dead*/
+        layout.insertRow(row, TableLayout.PREFERRED);
+        JPanel orangePanel = new JPanel();
+        orangePanel.setBackground(pal.getDeadNodeColor());
+        legendPanel.add(orangePanel, "0," + row + ",r, c");
+        JLabel lb4 = factory.createLabel(" Dead node");
+        lb4.setForeground(Color.WHITE);
+        legendPanel.add(lb4, "1," + row++ + ",l, c");
+        
         /* Riga vuota */
         layout.insertRow(row, 0.2);
         
