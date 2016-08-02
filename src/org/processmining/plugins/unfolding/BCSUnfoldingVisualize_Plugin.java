@@ -193,7 +193,7 @@ public class BCSUnfoldingVisualize_Plugin
 
 	
 
-	public BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map) {
+	private BPMNDiagram insertDefect(BPMNDiagram bpmnoriginal, StatisticMap map) {
 		//Clono il BPMN diagram
 
 		CloneBPMN bpmncopia = new CloneBPMN(bpmnoriginal.getLabel());
