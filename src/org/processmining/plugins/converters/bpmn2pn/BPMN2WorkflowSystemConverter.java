@@ -217,7 +217,7 @@ public class BPMN2WorkflowSystemConverter
 		//endEventMap.get(e.getParentPool().getId()).add(p);
 		
 		/* Save each pool its input */
-		if(e.getGraph().getInEdges(e).isEmpty()){
+		if(e.getGraph().getOutEdges(e).isEmpty()){
 			endEventMap.get(e.getParentPool().getId()).add(p);
 		}else{
 			endEventMap.remove(e.getParentPool().getId());
