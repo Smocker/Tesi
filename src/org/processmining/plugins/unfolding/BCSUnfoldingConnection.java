@@ -3,7 +3,6 @@ package org.processmining.plugins.unfolding;
 import org.processmining.framework.connections.impl.AbstractStrongReferencingConnection;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.support.unfolding.StatisticMap;
 
 /**

@@ -1,17 +1,10 @@
 package org.processmining.plugins.unfolding;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
-import javax.swing.BorderFactory;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import org.processmining.contexts.uitopia.UIPluginContext;
@@ -20,16 +13,13 @@ import org.processmining.contexts.uitopia.annotations.Visualizer;
 import org.processmining.framework.plugin.annotations.Plugin;
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
-import org.processmining.models.graphbased.directed.bpmn.BPMNDiagramFactory;
 import org.processmining.models.graphbased.directed.bpmn.BPMNNode;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
-import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
 import org.processmining.models.jgraph.ProMJGraphVisualizer;
 import org.processmining.models.jgraph.visualization.ProMJGraphPanel;
 import org.processmining.plugins.converters.bpmn2pn.CloneBPMN;
 import org.processmining.plugins.converters.bpmn2pn.EPetrinetNode;
-import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.plugins.unfolding.visualize.LegendBCSUnfolding;
 import org.processmining.plugins.unfolding.visualize.LegendPetrinet;
 import org.processmining.plugins.unfolding.visualize.Palette;
@@ -38,8 +28,6 @@ import org.processmining.plugins.unfolding.visualize.TabTraceUnfodingPanel;
 import org.processmining.plugins.unfolding.visualize.UtilitiesforMapping;
 import org.processmining.support.localconfiguration.LocalConfigurationMap;
 import org.processmining.support.unfolding.StatisticMap;
-
-import com.fluxicon.slickerbox.factory.SlickerDecorator;
 
 import info.clearthought.layout.TableLayout;
 import info.clearthought.layout.TableLayoutConstants;
