@@ -88,7 +88,7 @@ public class BPMN2Unfolding_Plugin
 			context.addConnection(new BCSUnfoldingConnection(stm, petrinet,(Petrinet) unfolding[0],bpmn));
 			printstatistic(context,bpmn,petrinet, (Petrinet)unfolding[0]);
 
-			return new Object [] {unfolding[1], unfolding[0], petrinet};
+			return new Object [] {stm, unfolding[0], petrinet};
 		}catch (Exception e) {
 			context.log(e.getMessage());
 			return null;
