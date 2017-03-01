@@ -30,7 +30,7 @@ public class PetriNet2Unfolding_Plugin
 	)
 	public Object[] convert(PluginContext context, Petrinet petrinet) 
 	{
-		BCSUnfolding petrinet2Unfolding;
+		BCSParSecondUnfolding petrinet2Unfolding;
 		Object[] unfolding;
 		
 		/* Settiamo la barra progressiva */
@@ -38,7 +38,7 @@ public class PetriNet2Unfolding_Plugin
 		
 		/* Converte la rete di Petri nella rete di unfolding */
 		writeLog(context, "Conversion of the Petri net in Unfolding net...");
-		petrinet2Unfolding = new BCSUnfolding(context, petrinet);
+		petrinet2Unfolding = new BCSParSecondUnfolding(context, petrinet);
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
