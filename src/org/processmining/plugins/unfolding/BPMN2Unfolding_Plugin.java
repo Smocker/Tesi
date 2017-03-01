@@ -1,61 +1,37 @@
 package org.processmining.plugins.unfolding;
 
-import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.contexts.uitopia.annotations.UITopiaVariant;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.annotations.Plugin;
-import org.processmining.framework.plugin.annotations.PluginVariant;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.plugins.converters.bpmn2pn.BPMN2WorkflowSystemConverter;
+import org.processmining.plugins.converters.bpmn2pn.InfoConversionBP2PN;
 import org.processmining.support.unfolding.StatisticMap;
 
 /**
  * Converte un BPMNDiagram in una Occurrence net with Unfolding
  * 
- * @author Daniele Cicciarella, Giorgio O. Spagnolo
+ * @author Daniele Cicciarella
  */
-
-@Plugin
-(
-		name = "BCS BPMN to Unfolding net", 
-		parameterLabels = {"BPMNDiagram", "Num Thread"},
-		returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net", "Petri net"}, 
-		returnTypes = {StatisticMap.class,Petrinet.class ,Petrinet.class}, 
-		userAccessible = true, 
-		help = "Convert BPMN diagram to Unfolding net"
-		)
 public class BPMN2Unfolding_Plugin 
 {
-	
+	@Plugin
+	(
+			name = "BCS BPMN to Unfolding net", 
+			parameterLabels = {"BPMNDiagram"},
+			returnLabels = {"Visualize BCS Unfolding Statistics", "Petri net", "Petri net"}, 
+			returnTypes = {StatisticMap.class,Petrinet.class ,Petrinet.class}, 
+			userAccessible = true, 
+			help = "Convert BPMN diagram to Unfolding net"
+			)
 	@UITopiaVariant
 	(
-			affiliation = "University of Pisa, ISTI CNR Italy", 
-			author = "Daniele Cicciarella, Giorgio O. Spagnolo", 
-			email = "cicciarellad@gmail.com, spagnolo@isti.cnr.it"
+			affiliation = "University of Pisa", 
+			author = "Daniele Cicciarella", 
+			email = "cicciarellad@gmail.com"
 			)
-	@PluginVariant(variantLabel = "BCS BPMN to Unfolding net UI, parameters", requiredParameterLabels = { 0 })
 	public Object[] convert(PluginContext context, BPMNDiagram bpmn) 
-	{
-		
-		return convertmethod(context, bpmn);
-	}
-	
-	/*@UITopiaVariant
-	(
-			affiliation = "University of Pisa, ISTI CNR Italy", 
-			author = "Daniele Cicciarella, Giorgio O. Spagnolo", 
-			email = "cicciarellad@gmail.com, spagnolo@isti.cnr.it"
-			)
-	@PluginVariant(variantLabel = "BCS BPMN to Unfolding net CLI,parameters, parameters", requiredParameterLabels = { 0,1 })
-	public Object[] convert2(PluginContext context, BPMNDiagram bpmn) 
-	{
-		
-		return convert(context, bpmn);
-	}*/
-	
-	
-	private Object[] convertmethod(PluginContext context, BPMNDiagram bpmn) 
 	{
 
 		Petrinet petrinet;
@@ -72,7 +48,7 @@ public class BPMN2Unfolding_Plugin
 			bpmn2Petrinet.convert(context);
 			petrinet = bpmn2Petrinet.getPetriNet();
 
-			
+			InfoConversionBP2PN info = bpmn2Petrinet.getInfoConversionBP2PN();
 
 			/* Converte la rete di Petri nella rete di unfolding */
 			writeLog(context, "Conversion of the Petri net in Unfolding net...");
@@ -80,15 +56,11 @@ public class BPMN2Unfolding_Plugin
 			unfolding = petrinet2Unfolding.convert();
 
 			/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */
-			
-			StatisticMap stm = (StatisticMap)unfolding[1];
-			stm.setReverseMap(bpmn2Petrinet.getReverseMap());
-			stm.setFlowMap(bpmn2Petrinet.getFlowMapPNtoBP());
-			stm.setLocalConfigurationMap(petrinet2Unfolding.getLocalConfigurationMap());
-			context.addConnection(new BCSUnfoldingConnection(stm, petrinet,(Petrinet) unfolding[0],bpmn));
+
+			context.addConnection(new BCSUnfoldingConnection((StatisticMap)unfolding[1], petrinet,(Petrinet) unfolding[0],info,bpmn));
 			printstatistic(context,bpmn,petrinet, (Petrinet)unfolding[0]);
 
-			return new Object [] {stm, unfolding[0], petrinet};
+			return new Object [] {unfolding[1], unfolding[0], petrinet};
 		}catch (Exception e) {
 			context.log(e.getMessage());
 			return null;
