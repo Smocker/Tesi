@@ -13,28 +13,46 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  * 
  * @author Daniele Cicciarella
  */
-public class LocalConfiguration 
-{
-	private ArrayList <Transition> localConfiguration = null;
-	
+public class LocalConfiguration {
+	private ArrayList<Transition> localConfiguration = null;
+
 	/**
 	 * Costruttore
 	 */
-	public LocalConfiguration()
-	{
-		localConfiguration = new ArrayList <Transition>();
+	public LocalConfiguration() {
+		localConfiguration = new ArrayList<Transition>();
 	}
-	
+
 	/**
 	 * Crea la configurazione locale di un nodo
 	 * 
-	 * @param N rete di Petri
-	 * @param pn nodo corrente
+	 * @param N
+	 *            rete di Petri
+	 * @param pn
+	 *            nodo corrente
 	 * @return configurazione locale di pn
 	 */
-	public ArrayList<Transition> set(Petrinet N, PetrinetNode pn) 
-	{
+	public ArrayList<Transition> set(Petrinet N, PetrinetNode pn) {
 		getLeastBackwardClosed(N, pn, localConfiguration);
+		return localConfiguration;
+	}
+
+	/*public ArrayList<Transition> add(Transition t) {
+		if (!localConfiguration.contains(t)) {
+			localConfiguration.add(t);
+		}
+		return localConfiguration;
+	}*/
+
+	public ArrayList<Transition> addAll(Transition t) {
+		localConfiguration.add(t);
+		return localConfiguration;
+	}
+
+	public ArrayList<Transition> remove(Transition t) {
+		if (localConfiguration.contains(t)) {
+			localConfiguration.remove(t);
+		}
 		return localConfiguration;
 	}
 
@@ -43,31 +61,31 @@ public class LocalConfiguration
 	 * 
 	 * @return configurazione locale
 	 */
-	public ArrayList<Transition> get() 
-	{
+	public ArrayList<Transition> get() {
 		return localConfiguration;
 	}
-	
+
 	/**
-	 * Visita all'indietro la rete di unfolding per la costruzione della configurazione locale
+	 * Visita all'indietro la rete di unfolding per la costruzione della
+	 * configurazione locale
 	 * 
-	 * @param N rete di Petri
-	 * @param pn nodo corrente
-	 * @param lista parziale delle transazioni analizzate in precendenza
+	 * @param N
+	 *            rete di Petri
+	 * @param pn
+	 *            nodo corrente
+	 * @param lista
+	 *            parziale delle transazioni analizzate in precendenza
 	 */
-	private void getLeastBackwardClosed(Petrinet N, PetrinetNode pn, ArrayList<Transition> back) 
-	{
-		if(pn instanceof Transition)
-		{
+	private void getLeastBackwardClosed(Petrinet N, PetrinetNode pn, ArrayList<Transition> back) {
+		if (pn instanceof Transition) {
 			// La transazione è stata visitata
-			if(back.contains(pn))	
+			if (back.contains(pn))
 				return;
 			back.add((Transition) pn);
 		}
-		
+
 		/* Visita ricorsiva */
-		for (Iterator<?> preset = N.getGraph().getInEdges(pn).iterator(); preset.hasNext();) 
-		{
+		for (Iterator<?> preset = N.getGraph().getInEdges(pn).iterator(); preset.hasNext();) {
 			Arc a = (Arc) preset.next();
 			getLeastBackwardClosed(N, a.getSource(), back);
 		}
@@ -75,8 +93,7 @@ public class LocalConfiguration
 
 	@Override
 	public String toString() {
-		return   localConfiguration.toString();
+		return localConfiguration.toString();
 	}
-	
-	
+
 }
