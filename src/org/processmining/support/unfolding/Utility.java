@@ -96,6 +96,27 @@ public class Utility
 	 * 
 	 * @param N rete di Petri
 	 * @param pn nodo da verificare
+	 * @parammarking
+	 * @return preset di t se e' abilitata, vuoto altrimenti
+	 */
+	public static List<PetrinetNode> isEnabledFromMarking(ArrayList<PetrinetNode> marking, PetrinetNode pn, Petrinet N)
+	{		
+		List<PetrinetNode> preset = getPreset(N, pn);
+		
+		if(preset.size() > 0) 
+		{
+			for(int i = 0; i < preset.size(); i++)
+				if(!marking.contains(preset.get(i))) 
+					return new ArrayList<PetrinetNode>();
+		}
+		return preset;
+	}
+	
+	/**
+	 * Verifica se un nodo e' abilitato
+	 * 
+	 * @param N rete di Petri
+	 * @param pn nodo da verificare
 	 * @param L1 map da N a N'
 	 * @return preset di t se e' abilitata, null altrimenti
 	 */
@@ -106,10 +127,11 @@ public class Utility
 		{
 			for(int i = 0; i < preset.size(); i++)
 				if(!L1.containsKey(preset.get(i))) 
-					return null;
+					return new ArrayList<PetrinetNode>();
 		}
 		return preset;
 	}
+	
 	
 	/**
 	 * Calcola il marking di un nodo
@@ -131,6 +153,32 @@ public class Utility
 		for(Transition t : C.get())
 		{
 			for(DirectedGraphEdge<?, ?> a: N.getGraph().getInEdges(L.get(t)))
+				if(marking.contains(a.getSource()))
+					marking.remove(a.getSource());
+		}
+		return marking;
+	}
+	
+	/**
+	 * ----------Calcola il marking di un nodo
+	 * 
+	 * @param N rete di Petri
+	 * @param C configurazione locale del nodo
+	 * @param L mappa da N' a N
+	 * @return marking del nodo
+	 */
+	public static ArrayList <PetrinetNode> getMarking(Petrinet N, LocalConfiguration C)
+	{
+		ArrayList <PetrinetNode> marking = new ArrayList <PetrinetNode> ();
+		
+		for(Transition t : C.get())
+		{
+			for(DirectedGraphEdge<?, ?> a: N.getGraph().getOutEdges(t))
+				marking.add((PetrinetNode) a.getTarget());
+		}
+		for(Transition t : C.get())
+		{
+			for(DirectedGraphEdge<?, ?> a: N.getGraph().getInEdges(t))
 				if(marking.contains(a.getSource()))
 					marking.remove(a.getSource());
 		}
