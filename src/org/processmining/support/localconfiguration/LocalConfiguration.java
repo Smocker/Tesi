@@ -15,13 +15,42 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class LocalConfiguration {
 	private ArrayList<Transition> localConfiguration = null;
-
+	private ArrayList<PetrinetNode> marking=null;
 	/**
 	 * Costruttore
 	 */
 	public LocalConfiguration() {
 		localConfiguration = new ArrayList<Transition>();
+		marking=new ArrayList<PetrinetNode>();;
 	}
+
+	public LocalConfiguration clone() {
+		LocalConfiguration ll = new LocalConfiguration();
+		for (Transition tra : localConfiguration) {
+			ll.addAll(tra);
+		}
+		return ll;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj == null)
+			return false;
+		if (obj instanceof LocalConfiguration) {
+			LocalConfiguration other = (LocalConfiguration) obj;
+			if(localConfiguration.size()!=other.get().size()){
+				return false;
+			}
+			for(Transition t : localConfiguration){
+				if(!other.get().contains(t)){
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 
 	/**
 	 * Crea la configurazione locale di un nodo
@@ -37,12 +66,20 @@ public class LocalConfiguration {
 		return localConfiguration;
 	}
 
-	/*public ArrayList<Transition> add(Transition t) {
+	public ArrayList<PetrinetNode> getMarking() {
+		return marking;
+	}
+
+	public void setMarking(ArrayList<PetrinetNode> marking) {
+		this.marking = marking;
+	}
+
+	public ArrayList<Transition> add(Transition t) {
 		if (!localConfiguration.contains(t)) {
 			localConfiguration.add(t);
 		}
 		return localConfiguration;
-	}*/
+	}
 
 	public ArrayList<Transition> addAll(Transition t) {
 		localConfiguration.add(t);
