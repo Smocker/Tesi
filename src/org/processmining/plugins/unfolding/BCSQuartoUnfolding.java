@@ -20,7 +20,7 @@ import org.processmining.support.unfolding.Pair;
 import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.Utility;
 
-public class UnfoldingBCSTerzo {
+public class BCSQuartoUnfolding {
 
 	protected PluginContext context;
 
@@ -55,7 +55,7 @@ public class UnfoldingBCSTerzo {
 	 * @param petrinet
 	 *            rete di petri originale
 	 */
-	UnfoldingBCSTerzo(PluginContext context, Petrinet petrinet) {
+	BCSQuartoUnfolding(PluginContext context, Petrinet petrinet) {
 		this.context = context;
 		this.petrinet = PetrinetFactory.clonePetrinet(petrinet);
 		ClonePetrinet pnc = new ClonePetrinet(petrinet.getLabel());
@@ -134,20 +134,21 @@ public class UnfoldingBCSTerzo {
 
 	private void visitQueue() throws InterruptedException {
 		int d = 0;
-		while (!queue.isEmpty()){// d < 50000) { //
+		while (!queue.isEmpty()) {//d < 150000) {
 			d++;
 			LocalConfiguration localConfig = queue.poll();
 			System.out.println("LocalConfiguration " + localConfig);
-			
-			ArrayList<PetrinetNode> markingUnfolding = localConfig.getMarking(); //Utility.getMarking(unfolding, localConfig);
+
+			ArrayList<PetrinetNode> markingUnfolding = localConfig.getMarking(); // Utility.getMarking(unfolding,
+																					// localConfig);
 			ArrayList<PetrinetNode> markingPetrinet = new ArrayList<PetrinetNode>();// petrinet
 
 			System.out.println("markingUnf " + markingUnfolding);
-			
+
 			for (PetrinetNode tlcm : markingUnfolding) {
 				markingPetrinet.add(unf2PetriMap.get(tlcm));
 			}
-			
+
 			for (PetrinetNode t1 : petrinet.getTransitions()) {// petrinet
 				List<PetrinetNode> presetAbilitato = Utility.isEnabledFromMarking(markingPetrinet, t1, petrinet);// petrinet
 				if (!presetAbilitato.isEmpty() && !markingUnfolding.isEmpty()) {
@@ -156,11 +157,12 @@ public class UnfoldingBCSTerzo {
 
 					PetrinetNode nodoStessaHistory = null;
 					boolean stessaHistory = false;
+					List<PetrinetNode> phistory = new ArrayList<PetrinetNode>();
 					// controllo la history del nodo
 					if (petri2UnfMap.containsKey(t1)) {
 
 						ArrayList<PetrinetNode> t1Unf = petri2UnfMap.get(t1);
-						
+
 						System.out.println("markingUnf " + markingUnfolding);
 						for (int j = 0; j < t1Unf.size() && !stessaHistory; j++) {
 							nodoStessaHistory = t1Unf.get(j);
@@ -168,50 +170,55 @@ public class UnfoldingBCSTerzo {
 									.isEmpty()) {
 								ArrayList<Place> historyT1 = Utility.getHistoryPlace(unfolding, t1Unf.get(j));
 								System.out.println("historyT1 " + t1Unf.get(j) + historyT1);
-								//for (int x = 0; x < markingUnfolding.size() && !stessaHistory; x++) {
-									
-							/*	ArrayList<Place> historyPlace = Utility.getHistoryPlace(unfolding, presetAbilitato, petri2UnfMap, markingUnfolding);
-								System.out.println("historyPlace " + historyPlace);
+								// for (int x = 0; x < markingUnfolding.size()
+								// && !stessaHistory; x++) {
 
-								if (historyT1.containsAll(historyPlace)) {
-									stessaHistory = true;
-									System.out.println("stessaHistory");
-									
-								}*/
+								/*
+								 * ArrayList<Place> historyPlace =
+								 * Utility.getHistoryPlace(unfolding,
+								 * presetAbilitato, petri2UnfMap,
+								 * markingUnfolding); System.out.println(
+								 * "historyPlace " + historyPlace);
+								 * 
+								 * if (historyT1.containsAll(historyPlace)) {
+								 * stessaHistory = true;
+								 * System.out.println("stessaHistory");
+								 * 
+								 * }
+								 */
 								
-									for (PetrinetNode nodoAbilitato : presetAbilitato) {
-										ArrayList<PetrinetNode> nodoAbilitatoArray = petri2UnfMap.get(nodoAbilitato);
-										for (PetrinetNode nodoAbilitatoUnf : nodoAbilitatoArray) {
-											if (markingUnfolding.contains(nodoAbilitatoUnf)) {
-												ArrayList<Place> historyPreset = Utility.getHistoryPlace(unfolding,
-														nodoAbilitatoUnf);
-												System.out.println("historyPreset " + nodoAbilitatoUnf + historyPreset);
+								for (PetrinetNode nodoAbilitato : presetAbilitato) {
+									ArrayList<PetrinetNode> nodoAbilitatoArray = petri2UnfMap.get(nodoAbilitato);
 
-												if (historyT1.containsAll(historyPreset)) {
-													stessaHistory = true;
-													System.out.println("stessaHistory");
-													
-												}else{
-													stessaHistory = false;
-												}
+									for (PetrinetNode nodoAbilitatoUnf : nodoAbilitatoArray) {
+										if (markingUnfolding.contains(nodoAbilitatoUnf)) {
+
+											Transition temp2 = unfolding.addTransition(t1.getLabel());
+
+											unfolding.addArc((Place) nodoAbilitatoUnf, temp2);
+											ArrayList<Place> historytemp2 = Utility.getHistoryPlace(unfolding, temp2);
+
+											if (historyT1.containsAll(historytemp2)) {
+												stessaHistory = true;
+												System.out.println("stessaHistory");
+
+											} else {
+												stessaHistory = false;
+												phistory.add(nodoAbilitatoUnf);
 											}
+											unfolding.removeArc(nodoAbilitatoUnf, temp2);
+											unfolding.removeTransition(temp2);
+
 										}
-										
+
 									}
 									
-									/*ArrayList<Place> historyPreset = Utility.getHistoryPlace(unfolding,
-											markingUnfolding.get(x));
-									System.out.println("historyPreset " + markingUnfolding.get(x) + historyPreset);
-
-									if (historyT1.containsAll(historyPreset)) {
-										stessaHistory = true;
-										System.out.println("stessaHistory");
-									}*/
 									
-								//}
+									
+
+								}
 							}
 						}
-
 					}
 
 					if (!stessaHistory) {
@@ -232,8 +239,10 @@ public class UnfoldingBCSTerzo {
 							ArrayList<PetrinetNode> nodoAbilitatoArray = petri2UnfMap.get(nodoAbilitato);
 							for (PetrinetNode nodoAbilitatoUnf : nodoAbilitatoArray) {
 								if (markingUnfolding.contains(nodoAbilitatoUnf)) {
+									if(phistory.isEmpty() || phistory.contains(nodoAbilitatoUnf)){
 									System.out.println("unfolding.addArc(p, t) " + nodoAbilitatoUnf + " " + t2);
 									unfolding.addArc((Place) nodoAbilitatoUnf, t2);
+									}
 								}
 							}
 						}
@@ -248,7 +257,8 @@ public class UnfoldingBCSTerzo {
 							boolean isCutoff = false;
 							List<PetrinetNode> postset = Utility.getPostset(petrinet, t1);
 
-							// Verifico se una piazza finale di t2 è condivisa
+							// Verifico se una piazza finale di t2 è
+							// condivisa
 							// da altre transizioni e se provoca cutoff
 							for (int i = 0; i < postset.size() && !isCutoff; i++)
 								isCutoff = isCutoff(t2, postset.get(i));
@@ -269,7 +279,9 @@ public class UnfoldingBCSTerzo {
 							}
 						}
 					} else {
-						//if (!statisticMap.getCutoff().contains(nodoStessaHistory)) {
+						// if
+						// (!statisticMap.getCutoff().contains(nodoStessaHistory))
+						// {
 						LocalConfiguration ll = localConfig.clone();
 						ll.addAll((Transition) nodoStessaHistory);
 						ll.setMarking(Utility.getMarking(unfolding, ll));
@@ -277,7 +289,7 @@ public class UnfoldingBCSTerzo {
 						System.out.println("stessa history " + localConfig);
 						System.out.println("stessa history " + ll);
 						queue.put(ll);
-						//}
+						// }
 					}
 
 				}

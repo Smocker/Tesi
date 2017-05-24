@@ -94,7 +94,7 @@ public class BCSUnfolding
 		reset = petrinet.addTransition("reset");
 		petrinet.addArc(o, reset);
 		petrinet.addArc(reset, i);
-		System.out.println("UNFOLDING NORMALE");
+
 		/* Inizializzo e visito la coda */
 		initQueue(i, i1);		
 		visitQueue();	
@@ -215,8 +215,7 @@ public class BCSUnfolding
 					for(Combination comb : combination)
 					{
 						
-						
-						/* Aggiungo t2 all'unfolding il quale sarà collagato con le piazze che lo abilitano */
+						/* Aggiungo t2 all'unfolding il quale sarà collegato con le piazze che lo abilitano */
 						Transition t3 = unfolding.addTransition(t2.getLabel());
 						t3.getAttributeMap().put("Original id",id);		
 						for(int i = 0; i < comb.getElements().size(); i++)

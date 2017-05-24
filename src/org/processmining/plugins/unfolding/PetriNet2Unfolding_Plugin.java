@@ -28,9 +28,9 @@ public class PetriNet2Unfolding_Plugin
 		author = "Daniele Cicciarella", 
 		email = "cicciarellad@gmail.com"
 	)
-	public Object[] convert(PluginContext context, Petrinet petrinet) 
+	public Object[] convert(PluginContext context, Petrinet petrinet) throws InterruptedException 
 	{
-		BCSParSecondUnfolding petrinet2Unfolding;
+		BCSQuartoUnfolding petrinet2Unfolding;
 		Object[] unfolding;
 		
 		/* Settiamo la barra progressiva */
@@ -38,7 +38,7 @@ public class PetriNet2Unfolding_Plugin
 		
 		/* Converte la rete di Petri nella rete di unfolding */
 		writeLog(context, "Conversion of the Petri net in Unfolding net...");
-		petrinet2Unfolding = new BCSParSecondUnfolding(context, petrinet);
+		petrinet2Unfolding = new BCSQuartoUnfolding(context, petrinet);
 		unfolding = petrinet2Unfolding.convert();
 		
 		/* Aggiungo connessione per la visualizzazione delle reti e statistiche delle rete unfoldata */

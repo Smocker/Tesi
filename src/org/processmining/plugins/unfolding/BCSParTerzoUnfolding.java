@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.directed.DirectedGraphEdge;
@@ -30,7 +31,7 @@ import org.processmining.support.unfolding.Utility;
  * 
  * @author Daniele Cicciarella
  */
-public class BCSParSecondUnfolding {// implements Runnable {
+public class BCSParTerzoUnfolding {// implements Runnable {
 	/* Contesto di ProM */
 	protected PluginContext context;
 
@@ -42,7 +43,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 	protected Transition reset;
 
 	/* Coda contenente le configurazioni da analizzare */
-	protected LinkedList<LocalConfiguration> queue = new LinkedList<LocalConfiguration>();
+	protected LinkedBlockingQueue<LocalConfiguration> queue = new LinkedBlockingQueue<LocalConfiguration>();
 	/*
 	 * Mappa ogni nodo della rete di Petri a un uno o più nodi della rete di
 	 * unfolding
@@ -56,7 +57,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 	 * Mappa ogni transizione della rete di unfolding con il rispettivo marking
 	 */
 	protected Map<PetrinetNode, ArrayList<PetrinetNode>> markingMap = new HashMap<PetrinetNode, ArrayList<PetrinetNode>>();
-
+	private List<Transition> listt = new ArrayList<Transition>();
 	protected Map<Transition, ArrayList<Thread>> threads = new HashMap<Transition, ArrayList<Thread>>();
 	protected ArrayList<Transition> transitionEsaminate = new ArrayList<Transition>();
 
@@ -83,7 +84,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 	 * @param petrinet
 	 *            rete di petri originale
 	 */
-	BCSParSecondUnfolding(PluginContext context, Petrinet petrinet) {
+	BCSParTerzoUnfolding(PluginContext context, Petrinet petrinet) {
 		this.context = context;
 		this.petrinet = PetrinetFactory.clonePetrinet(petrinet);
 		ClonePetrinet pnc = new ClonePetrinet(petrinet.getLabel());
@@ -96,8 +97,9 @@ public class BCSParSecondUnfolding {// implements Runnable {
 	 * Converte una rete di Petri in una rete BCS unfolding
 	 * 
 	 * @return la rete BCS unfolding e le sue statistiche
+	 * @throws InterruptedException 
 	 */
-	public Object[] convert() {
+	public Object[] convert() throws InterruptedException {
 		i = Utility.getStartNode(petrinet);
 		o = Utility.getEndNode(petrinet);
 
@@ -136,8 +138,9 @@ public class BCSParSecondUnfolding {// implements Runnable {
 	 *            piazza iniziale della rete di petri
 	 * @param p1
 	 *            piazza iniziale della rete di unfolding
+	 * @throws InterruptedException 
 	 */
-	private void initQueue(Place p, Place p1) {
+	private void initQueue(Place p, Place p1) throws InterruptedException {
 		/*
 		 * Per tutte le transizioni t della rete di petri attaccate alla piazza
 		 * iniziale p
@@ -167,17 +170,17 @@ public class BCSParSecondUnfolding {// implements Runnable {
 
 			/* Aggiorno tutte le strutture globali e la coda */
 			refreshCorrispondence(t, t1);
-			queue.push(localConfigurationMap.get(t1));
+			queue.put(localConfigurationMap.get(t1));
 		}
 	}
 
 	private void visitQueue() {
 		Collection<Transition> transitions = petrinet.getTransitions();
-		ExecutorService executor = Executors.newFixedThreadPool(transitions.size());
-		synchronized (queue) {
+		ExecutorService executor = Executors.newFixedThreadPool(100);
+		
 			while (!queue.isEmpty()) {
 				/* Estraggo una configurazione c da q */
-				LocalConfiguration c = queue.pop();
+				LocalConfiguration c = queue.poll();
 				Transition t1 = c.get().get(0);
 				Transition t = (Transition) unf2PetriMap.get(t1);
 				/* Per ogni piazza p della rete originale attaccate a t */
@@ -186,28 +189,31 @@ public class BCSParSecondUnfolding {// implements Runnable {
 					Place p = (Place) a1.getTarget();
 					Place pi = getPrecedent(t1, p);
 					for (Transition tp : transitions) {
+					//	if(!listt.contains(tp)){
 						Thread tr = createRunnable(tp, pi, this);
 						executor.execute(tr);
 						System.out.println("lancia thread " + tp);
+						listt.add(tp);
+					//	}
 					}
 					/*
 					 * Per ogni transizione t2 delle rete originale attaccate a
 					 * p
-					 */
+					
 					for (DirectedGraphEdge<?, ?> a2 : petrinet.getGraph().getOutEdges(p)) {
 						Transition t2 = (Transition) a2.getTarget();
 
-					}
+					} */
 				}
 			}
-		}
+		
 		executor.shutdown();
 		while (!executor.isTerminated()) {
 		}
 
 	}
 
-	private Thread createRunnable(final Transition t2, final Place pi, final BCSParSecondUnfolding bcs) {
+	private Thread createRunnable(final Transition t2, final Place pi, final BCSParTerzoUnfolding bcs) {
 
 		Thread aRunnable = new Thread() {
 
@@ -234,12 +240,12 @@ public class BCSParSecondUnfolding {// implements Runnable {
 					} else {
 						list.add(Thread.currentThread());
 					}
-					List<PetrinetNode> presetT2 = null;
+					List<PetrinetNode> presetT2 = new ArrayList<PetrinetNode>();
 					ArrayList<Combination> combination = null;
 					int sizeCombination = 1;
 
 					/* Verifico se t2 è abilitata */
-					while ((presetT2 = Utility.isEnabled(petrinet, t2, petri2UnfMap)) == null && !fine(t2)) {
+					while ((presetT2 = Utility.isEnabled(petrinet, t2, petri2UnfMap)).isEmpty() && !fine(t2)/**/) {
 						try {
 							System.out.println("wait ENABLED " + t2);
 							bcs.wait();
@@ -249,7 +255,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 						}
 					}
 
-					if (fine(t2)) {
+				/**/	if (fine(t2)) {
 						System.out.println("FINE");
 						bcs.notifyAll();
 						return;
@@ -261,10 +267,11 @@ public class BCSParSecondUnfolding {// implements Runnable {
 					 * possibili
 					 */
 					List<List<PetrinetNode>> possibleCombination = new ArrayList<List<PetrinetNode>>();
-					System.out.println("petri2UnfMap.get(presetT2.get(i)); " + petri2UnfMap.get(presetT2.get(0)));
 					for (int i = 0; i < presetT2.size(); i++) {
-						if (!unf2PetriMap.get(pi).equals(presetT2.get(i))) {
-							ArrayList<PetrinetNode> array = null;
+						if (!unf2PetriMap.get(pi).equals(presetT2.get(i)) && petri2UnfMap.containsKey(presetT2.get(i))) {
+							System.out.println("petri2UnfMap.get(presetT2.get(i)); " + petri2UnfMap.get(presetT2.get(i)));
+							ArrayList <PetrinetNode> array = petri2UnfMap.get(presetT2.get(i));
+						/*	ArrayList<PetrinetNode> array = null;
 							while ((array = petri2UnfMap.get(presetT2.get(i))) == null && !fine(t2)) {
 								try {
 									System.out.println("wait ARRAY " + t2);
@@ -279,7 +286,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 								System.out.println("FINE");
 								bcs.notifyAll();
 								return;
-							}
+							}*/
 
 							possibleCombination.add(array);
 							System.out.println("transition " + t2 + " " + sizeCombination + " " + array);
@@ -352,7 +359,12 @@ public class BCSParSecondUnfolding {// implements Runnable {
 										refreshCorrispondence(p2, p3);
 										bcs.notifyAll();
 									}
-									queue.push(localConfigurationMap.get(t3));
+									try {
+										queue.put(localConfigurationMap.get(t3));
+									} catch (InterruptedException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 									System.out.println("PUSH " + Thread.currentThread().getId());
 								} else {
 									transitionEsaminate.add(t2);
@@ -365,6 +377,7 @@ public class BCSParSecondUnfolding {// implements Runnable {
 						}
 
 					}
+					
 
 					System.out.println("NOTIFY");
 					bcs.notifyAll();

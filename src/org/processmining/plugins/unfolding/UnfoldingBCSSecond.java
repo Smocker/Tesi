@@ -20,7 +20,7 @@ import org.processmining.support.unfolding.Pair;
 import org.processmining.support.unfolding.StatisticMap;
 import org.processmining.support.unfolding.Utility;
 
-public class UnfoldingBCSTerzo {
+public class UnfoldingBCSSecond {
 
 	protected PluginContext context;
 
@@ -41,10 +41,9 @@ public class UnfoldingBCSTerzo {
 	 * unfolding
 	 */
 	protected Map<PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap = new HashMap<PetrinetNode, ArrayList<PetrinetNode>>();
+
 	/* Mappa ogni nodo della rete di unfolding a un nodo della rete di Petri */
 	protected Map<PetrinetNode, PetrinetNode> unf2PetriMap = new HashMap<PetrinetNode, PetrinetNode>();
-	protected Map<PetrinetNode, ArrayList<PetrinetNode>> markingMap = new HashMap<PetrinetNode, ArrayList<PetrinetNode>>();
-
 	protected ArrayList<Transition> transitions = new ArrayList<Transition>();
 
 	/**
@@ -55,7 +54,7 @@ public class UnfoldingBCSTerzo {
 	 * @param petrinet
 	 *            rete di petri originale
 	 */
-	UnfoldingBCSTerzo(PluginContext context, Petrinet petrinet) {
+	UnfoldingBCSSecond(PluginContext context, Petrinet petrinet) {
 		this.context = context;
 		this.petrinet = PetrinetFactory.clonePetrinet(petrinet);
 		ClonePetrinet pnc = new ClonePetrinet(petrinet.getLabel());
@@ -127,159 +126,92 @@ public class UnfoldingBCSTerzo {
 			refreshCorrispondence(t, t1);
 			LocalConfiguration lc = new LocalConfiguration();
 			lc.set(unfolding, t1);
-			lc.setMarking(Utility.getMarking(unfolding, lc));
 			queue.put(lc);
 		}
 	}
 
 	private void visitQueue() throws InterruptedException {
-		int d = 0;
-		while (!queue.isEmpty()){// d < 50000) { //
-			d++;
-			LocalConfiguration localConfig = queue.poll();
-			System.out.println("LocalConfiguration " + localConfig);
-			
-			ArrayList<PetrinetNode> markingUnfolding = localConfig.getMarking(); //Utility.getMarking(unfolding, localConfig);
-			ArrayList<PetrinetNode> markingPetrinet = new ArrayList<PetrinetNode>();// petrinet
+		int i=0;
+		while (!queue.isEmpty()) 
+			{
+			i++;
+			LocalConfiguration lcm = queue.poll();
+			System.out.println("LocalConfiguration " + lcm);
+			System.out.println("queu size " + queue.size());
+		//	ArrayList<PetrinetNode> marking = Utility.getMarking(petrinet, lcm);
 
-			System.out.println("markingUnf " + markingUnfolding);
-			
-			for (PetrinetNode tlcm : markingUnfolding) {
-				markingPetrinet.add(unf2PetriMap.get(tlcm));
-			}
-			
-			for (PetrinetNode t1 : petrinet.getTransitions()) {// petrinet
-				List<PetrinetNode> presetAbilitato = Utility.isEnabledFromMarking(markingPetrinet, t1, petrinet);// petrinet
-				if (!presetAbilitato.isEmpty() && !markingUnfolding.isEmpty()) {
-					System.out.println("marking " + markingPetrinet);
-					System.out.println(t1 + " è abilitata");
+			for (Transition t : lcm.get()) {//unfolding
+				System.out.println("transition t = " + t);
 
-					PetrinetNode nodoStessaHistory = null;
-					boolean stessaHistory = false;
-					// controllo la history del nodo
-					if (petri2UnfMap.containsKey(t1)) {
-
-						ArrayList<PetrinetNode> t1Unf = petri2UnfMap.get(t1);
+				for (PetrinetNode p : Utility.getPostset(unfolding, t)) {//unfolding
+					System.out.println("place p = " + p);
+				//	petri2UnfMap
+					
+					for (PetrinetNode t1 : Utility.getPostset(petrinet, unf2PetriMap.get(p))) {//petrinet						
+						System.out.println("transition t1 = " + t1);
 						
-						System.out.println("markingUnf " + markingUnfolding);
-						for (int j = 0; j < t1Unf.size() && !stessaHistory; j++) {
-							nodoStessaHistory = t1Unf.get(j);
-							if (!Utility.isEnabledFromMarking(markingUnfolding, nodoStessaHistory, unfolding)
-									.isEmpty()) {
-								ArrayList<Place> historyT1 = Utility.getHistoryPlace(unfolding, t1Unf.get(j));
-								System.out.println("historyT1 " + t1Unf.get(j) + historyT1);
-								//for (int x = 0; x < markingUnfolding.size() && !stessaHistory; x++) {
-									
-							/*	ArrayList<Place> historyPlace = Utility.getHistoryPlace(unfolding, presetAbilitato, petri2UnfMap, markingUnfolding);
-								System.out.println("historyPlace " + historyPlace);
+						LocalConfiguration l = new LocalConfiguration();//petrinet
+						for (Transition tlcm : lcm.get()) {
+								l.add((Transition) unf2PetriMap.get(tlcm));
+						}
+						System.out.println("LocalConfiguration + t " + l);
 
-								if (historyT1.containsAll(historyPlace)) {
-									stessaHistory = true;
-									System.out.println("stessaHistory");
-									
-								}*/
-								
-									for (PetrinetNode nodoAbilitato : presetAbilitato) {
-										ArrayList<PetrinetNode> nodoAbilitatoArray = petri2UnfMap.get(nodoAbilitato);
-										for (PetrinetNode nodoAbilitatoUnf : nodoAbilitatoArray) {
-											if (markingUnfolding.contains(nodoAbilitatoUnf)) {
-												ArrayList<Place> historyPreset = Utility.getHistoryPlace(unfolding,
-														nodoAbilitatoUnf);
-												System.out.println("historyPreset " + nodoAbilitatoUnf + historyPreset);
+					//	l.remove((Transition) t1);
+						System.out.println("LocalConfiguration - t " + l);
 
-												if (historyT1.containsAll(historyPreset)) {
-													stessaHistory = true;
-													System.out.println("stessaHistory");
-													
-												}else{
-													stessaHistory = false;
-												}
-											}
-										}
-										
-									}
-									
-									/*ArrayList<Place> historyPreset = Utility.getHistoryPlace(unfolding,
-											markingUnfolding.get(x));
-									System.out.println("historyPreset " + markingUnfolding.get(x) + historyPreset);
+						ArrayList<PetrinetNode> markingCmenoT = Utility.getMarking(petrinet, l);
+						System.out.println("marking - t " + markingCmenoT);
+						
+						List<PetrinetNode> presetAbilitato = Utility.isEnabledFromMarking(markingCmenoT, t1, petrinet);//petrinet
+						if (!presetAbilitato.isEmpty()) {
+							System.out.println(t1 + " è abilitata");
+						}else{
+							System.out.println(t1 + " non è abilitata");
 
-									if (historyT1.containsAll(historyPreset)) {
-										stessaHistory = true;
-										System.out.println("stessaHistory");
-									}*/
-									
-								//}
+						}
+						if (!presetAbilitato.isEmpty()) {
+							String id = "";
+							try {
+								id = t1.getAttributeMap().get("Original id").toString();
+							} catch (NullPointerException e) {
+								id = "_not_present";
 							}
-						}
+							Transition t2 = unfolding.addTransition(t1.getLabel());
+							t2.getAttributeMap().put("Original id", id);
+							System.out.println("preset "+Utility.getPreset(petrinet, t1));
+						//	petri2UnfMap
 
-					}
-
-					if (!stessaHistory) {
-
-						String id = "";
-						try {
-							id = t1.getAttributeMap().get("Original id").toString();
-						} catch (NullPointerException e) {
-							id = "_not_present";
-						}
-
-						Transition t2 = unfolding.addTransition(t1.getLabel());
-						t2.getAttributeMap().put("Original id", id);
-						System.out.println("addTransition " + t1);
-						// petri2UnfMap
-
-						for (PetrinetNode nodoAbilitato : presetAbilitato) {
-							ArrayList<PetrinetNode> nodoAbilitatoArray = petri2UnfMap.get(nodoAbilitato);
-							for (PetrinetNode nodoAbilitatoUnf : nodoAbilitatoArray) {
-								if (markingUnfolding.contains(nodoAbilitatoUnf)) {
-									System.out.println("unfolding.addArc(p, t) " + nodoAbilitatoUnf + " " + t2);
-									unfolding.addArc((Place) nodoAbilitatoUnf, t2);
+							for (PetrinetNode pm : presetAbilitato) {
+								ArrayList<PetrinetNode> pmArray = petri2UnfMap.get(pm);
+								for (PetrinetNode pm1 : pmArray) {
+									if (Utility.getMarking(unfolding, lcm).contains(pm1)){
+										System.out.println("unfolding.addArc(p, t) "+ pm1+ " "+t2);
+										unfolding.addArc((Place) pm1, t2);
+									}
 								}
 							}
-						}
-						refreshCorrispondence(t1, t2);
+							refreshCorrispondence(t1, t2);
 
-						if (t1.equals(reset)) {
-							if (markingMap.get(t2).size() == 0)
-								statisticMap.addCutoff((Transition) t2);
-							else
-								statisticMap.addCutoffUnbounded((Transition) t2);
-						} else {
-							boolean isCutoff = false;
-							List<PetrinetNode> postset = Utility.getPostset(petrinet, t1);
-
-							// Verifico se una piazza finale di t2 è condivisa
-							// da altre transizioni e se provoca cutoff
-							for (int i = 0; i < postset.size() && !isCutoff; i++)
-								isCutoff = isCutoff(t2, postset.get(i));
+							l.add((Transition) t1);
+							
+							boolean isCutoff = isCutoff(l, (Transition) t1, t2);
 
 							if (isCutoff == false) {
 								for (PetrinetNode post : Utility.getPostset(petrinet, t1)) {
 									Place p1 = unfolding.addPlace(post.getLabel());
-									p1.getAttributeMap().put("Original id", post.getAttributeMap().get("Original id"));
+									p1.getAttributeMap().put("Original id", p.getAttributeMap().get("Original id"));
 									unfolding.addArc(t2, p1);
-									System.out.println("unfolding.addArc(t, p) " + t2 + " " + p1);
+									System.out.println("unfolding.addArc(t, p) "+ t2+ " "+p1);
 									refreshCorrispondence(post, p1);
 								}
-								LocalConfiguration localConfigNew = localConfig.clone();
-								localConfigNew.addAll(t2);
-								localConfigNew.setMarking(Utility.getMarking(unfolding, localConfigNew));
-								System.out.println("non è cutoff LocalConfiguration " + localConfigNew);
-								queue.put(localConfigNew);
+								LocalConfiguration ll = new LocalConfiguration();
+								ll.set(unfolding, t2);
+								System.out.println("non è cutoff LocalConfiguration " + ll);
+								queue.put(ll);
 							}
 						}
-					} else {
-						//if (!statisticMap.getCutoff().contains(nodoStessaHistory)) {
-						LocalConfiguration ll = localConfig.clone();
-						ll.addAll((Transition) nodoStessaHistory);
-						ll.setMarking(Utility.getMarking(unfolding, ll));
 
-						System.out.println("stessa history " + localConfig);
-						System.out.println("stessa history " + ll);
-						queue.put(ll);
-						//}
 					}
-
 				}
 			}
 		}
@@ -301,45 +233,15 @@ public class UnfoldingBCSTerzo {
 		unf2PetriMap.put(pn1, pn);
 
 		/* Se è una transizione aggiornare le altre map */
-
-		if (pn1 instanceof Transition) {
-			LocalConfiguration lc = new LocalConfiguration();
-			lc.set(unfolding, pn1);
-			markingMap.put(pn1, Utility.getMarking(petrinet, lc, unf2PetriMap));
-			// xorMap.put(pn1,Utility.getHistoryXOR(unfolding, pn1, null));
-		}
-
-	}
-
-	private boolean isCutoff(Transition t, PetrinetNode place) {
-		int isBounded;
-
-		// Controllo se place è stato inserito nell'unfolding
-		if (petri2UnfMap.containsKey(place)) {
-			ArrayList<PetrinetNode> markingT = markingMap.get(t);
-
-			// Se nella storia dei place di t esiste place allora è un ciclo
-			for (Place h : Utility.getHistoryPlace(unfolding, t)) {
-				if (unf2PetriMap.get(h).equals(place)) {
-					for (DirectedGraphEdge<?, ?> a : unfolding.getGraph().getInEdges(h)) {
-						isBounded = Utility.isBounded(markingT, markingMap.get(a.getSource()));
-						if (isBounded == 0) {
-							statisticMap.addCutoff(t);
-							return true;
-						} else if (isBounded > 0) {
-							statisticMap.addCutoffUnbounded(t);
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		} else
-			return false;
+		/*
+		 * if(pn1 instanceof Transition) { localConfigurationMap.add(pn1,
+		 * unfolding); markingMap.put(pn1, Utility.getMarking(petrinet,
+		 * localConfigurationMap.get(pn1), unf2PetriMap)); //xorMap.put(pn1,
+		 * Utility.getHistoryXOR(unfolding, pn1, null)); }
+		 */
 	}
 
 	// confronto la label delle transition e NON VA BENE
-	// t2 petrinet, tunf unfolding, lc2 petrinet
 	private boolean isCutoff(LocalConfiguration lc2, Transition t2, Transition tUnf) {
 		ArrayList<PetrinetNode> markingT2 = Utility.getMarking(petrinet, lc2);
 		for (Transition t1 : lc2.get()) {
@@ -350,8 +252,7 @@ public class UnfoldingBCSTerzo {
 				ArrayList<PetrinetNode> markingT1 = Utility.getMarking(petrinet, lc1);
 				System.out.println("lc1 " + lc1 + "markingT1 " + markingT1);
 				System.out.println("lc2 " + lc2 + "markingT2 " + markingT2);
-				if (markingT2.size() == 0 || t2.getLabel() == "reset"
-						|| (markingT2.size() == markingT1.size() && markingT2.containsAll(markingT1))) {
+				if (markingT2.size()==0 || t2.getLabel()=="reset"||( markingT2.size() == markingT1.size() && markingT2.containsAll(markingT1))) {
 					// cutoff
 					statisticMap.addCutoff(tUnf);
 					System.out.println("cutoff " + tUnf);
