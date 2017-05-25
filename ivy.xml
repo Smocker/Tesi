@@ -1,0 +1,14 @@
+<ivy-module version="2.0">
+    <info organisation="prom" module="PetrinetUnfolding" revision="latest">
+    	<description>
+    		Version VERSION
+    	</description>
+    </info>
+    <dependencies>
+        <dependency org="prom" name="ApacheUtils" rev="latest" changing="true" />
+       <dependency org="prom" name="PetriNets" rev="latest" changing="true" />
+       <dependency org="prom" name="Widgets" rev="latest" changing="true" />
+       <dependency org="prom" name="BPMN" rev="latest" changing="true" />
+       <dependency org="prom" name="BPMNConversions" rev="latest" changing="true" />
+    </dependencies>
+</ivy-module>
