@@ -1,0 +1,36 @@
+print("Starting example script: Woflan...");
+
+String importFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
+
+
+File folder = new File(importFileRoot);
+File[] listOfFiles = folder.listFiles();
+String array = "";
+for (File file : listOfFiles) {
+	if (file.isFile()) {
+		String ext = file.getName().substring(file.getName().lastIndexOf('.'));
+		String name = file.getName().substring(0,file.getName().lastIndexOf('.'));
+		if(ext.equals(".pnml")){
+			
+			print("--------******-----------");
+			print(file.getName());
+			// Carico il modello pn
+			pn_marking = import_petri_net_from_pnml_file(importFileRoot + "/" + file.getName());
+			double startTime = System.currentTimeMillis();
+			result = analyze_with_woflan(pn_marking[0]);
+			
+			double time = (System.currentTimeMillis() - startTime);
+			print(result.toString());
+			print("+++++++++++++++++++++++++");
+			print(file.getName());
+			//stampo statistiche
+			
+			print(time);
+			
+			print("--------******-----------");
+		}
+	}
+}
+
+print(array);
+

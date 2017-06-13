@@ -1,0 +1,59 @@
+print("Starting example script: BPMN to PN...");
+String testFileRoot = System.getProperty("user.dir") + "/tests/testfiles/bpmn/bp";
+String exportFileRoot = System.getProperty("user.dir") + "/tests/testfiles/pn";
+
+
+File folder = new File(testFileRoot);
+File[] listOfFiles = folder.listFiles();
+String array = "";
+for (File file : listOfFiles) {
+	if (file.isFile()) {
+		String ext = file.getName().substring(file.getName().lastIndexOf('.'));
+		String name = file.getName().substring(0,file.getName().lastIndexOf('.'));
+		if(ext.equals(".bpmn")){
+			
+			print("--------******-----------");
+			print(file.getName());
+			// Carico il modello BPMN
+			bpmn = import_bpmn_model_from_bpmn_2_0_file(testFileRoot + "/" + file.getName());
+
+			// Converto il modello in Petrinet ed eseguo lunfolding
+			bpmn_diagram = select_bpmn_diagram(bpmn);
+			result = bcs_bpmn_to_unfolding_net(bpmn_diagram);
+			
+			print("+++++++++++++++++++++++++");
+			print(file.getName());
+			//stampo statistiche
+			String bp =  bpmn_diagram.getNodes().size()+"/"+ bpmn_diagram.getFlows().size()+"/"+bpmn_diagram.getMessageFlows().size();
+			String message = "BPMN Node/Flow/MFow: "+ bp;
+			print(message);
+			int nArcs = 0;
+			for(org.processmining.models.graphbased.directed.petrinet.elements.Place p : result[2].getPlaces()){
+				nArcs += result[2].getGraph().getInEdges(p).size() + result[2].getGraph().getOutEdges(p).size();
+			}
+			String p =  result[2].getTransitions().size()+"/"+ result[2].getPlaces().size()+"/"+ nArcs;
+			message = "Petri Net T/P/A: "+ p;
+			print(message);
+			nArcs = 0;
+			for(org.processmining.models.graphbased.directed.petrinet.elements.Place p : result[1].getPlaces()){
+				nArcs += result[1].getGraph().getInEdges(p).size() + result[1].getGraph().getOutEdges(p).size();
+			}
+			String u = result[1].getTransitions().size()+"/"+ result[1].getPlaces().size()+"/"+ nArcs;
+			message = "Unfolding Net T/P/A: "+ u;
+			print(message);
+			print("+++++++++++++++++++++++++");
+			//stampo risultato unfoldings
+			String y = file.getName()+"|"+bp+"|"+p+"|"+u+"|";
+			String k = result[0].getCLIstat() +"\n";
+			print(k);
+			array += y+k;
+			//print(result[0]);
+			File export = new File(exportFileRoot + "/"+name+".pnml");
+			pnml_export_petri_net_(result[2], export);
+			print("--------******-----------");
+		}
+	}
+}
+
+print(array);
+
