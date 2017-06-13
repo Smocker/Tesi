@@ -1,11 +1,10 @@
 package org.processmining.support.unfolding;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
@@ -113,17 +112,17 @@ public class Combination
 	 * 
 	 * @param combination le combinazioni correnti
 	 * @param t la transezione da aggiungere all'unfolding
-	 * @param L1 la map da rete di Petri a rete di Unfolding
+	 * @param petri2UnfMap la map da rete di Petri a rete di Unfolding
 	 * @param N1 la rete di unfolding
 	 */
-	public static void filter(ArrayList<Combination> combination, Transition t, Map<PetrinetNode, ArrayList<PetrinetNode>> L1, Petrinet N1) 
+	public  static void filter(ArrayList<Combination> combination, Transition t, Map<PetrinetNode, CopyOnWriteArrayList<PetrinetNode>> petri2UnfMap, Petrinet N1) 
 	{
 		List<PetrinetNode> preset = null;
 		
 		/* Se non è contenuto allora t non è stato mai inserito */
-		if(L1.containsKey(t))
+		if(petri2UnfMap.containsKey(t))
 		{
-			for(PetrinetNode t1 : L1.get(t)) 
+			for(PetrinetNode t1 : petri2UnfMap.get(t)) 
 			{
 				preset = Utility.getPreset(N1, t1);
 				for(int i = 0; i < combination.size(); i++)
