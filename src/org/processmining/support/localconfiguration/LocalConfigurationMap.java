@@ -1,6 +1,5 @@
 package org.processmining.support.localconfiguration;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;

@@ -15,13 +15,11 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class LocalConfiguration {
 	private ArrayList<Transition> localConfiguration = null;
-	private ArrayList<PetrinetNode> marking=null;
 	/**
 	 * Costruttore
 	 */
 	public LocalConfiguration() {
 		localConfiguration = new ArrayList<Transition>();
-		marking=new ArrayList<PetrinetNode>();;
 	}
 
 	public LocalConfiguration clone() {
@@ -64,14 +62,6 @@ public class LocalConfiguration {
 	public ArrayList<Transition> set(Petrinet N, PetrinetNode pn) {
 		getLeastBackwardClosed(N, pn, localConfiguration);
 		return localConfiguration;
-	}
-
-	public ArrayList<PetrinetNode> getMarking() {
-		return marking;
-	}
-
-	public void setMarking(ArrayList<PetrinetNode> marking) {
-		this.marking = marking;
 	}
 
 	public ArrayList<Transition> add(Transition t) {
