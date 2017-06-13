@@ -3,6 +3,7 @@ package org.processmining.support.unfolding;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.processmining.models.graphbased.AttributeMap;
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram;
@@ -146,10 +147,10 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 	 * 
 	 * @param N rete di petri
 	 * @param N1 rete di unfolding
-	 * @param L1 mappa da N a N' 
+	 * @param petri2UnfMap mappa da N a N' 
 	 * @param localConfigurationMap 
 	 */
-	public void setStatistic(Petrinet N, Petrinet N1, Map<PetrinetNode, ArrayList<PetrinetNode>> L1, LocalConfigurationMap localConfigurationMap)
+	public void setStatistic(Petrinet N, Petrinet N1, Map<PetrinetNode, CopyOnWriteArrayList<PetrinetNode>> petri2UnfMap, LocalConfigurationMap localConfigurationMap)
 	{
 		this.localConfigurationMap=localConfigurationMap;
 		/* Statistiche della rete */
@@ -160,7 +161,7 @@ public class StatisticMap extends HashMap<String, ArrayList <Transition>>
 		
 		/* Verifico se c'è qualche transizione dead */
 		for(Transition pn : N.getTransitions())
-			if(!L1.containsKey(pn))
+			if(!petri2UnfMap.containsKey(pn))
 				addDead(pn);
 		
 		/* Verifico le soundness */

@@ -115,6 +115,27 @@ public class Utility {
 	}
 
 	/**
+	 * @param N
+	 *            rete di Petri
+	 * @param t
+	 *            nodo di cui calcolare il preset
+	 * @param L1
+	 *            map da N a N'
+	 * @return preset di t su unfolding
+	 */
+	public static ArrayList<PetrinetNode> getPresetOnUnf(Petrinet N, PetrinetNode t,
+			Map<PetrinetNode, ArrayList<PetrinetNode>> L1) {
+		List<PetrinetNode> preset = getPreset(N, t);
+		ArrayList<PetrinetNode> presetUnf = new ArrayList<PetrinetNode>();
+		for (PetrinetNode p : preset) {
+			if (L1.containsKey(p)) {
+				presetUnf.addAll(L1.get(p));
+			}
+		}
+		return presetUnf;
+	}
+
+	/**
 	 * Verifica se un nodo e' abilitato
 	 * 
 	 * @param N
@@ -125,13 +146,14 @@ public class Utility {
 	 *            map da N a N'
 	 * @return preset di t se e' abilitata, null altrimenti
 	 */
+
 	public static List<PetrinetNode> isEnabled(Petrinet N, PetrinetNode pn,
 			Map<PetrinetNode, ArrayList<PetrinetNode>> L1) {
 		List<PetrinetNode> preset = getPreset(N, pn);
-		if (preset.size() > 1) {
+		if (preset.size() >= 1) {
 			for (int i = 0; i < preset.size(); i++)
 				if (!L1.containsKey(preset.get(i)))
-					return new ArrayList<PetrinetNode>();
+					return null;
 		}
 		return preset;
 	}
@@ -368,73 +390,4 @@ public class Utility {
 		}
 		return history;
 	}
-
-/*	public static Transition addTransition(PetrinetNode t1, Petrinet unfolding, Petrinet petrinet,
-			Map<PetrinetNode, ArrayList<PetrinetNode>> petri2UnfMap, Map<PetrinetNode, PetrinetNode> unf2PetriMap) {
-		String id = "";
-		try {
-			id = t1.getAttributeMap().get("Original id").toString();
-		} catch (NullPointerException e) {
-			id = "_not_present";
-		}
-		List<List<PetrinetNode>> pllp = new ArrayList<List<PetrinetNode>>();
-		
-		List<PetrinetNode> presetlistt1 = Utility.getPreset(petrinet, t1);
-		
-		for (int i=0; i<presetlistt1.size();i++) {	
-			PetrinetNode preset = presetlistt1.get(i);		
-			ArrayList<PetrinetNode> unfondingpreset = petri2UnfMap.get(preset);
-			int z = 0;
-			for (PetrinetNode presetunf : unfondingpreset) {
-				
-				if(i==0){
-					List<PetrinetNode> listT2 = new ArrayList<PetrinetNode>();
-					pllp.add(listT2);
-					listT2.add(presetunf);
-				}else{
-					List<PetrinetNode> listT2 = pllp.get(z);
-					listT2.add(presetunf);
-				}
-				z++;
-			}
-
-		}
-		
-		for(List<PetrinetNode> listprest : pllp){
-			ArrayList<Place> historyT1 = null;
-			if(petri2UnfMap.containsKey(t1)){
-				 historyT1 = Utility.getHistoryPlace(unfolding, t1);
-			}
-			Transition t2 = unfolding.addTransition(t1.getLabel());
-			t2.getAttributeMap().put("Original id", id);
-			System.out.println("addTransition " + t1);
-			
-			for (PetrinetNode preset : listprest) {
-				unfolding.addArc((Place) preset, t2);
-				
-			}
-			ArrayList<Place> historyT2 = null;
-			if(historyT1!=null){
-				 historyT2 = Utility.getHistoryPlace(unfolding, t2);
-			}
-			if(historyT2!=null){
-				if(historyT2.contains(historyT1)){
-					for( PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode> edges : t2.getGraph().getInEdges(t2)){	
-						unfolding.removeArc(edges.getSource(), edges.getTarget());
-					}
-					unfolding.removeTransition(t2);
-					
-					
-				}
-			}
-			
-			
-			
-		}
-		
-		
-
-		return t2;
-	}*/
-
 }
